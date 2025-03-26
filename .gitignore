@@ -1,0 +1,19 @@
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+
+# Ignore database files
+database.db
+
+# Ignore sensitive files
+key.txt
+
+# Ignore environment variables
+.env
+
+# Ignore log files
+*.log
+
+# Ignore IDE files
+.vscode/
+.idea/

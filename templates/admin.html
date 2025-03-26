@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+    <h1 class="text-center text-danger mb-4">Admin Dashboard</h1>
+    <div class="alert alert-success" role="alert">
+        Welcome, Administrator! This is your control panel.
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Manage Students</h5>
+                    <p class="card-text text-secondary">View and manage student records.</p>
+                    <a href="/students" class="btn btn-outline-info">View Students</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">System Settings</h5>
+                    <p class="card-text text-secondary">Configure system settings (Placeholder).</p>
+                    <a href="#" class="btn btn-outline-warning disabled">Coming Soon</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

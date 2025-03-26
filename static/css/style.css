@@ -1,0 +1,29 @@
+body {
+    background-color: #87CEEB; /* Sky Blue */
+    font-family: 'Inter', sans-serif;
+    transition: background-color 0.5s ease;
+}
+
+.navbar {
+    background-color: #FFFFFF; /* White background */
+}
+
+/* Floating Contact Us Button */
+.floating-contact {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff; /* Button color */
+    color: white; /* Text color */
+    border: none;
+    border-radius: 50px;
+    padding: 15px 20px;
+    font-size: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+.floating-contact:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
