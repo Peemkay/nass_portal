@@ -1,58 +1,194 @@
 {% extends 'base.html' %}
 {% block title %}Registration - Page 6{% endblock %}
-{% block content %}
-    <h1 class="text-center text-success mb-4">Student Registration - Page 6</h1>
-    <form method="post" action="{{ url_for('registration_page_6') }}" class="shadow-lg rounded-lg p-4 bg-white" enctype="multipart/form-data">
-        <h2 class="text-center mb-3">Previous Military Courses Attended</h2>
-        <div class="form-group">
-            <label class="text-secondary">Previous Military Courses:</label>
-             <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Serial</th>
-                            <th>Name of Institution</th>
-                            <th>Year From</th>
-                            <th>Year To</th>
-                            <th>Cert Obtained</th>
-                            <th>Grade Obtained</th>
-                            <th>Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><input type="text" class="form-control" name="military_serial[]"></td>
-                            <td><input type="text" class="form-control" name="military_name[]"></td>
-                            <td><input type="date" class="form-control" name="military_year_from[]"></td>
-                            <td><input type="date" class="form-control" name="military_year_to[]"></td>
-                            <td><input type="text" class="form-control" name="military_cert[]"></td>
-                            <td><input type="text" class="form-control" name="military_grade[]"></td>
-                            <td><input type="text" class="form-control" name="military_remarks[]"></td>
-                        </tr>
-                        <tr>
-                            <td><input type="text" class="form-control" name="military_serial[]"></td>
-                            <td><input type="text" class="form-control" name="military_name[]"></td>
-                            <td><input type="date" class="form-control" name="military_year_from[]"></td>
-                            <td><input type="date" class="form-control" name="military_year_to[]"></td>
-                            <td><input type="text" class="form-control" name="military_cert[]"></td>
-                            <td><input type="text" class="form-control" name="military_grade[]"></td>
-                            <td><input type="text" class="form-control" name="military_remarks[]"></td>
-                        </tr>
-                        <tr>
-                            <td><input type="text" class="form-control" name="military_serial[]"></td>
-                            <td><input type="text" class="form-control" name="military_name[]"></td>
-                            <td><input type="date" class="form-control" name="military_year_from[]"></td>
-                            <td><input type="date" class="form-control" name="military_year_to[]"></td>
-                            <td><input type="text" class="form-control" name="military_cert[]"></td>
-                            <td><input type="text" class="form-control" name="military_grade[]"></td>
-                            <td><input type="text" class="form-control" name="military_remarks[]"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        <button type="button" class="btn btn-secondary" onclick="window.history.back();">Previous</button>
-        <button type="submit" class="btn btn-primary">Next</button>
-    </form>
+{% block content %}
+<div class="container py-4">
+    <h1 class="text-center text-success mb-4">Student Registration - Page 6</h1>
+    
+    <div class="card shadow-lg">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4">Document Upload & Additional Information</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="post" action="{{ url_for('main.registration_page_6') }}" class="needs-validation" enctype="multipart/form-data" novalidate>
+                <!-- Required Documents Section -->
+                <div class="mb-4">
+                    <h3 class="mb-3">Required Documents</h3>
+                    <div class="row g-3">
+                        <!-- Passport Photograph -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="passport_photo" class="form-label">Passport Photograph (JPG/PNG, max 2MB)</label>
+                                <input type="file" class="form-control" id="passport_photo" name="passport_photo" 
+                                       accept="image/jpeg,image/png" required>
+                                <div class="invalid-feedback">Please upload a passport photograph.</div>
+                                <small class="text-muted">Recent passport photograph with white background</small>
+                            </div>
+                        </div>
+
+                        <!-- Birth Certificate -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="birth_cert" class="form-label">Birth Certificate/Declaration of Age (PDF, max 2MB)</label>
+                                <input type="file" class="form-control" id="birth_cert" name="birth_cert" 
+                                       accept="application/pdf" required>
+                                <div class="invalid-feedback">Please upload your birth certificate.</div>
+                            </div>
+                        </div>
+
+                        <!-- Educational Certificates -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edu_certs" class="form-label">Educational Certificates (PDF, max 5MB)</label>
+                                <input type="file" class="form-control" id="edu_certs" name="edu_certs" 
+                                       accept="application/pdf" required>
+                                <div class="invalid-feedback">Please upload your educational certificates.</div>
+                                <small class="text-muted">Combine all certificates into a single PDF</small>
+                            </div>
+                        </div>
+
+                        <!-- Professional Certificates -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="prof_certs" class="form-label">Professional Certificates (PDF, max 5MB)</label>
+                                <input type="file" class="form-control" id="prof_certs" name="prof_certs" 
+                                       accept="application/pdf">
+                                <small class="text-muted">Optional - Combine all certificates into a single PDF</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information Section -->
+                <div class="mb-4">
+                    <h3 class="mb-3">Additional Information</h3>
+                    <div class="row g-3">
+                        <!-- Special Needs -->
+                        <div class="col-md-12">
+                            <label for="special_needs" class="form-label">Do you have any special needs or requirements?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="has_special_needs" id="special_needs_no" 
+                                       value="no" checked>
+                                <label class="form-check-label" for="special_needs_no">No</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="has_special_needs" id="special_needs_yes" 
+                                       value="yes">
+                                <label class="form-check-label" for="special_needs_yes">Yes</label>
+                            </div>
+                            <div class="mt-2" id="special_needs_details_container" style="display: none;">
+                                <textarea class="form-control" id="special_needs_details" name="special_needs_details" 
+                                          rows="3" placeholder="Please describe your special needs"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Medical Conditions -->
+                        <div class="col-md-12">
+                            <label for="medical_conditions" class="form-label">Do you have any medical conditions we should be aware of?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="has_medical_conditions" 
+                                       id="medical_conditions_no" value="no" checked>
+                                <label class="form-check-label" for="medical_conditions_no">No</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="has_medical_conditions" 
+                                       id="medical_conditions_yes" value="yes">
+                                <label class="form-check-label" for="medical_conditions_yes">Yes</label>
+                            </div>
+                            <div class="mt-2" id="medical_conditions_details_container" style="display: none;">
+                                <textarea class="form-control" id="medical_conditions_details" name="medical_conditions_details" 
+                                          rows="3" placeholder="Please describe your medical conditions"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Declaration -->
+                        <div class="col-12 mt-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="declaration" name="declaration" required>
+                                <label class="form-check-label" for="declaration">
+                                    I declare that all the information provided in this application is true and correct. 
+                                    I understand that any false or misleading information may result in the rejection of my application 
+                                    or termination of my enrollment.
+                                </label>
+                                <div class="invalid-feedback">
+                                    You must agree before submitting.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-secondary" 
+                            onclick="window.location.href='{{ url_for('main.registration_page_5') }}'">
+                        <i class="fas fa-arrow-left me-2"></i>Previous
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        Submit Application<i class="fas fa-check ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+// Form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+
+// File size validation
+document.querySelectorAll('input[type="file"]').forEach(function(input) {
+    input.addEventListener('change', function() {
+        if (this.files[0]) {
+            const maxSize = this.id.includes('certs') ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
+            if (this.files[0].size > maxSize) {
+                alert('File is too large. Maximum size is ' + (maxSize/1024/1024) + 'MB');
+                this.value = '';
+            }
+        }
+    });
+});
+
+// Toggle special needs details
+document.querySelectorAll('input[name="has_special_needs"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        document.getElementById('special_needs_details_container').style.display = 
+            this.value === 'yes' ? 'block' : 'none';
+    });
+});
+
+// Toggle medical conditions details
+document.querySelectorAll('input[name="has_medical_conditions"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        document.getElementById('medical_conditions_details_container').style.display = 
+            this.value === 'yes' ? 'block' : 'none';
+    });
+});
+</script>
+{% endblock %}
+
 {% endblock %}

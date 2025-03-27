@@ -40,14 +40,88 @@ def registration_page_1():
 
 @bp.route('/registration_page_2', methods=['GET', 'POST'])
 def registration_page_2():
+    # Check if user completed page 1
     if not session.get('personnel_number'):
         flash('Please start from the beginning', 'error')
         return redirect(url_for('main.registration_page_1'))
     
     if request.method == 'POST':
-        # ... rest of the code ...
-        return redirect(url_for('main.registration_page_3'))
+        try:
+            # Validate required fields
+            required_fields = ['nationality', 'marital_status', 'state_of_origin', 
+                             'permanent_address']
+            
+            # Check if all required fields are present
+            for field in required_fields:
+                if not request.form.get(field):
+                    flash(f'{field.replace("_", " ").title()} is required', 'error')
+                    return render_template('registration_page_2.html')
+            
+            # Save all fields to session
+            for field in required_fields:
+                session[field] = request.form[field]
+            
+            # Redirect to page 3
+            return redirect(url_for('main.registration_page_3'))
+            
+        except Exception as e:
+            flash('An error occurred. Please try again.', 'error')
+            return render_template('registration_page_2.html')
+            
     return render_template('registration_page_2.html')
+
+@bp.route('/registration_page_3', methods=['GET', 'POST'])
+def registration_page_3():
+    if not session.get('nationality'):  # Check if page 2 was completed
+        flash('Please complete previous steps first', 'error')
+        return redirect(url_for('main.registration_page_2'))
+    
+    if request.method == 'POST':
+        try:
+            # Save social media data
+            social_fields = ['facebook', 'twitter', 'whatsapp', 'instagram']
+            
+            # Validate WhatsApp as it's required
+            if not request.form.get('whatsapp'):
+                flash('WhatsApp number is required', 'error')
+                return render_template('registration_page_3.html')
+            
+            # Save all social media fields to session
+            for field in social_fields:
+                session[field] = request.form.get(field, '')  # Use empty string as default
+            
+            return redirect(url_for('main.registration_page_4'))
+        except Exception as e:
+            flash('An error occurred. Please try again.', 'error')
+            return render_template('registration_page_3.html')
+    return render_template('registration_page_3.html')
+
+@bp.route('/registration_page_4', methods=['GET', 'POST'])
+def registration_page_4():
+    if not session.get('whatsapp'):  # Check if page 3 was completed
+        flash('Please complete previous steps first', 'error')
+        return redirect(url_for('main.registration_page_3'))
+    
+    if request.method == 'POST':
+        try:
+            # Validate required fields
+            required_fields = ['nok_name_1', 'nok_address_1', 'nok_gsm_number_1']
+            for field in required_fields:
+                if not request.form.get(field):
+                    flash(f'{field.replace("_", " ").title()} is required', 'error')
+                    return render_template('registration_page_4.html')
+            
+            # Save next of kin data
+            session['nok_name_1'] = request.form['nok_name_1']
+            session['nok_address_1'] = request.form['nok_address_1']
+            session['nok_gsm_number_1'] = request.form['nok_gsm_number_1']
+            session['nok_email_1'] = request.form.get('nok_email_1', '')
+            
+            return redirect(url_for('main.registration_page_5'))
+        except Exception as e:
+            flash('An error occurred. Please try again.', 'error')
+            return render_template('registration_page_4.html')
+    return render_template('registration_page_4.html')
 
 @bp.route('/courses')
 def courses():

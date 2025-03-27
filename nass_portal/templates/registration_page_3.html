@@ -2,26 +2,33 @@
 {% block title %}Registration - Page 3{% endblock %}
 {% block content %}
     <h1 class="text-center text-success mb-4">Student Registration - Page 3</h1>
-    <form method="post" action="{{ url_for('registration_page_3') }}" class="shadow-lg rounded-lg p-4 bg-white" enctype="multipart/form-data">
+    <form method="post" action="{{ url_for('main.registration_page_3') }}" class="shadow-lg rounded-lg p-4 bg-white">
         <h2 class="text-center mb-3">Social Media Contact</h2>
         <div class="form-group">
             <label for="facebook" class="text-secondary">Facebook Name:</label>
-            <input type="text" class="form-control" id="facebook" name="facebook" placeholder="Enter Facebook Name" required>
+            <input type="text" class="form-control" id="facebook" name="facebook" 
+                   value="{{ session.get('facebook', '') }}" placeholder="Enter Facebook Name">
         </div>
         <div class="form-group">
             <label for="twitter" class="text-secondary">Twitter Handle:</label>
-            <input type="text" class="form-control" id="twitter" name="twitter" placeholder="Enter Twitter Handle" required>
+            <input type="text" class="form-control" id="twitter" name="twitter" 
+                   value="{{ session.get('twitter', '') }}" placeholder="Enter Twitter Handle">
         </div>
         <div class="form-group">
             <label for="whatsapp" class="text-secondary">WhatsApp Number:</label>
-            <input type="tel" class="form-control" id="whatsapp" name="whatsapp" placeholder="Enter WhatsApp Number" required>
+            <input type="tel" class="form-control" id="whatsapp" name="whatsapp" 
+                   value="{{ session.get('whatsapp', '') }}" placeholder="Enter WhatsApp Number" required>
+            <div class="invalid-feedback">WhatsApp number is required</div>
         </div>
         <div class="form-group">
             <label for="instagram" class="text-secondary">Instagram:</label>
-            <input type="text" class="form-control" id="instagram" name="instagram" placeholder="Enter Instagram Handle" required>
+            <input type="text" class="form-control" id="instagram" name="instagram" 
+                   value="{{ session.get('instagram', '') }}" placeholder="Enter Instagram Handle">
         </div>
 
-        <button type="button" class="btn btn-secondary" onclick="window.history.back();">Previous</button>
-        <button type="submit" class="btn btn-primary">Next</button>
+        <div class="mt-4">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('main.registration_page_2') }}'">Previous</button>
+            <button type="submit" class="btn btn-primary">Next</button>
+        </div>
     </form>
 {% endblock %}

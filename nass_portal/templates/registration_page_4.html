@@ -2,26 +2,39 @@
 {% block title %}Registration - Page 4{% endblock %}
 {% block content %}
     <h1 class="text-center text-success mb-4">Student Registration - Page 4</h1>
-    <form method="post" action="{{ url_for('registration_page_4') }}" class="shadow-lg rounded-lg p-4 bg-white" enctype="multipart/form-data">
+    <form method="post" action="{{ url_for('main.registration_page_4') }}" class="shadow-lg rounded-lg p-4 bg-white">
         <h2 class="text-center mb-3">Next of Kin Information</h2>
+        
         <div class="form-group">
-            <label for="nok_name_1" class="text-secondary">NOK Name (1):</label>
-            <input type="text" class="form-control" id="nok_name_1" name="nok_name_1" placeholder="Enter NOK Name" required>
+            <label for="nok_name_1" class="text-secondary">Next of Kin Name:</label>
+            <input type="text" class="form-control" id="nok_name_1" name="nok_name_1" 
+                   value="{{ session.get('nok_name_1', '') }}" placeholder="Enter Next of Kin Name" required>
+            <div class="invalid-feedback">Next of Kin Name is required</div>
         </div>
+        
         <div class="form-group">
-            <label for="nok_address_1" class="text-secondary">NOK Address (1):</label>
-            <input type="text" class="form-control" id="nok_address_1" name="nok_address_1" placeholder="Enter NOK Address" required>
+            <label for="nok_address_1" class="text-secondary">Next of Kin Address:</label>
+            <textarea class="form-control" id="nok_address_1" name="nok_address_1" 
+                      placeholder="Enter Next of Kin Address" required>{{ session.get('nok_address_1', '') }}</textarea>
+            <div class="invalid-feedback">Next of Kin Address is required</div>
         </div>
+        
         <div class="form-group">
-            <label for="nok_gsm_number_1" class="text-secondary">NOK GSM Number (1):</label>
-            <input type="tel" class="form-control" id="nok_gsm_number_1" name="nok_gsm_number_1" placeholder="Enter NOK GSM Number" required>
+            <label for="nok_gsm_number_1" class="text-secondary">Next of Kin Phone Number:</label>
+            <input type="tel" class="form-control" id="nok_gsm_number_1" name="nok_gsm_number_1" 
+                   value="{{ session.get('nok_gsm_number_1', '') }}" placeholder="Enter Next of Kin Phone Number" required>
+            <div class="invalid-feedback">Next of Kin Phone Number is required</div>
         </div>
+        
         <div class="form-group">
-            <label for="nok_email_1" class="text-secondary">NOK Email (1):</label>
-            <input type="email" class="form-control" id="nok_email_1" name="nok_email_1" placeholder="Enter NOK Email" required>
+            <label for="nok_email_1" class="text-secondary">Next of Kin Email:</label>
+            <input type="email" class="form-control" id="nok_email_1" name="nok_email_1" 
+                   value="{{ session.get('nok_email_1', '') }}" placeholder="Enter Next of Kin Email">
         </div>
 
-        <button type="button" class="btn btn-secondary" onclick="window.history.back();">Previous</button>
-        <button type="submit" class="btn btn-primary">Next</button>
+        <div class="mt-4">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('main.registration_page_3') }}'">Previous</button>
+            <button type="submit" class="btn btn-primary">Next</button>
+        </div>
     </form>
 {% endblock %}

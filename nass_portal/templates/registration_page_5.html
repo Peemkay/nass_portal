@@ -1,32 +1,163 @@
 {% extends 'base.html' %}
 {% block title %}Registration - Page 5{% endblock %}
-{% block content %}
-    <h1 class="text-center text-success mb-4">Student Registration - Page 5</h1>
-    <form method="post" action="{{ url_for('registration_page_5') }}" class="shadow-lg rounded-lg p-4 bg-white" enctype="multipart/form-data">
-        <h2 class="text-center mb-3">Previous Academic Records</h2>
-        <div class="form-group">
-            <label class="text-secondary">University/Polytechnic/College of Education:</label>
-             <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Serial</th>
-                            <th>Name of Institution</th>
-                            <th>Year From</th>
-                            <th>Year To</th>
-                            <th>Cert Obtained</th>
-                            <th>Grade Obtained</th>
-                            <th>Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Your existing table rows here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        <button type="button" class="btn btn-secondary" onclick="window.history.back();">Previous</button>
-        <button type="submit" class="btn btn-primary">Next</button>
-    </form>
+{% block content %}
+<div class="container py-4">
+    <h1 class="text-center text-success mb-4">Student Registration - Page 5</h1>
+    
+    <div class="card shadow-lg">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4">Academic Records</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="post" action="{{ url_for('main.registration_page_5') }}" class="needs-validation" novalidate>
+                <!-- Academic Records Table -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Serial</th>
+                                <th>Name of Institution</th>
+                                <th>Year From</th>
+                                <th>Year To</th>
+                                <th>Certificate Obtained</th>
+                                <th>Grade</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in range(3) %}  <!-- Allow for 3 entries -->
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" name="uni_serial[]" 
+                                           value="{{ session.get('uni_serial', [])[i] if session.get('uni_serial') and i < len(session.get('uni_serial')) else '' }}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="uni_name[]" 
+                                           value="{{ session.get('uni_name', [])[i] if session.get('uni_name') and i < len(session.get('uni_name')) else '' }}"
+                                           {% if i == 0 %}required{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" name="uni_year_from[]" min="1950" max="2099"
+                                           value="{{ session.get('uni_year_from', [])[i] if session.get('uni_year_from') and i < len(session.get('uni_year_from')) else '' }}"
+                                           {% if i == 0 %}required{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" name="uni_year_to[]" min="1950" max="2099"
+                                           value="{{ session.get('uni_year_to', [])[i] if session.get('uni_year_to') and i < len(session.get('uni_year_to')) else '' }}"
+                                           {% if i == 0 %}required{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="uni_cert[]"
+                                           value="{{ session.get('uni_cert', [])[i] if session.get('uni_cert') and i < len(session.get('uni_cert')) else '' }}"
+                                           {% if i == 0 %}required{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="uni_grade[]"
+                                           value="{{ session.get('uni_grade', [])[i] if session.get('uni_grade') and i < len(session.get('uni_grade')) else '' }}"
+                                           {% if i == 0 %}required{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="uni_remarks[]"
+                                           value="{{ session.get('uni_remarks', [])[i] if session.get('uni_remarks') and i < len(session.get('uni_remarks')) else '' }}">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Professional Qualifications -->
+                <h3 class="mb-3">Professional Qualifications</h3>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Serial</th>
+                                <th>Qualification</th>
+                                <th>Institution</th>
+                                <th>Year Obtained</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in range(2) %}  <!-- Allow for 2 entries -->
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" name="prof_serial[]"
+                                           value="{{ session.get('prof_serial', [])[i] if session.get('prof_serial') and i < len(session.get('prof_serial')) else '' }}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="prof_qual[]"
+                                           value="{{ session.get('prof_qual', [])[i] if session.get('prof_qual') and i < len(session.get('prof_qual')) else '' }}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="prof_inst[]"
+                                           value="{{ session.get('prof_inst', [])[i] if session.get('prof_inst') and i < len(session.get('prof_inst')) else '' }}">
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" name="prof_year[]" min="1950" max="2099"
+                                           value="{{ session.get('prof_year', [])[i] if session.get('prof_year') and i < len(session.get('prof_year')) else '' }}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="prof_remarks[]"
+                                           value="{{ session.get('prof_remarks', [])[i] if session.get('prof_remarks') and i < len(session.get('prof_remarks')) else '' }}">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-secondary" 
+                            onclick="window.location.href='{{ url_for('main.registration_page_4') }}'">
+                        <i class="fas fa-arrow-left me-2"></i>Previous
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Next<i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+// Form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+
+// Year validation
+document.querySelectorAll('input[type="number"]').forEach(function(input) {
+    input.addEventListener('input', function() {
+        if (this.value < 1950) this.value = 1950;
+        if (this.value > 2099) this.value = 2099;
+    });
+});
+</script>
+{% endblock %}
+
 {% endblock %}
