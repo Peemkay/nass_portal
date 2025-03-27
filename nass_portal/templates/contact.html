@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us{% endblock %}
+
+{% block content %}
+<div class="contact-wrapper">
+    <div class="container">
+        <!-- Contact Info Cards -->
+        <div class="row mb-5">
+            <div class="col-lg-4 mb-4">
+                <div class="contact-card shadow-sm">
+                    <div class="card-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h3>Call Us</h3>
+                    <p>+234 xxx xxxx xxx</p>
+                    <p>Monday - Friday: 8:00 AM - 4:00 PM</p>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="contact-card shadow-sm">
+                    <div class="card-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email Us</h3>
+                    <p>info@nassportal.com</p>
+                    <p>support@nassportal.com</p>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="contact-card shadow-sm">
+                    <div class="card-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Visit Us</h3>
+                    <p>Nigerian Army School of Signals</p>
+                    <p>Apapa, Lagos, Nigeria</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map and Contact Form Section -->
+        <div class="row">
+            <!-- Contact Form -->
+            <div class="col-lg-6 mb-4">
+                <div class="contact-form-container shadow-sm">
+                    <h2>Send us a Message</h2>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" class="form-control" id="subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea class="form-control" id="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">
+                            Send Message
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            <div class="col-lg-6 mb-4">
+                <div class="map-container shadow-sm">
+                    <div class="map-header">
+                        <h2>Our Location</h2>
+                        <p>Find us at the Nigerian Army School of Signals, Apapa</p>
+                    </div>
+                    <div class="map-wrapper">
+                        <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3964.5667037073765!2d3.3572229761992753!3d6.448611094649097!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNsKwMjYnNTUuMCJOIDPCsDIxJzI2LjAiRQ!5e0!3m2!1sen!2sng!4v1709913331669!5m2!1sen!2sng&markers=color:red%7C6.448611,3.357223"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                    <div class="map-footer">
+                        <a href="https://maps.app.goo.gl/4pi5LYc2tW3bu1uZ9" target="_blank" class="directions-btn">
+                            <i class="fas fa-directions"></i>
+                            Get Directions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Registration - Page 7{% endblock %}
+{% block content %}
+    <h1 class="text-center text-success mb-4">Student Registration - Page 7</h1>
+    <form method="post" action="{{ url_for('submit_registration') }}" class="shadow-lg rounded-lg p-4 bg-white" enctype="multipart/form-data">
+        <h2 class="text-center mb-3">Final Review and Submission</h2>
+        <p class="text-center">Please review your information before submitting.</p>
+
+        <button type="button" class="btn btn-secondary" onclick="window.history.back();">Previous</button>
+        <button type="submit" class="btn btn-primary">Submit Registration</button>
+    </form>
+{% endblock %}

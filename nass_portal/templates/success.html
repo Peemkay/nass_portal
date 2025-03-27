@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Registration Successful{% endblock %}
+{% block content %}
+    <h1 class="text-center text-success">Registration Successful!</h1>
+    <p class="text-center">Thank you for registering. Your information has been successfully submitted.</p>
+    <div class="text-center">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Go to Home</a>
+    </div>
+{% endblock %}

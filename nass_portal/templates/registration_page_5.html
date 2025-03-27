@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Registration - Page 5{% endblock %}
+{% block content %}
+    <h1 class="text-center text-success mb-4">Student Registration - Page 5</h1>
+    <form method="post" action="{{ url_for('registration_page_5') }}" class="shadow-lg rounded-lg p-4 bg-white" enctype="multipart/form-data">
+        <h2 class="text-center mb-3">Previous Academic Records</h2>
+        <div class="form-group">
+            <label class="text-secondary">University/Polytechnic/College of Education:</label>
+             <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Serial</th>
+                            <th>Name of Institution</th>
+                            <th>Year From</th>
+                            <th>Year To</th>
+                            <th>Cert Obtained</th>
+                            <th>Grade Obtained</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Your existing table rows here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary" onclick="window.history.back();">Previous</button>
+        <button type="submit" class="btn btn-primary">Next</button>
+    </form>
+{% endblock %}

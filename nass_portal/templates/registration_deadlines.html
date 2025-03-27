@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Manage Registration Deadlines{% endblock %}
+{% block content %}
+    <h1 class="text-center text-danger mb-4">Manage Registration Deadlines</h1>
+    <div class="alert alert-success" role="alert">
+        Use the form below to set the registration deadlines.
+    </div>
+    <form method="POST" action="/registration_deadlines" class="shadow-lg rounded-lg p-4 bg-white" onsubmit="showStatusModal(event)">
+        <div class="modal" id="statusModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Status</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="statusMessage"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="registration_start" class="text-secondary">Registration Start Date:</label>
+            <input type="date" class="form-control" id="registration_start" name="registration_start" required>
+        </div>
+        <div class="form-group">
+            <label for="registration_end" class="text-secondary">Registration End Date:</label>
+            <input type="date" class="form-control" id="registration_end" name="registration_end" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Deadlines</button>
+        <script>
+            function showStatusModal(event) {
+                event.preventDefault(); // Prevent the default form submission
+                const form = event.target;
+                const formData = new FormData(form);
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('statusMessage').innerText = data.message;
+                    $('#statusModal').modal('show'); // Show the modal
+                })
+                .catch(error => {
+                    document.getElementById('statusMessage').innerText = 'Error saving deadlines.';
+                    $('#statusModal').modal('show'); // Show the modal
+                });
+            }
+        </script>
+
+        <script>
+            function showStatusModal(event) {
+                event.preventDefault(); // Prevent the default form submission
+                const form = event.target;
+                const formData = new FormData(form);
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('statusMessage').innerText = data.message;
+                    $('#statusModal').modal('show'); // Show the modal
+                })
+                .catch(error => {
+                    document.getElementById('statusMessage').innerText = 'Error saving deadlines.';
+                    $('#statusModal').modal('show'); // Show the modal
+                });
+            }
+        </script>
+
+    </form>
+    {% if deadlines %}
+        <h2 class="text-center mt-4">Current Deadlines</h2>
+        <p>Start Date: {{ deadlines.registration_start }}</p>
+        <p>End Date: {{ deadlines.registration_end }}</p>
+    {% endif %}
+{% endblock %}

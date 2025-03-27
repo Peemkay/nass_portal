@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Registration - Page 1{% endblock %}
+{% block content %}
+    <h1 class="text-center text-success mb-4">Student Registration - Page 1</h1>
+    <form method="post" action="{{ url_for('main.registration_page_1') }}" class="shadow-lg rounded-lg p-4 bg-white" enctype="multipart/form-data">
+        <h2 class="text-center mb-3">Personal Details</h2>
+        <div class="form-group">
+            <label for="passport" class="text-secondary">Passport Photograph:</label>
+            <input type="file" class="form-control" id="passport" name="passport" accept="image/*" required onchange="previewImage(this)">
+            <div id="passport-preview" style="margin-top: 10px; display: none;">
+                <img id="passport-img" src="#" alt="Passport Preview" style="max-width: 200px; max-height: 200px;">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="personnel_number" class="text-secondary">Army /Personnel Number:</label>
+            <input type="text" class="form-control" id="personnel_number" name="personnel_number" placeholder="Enter Army/Personnel Number" required>
+        </div>
+        <div class="form-group">
+            <label for="rank" class="text-secondary">Rank:</label>
+            <input type="text" class="form-control" id="rank" name="rank" placeholder="Enter Rank" required>
+        </div>
+        <div class="form-group">
+            <label for="name" class="text-secondary">Name in full: (Surname in Capital and Underline)</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter Full Name" required>
+        </div>
+        <div class="form-group">
+            <label for="unit" class="text-secondary">Unit:</label>
+            <input type="text" class="form-control" id="unit" name="unit" placeholder="Enter Unit" required>
+        </div>
+        <div class="form-group">
+            <label for="dob" class="text-secondary">Date of Birth:</label>
+            <input type="date" class="form-control" id="dob" name="dob" required>
+        </div>
+        <div class="form-group">
+            <label for="year_in_rank" class="text-secondary">Year in Rank:</label>
+            <input type="text" class="form-control" id="year_in_rank" name="year_in_rank" placeholder="Enter Year in Rank" required>
+        </div>
+        <div class="form-group">
+            <label for="year_of_last_promotion" class="text-secondary">Year of Last Promotion:</label>
+            <input type="text" class="form-control" id="year_of_last_promotion" name="year_of_last_promotion" placeholder="Enter Year of Last Promotion" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Next</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+<div class="courses-container">
+    <h1 class="text-center course-main-title">Our Training Programs</h1>
+    <p class="text-center course-subtitle">Comprehensive military signal training courses for officers and soldiers</p>
+
+    <!-- Officers Section -->
+    <section class="course-section">
+        <div class="section-header">
+            <h2>Officers Training Programs</h2>
+            <p class="section-description">Advanced training courses designed for military officers at different ranks</p>
+        </div>
+
+        <div class="course-grid">
+            <!-- Junior Level -->
+            <div class="course-card-wrapper">
+                <div class="modern-course-card">
+                    <div class="card-banner junior-level">
+                        <i class="fas fa-user-graduate"></i>
+                        <h3>Junior Level</h3>
+                    </div>
+                    <div class="card-content">
+                        <ul class="course-list">
+                            <li><i class="fas fa-check-circle"></i> Junior Level Course</li>
+                            <li><i class="fas fa-check-circle"></i> Basic Computer Course (BCC)</li>
+                            <li><i class="fas fa-check-circle"></i> Electronic Warfare Course</li>
+                            <li><i class="fas fa-check-circle"></i> Young Officers Course</li>
+                        </ul>
+                        <a href="{{ url_for('main.registration') }}" class="btn btn-primary card-btn">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mid Level -->
+            <div class="course-card-wrapper">
+                <div class="modern-course-card">
+                    <div class="card-banner mid-level">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Mid Level</h3>
+                    </div>
+                    <div class="card-content">
+                        <ul class="course-list">
+                            <li><i class="fas fa-check-circle"></i> Squadron Commanders' Course</li>
+                            <li><i class="fas fa-check-circle"></i> Advanced Computer Course</li>
+                            <li><i class="fas fa-check-circle"></i> Satellite Communication</li>
+                            <li><i class="fas fa-check-circle"></i> Engineering Course (SOEC)</li>
+                        </ul>
+                        <a href="{{ url_for('main.registration') }}" class="btn btn-primary card-btn">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Senior Level -->
+            <div class="course-card-wrapper">
+                <div class="modern-course-card">
+                    <div class="card-banner senior-level">
+                        <i class="fas fa-star"></i>
+                        <h3>Senior Level</h3>
+                    </div>
+                    <div class="card-content">
+                        <ul class="course-list">
+                            <li><i class="fas fa-check-circle"></i> Regiment Commanders' Course</li>
+                            <li><i class="fas fa-check-circle"></i> Strategic Communications</li>
+                            <li><i class="fas fa-check-circle"></i> Advanced Leadership</li>
+                        </ul>
+                        <a href="{{ url_for('main.registration') }}" class="btn btn-primary card-btn">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Soldiers Section -->
+    <section class="course-section">
+        <div class="section-header">
+            <h2>Soldiers Training Programs</h2>
+            <p class="section-description">Specialized training courses for soldiers at various expertise levels</p>
+        </div>
+
+        <div class="course-grid">
+            <!-- Basic Level -->
+            <div class="course-card-wrapper">
+                <div class="modern-course-card">
+                    <div class="card-banner basic-level">
+                        <i class="fas fa-layer-group"></i>
+                        <h3>Basic Level</h3>
+                    </div>
+                    <div class="card-content">
+                        <ul class="course-list">
+                            <li><i class="fas fa-check-circle"></i> Technical Course (TC) X III</li>
+                            <li><i class="fas fa-check-circle"></i> Basic Computer Course</li>
+                            <li><i class="fas fa-check-circle"></i> Computer Hardware Course</li>
+                        </ul>
+                        <a href="{{ url_for('main.registration') }}" class="btn btn-primary card-btn">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medium Level -->
+            <div class="course-card-wrapper">
+                <div class="modern-course-card">
+                    <div class="card-banner medium-level">
+                        <i class="fas fa-cogs"></i>
+                        <h3>Medium Level</h3>
+                    </div>
+                    <div class="card-content">
+                        <ul class="course-list">
+                            <li><i class="fas fa-check-circle"></i> Technical Course (TC) X2</li>
+                            <li><i class="fas fa-check-circle"></i> Advanced Computer Course</li>
+                            <li><i class="fas fa-check-circle"></i> VSAT Management</li>
+                        </ul>
+                        <a href="{{ url_for('main.registration') }}" class="btn btn-primary card-btn">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Level -->
+            <div class="course-card-wrapper">
+                <div class="modern-course-card">
+                    <div class="card-banner advanced-level">
+                        <i class="fas fa-rocket"></i>
+                        <h3>Advanced Level</h3>
+                    </div>
+                    <div class="card-content">
+                        <ul class="course-list">
+                            <li><i class="fas fa-check-circle"></i> Technical Course (TC) X 1</li>
+                            <li><i class="fas fa-check-circle"></i> Programming Course</li>
+                            <li><i class="fas fa-check-circle"></i> Network Security</li>
+                        </ul>
+                        <a href="{{ url_for('main.registration') }}" class="btn btn-primary card-btn">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specialist Level -->
+            <div class="course-card-wrapper">
+                <div class="modern-course-card">
+                    <div class="card-banner specialist-level">
+                        <i class="fas fa-crown"></i>
+                        <h3>Specialist Level</h3>
+                    </div>
+                    <div class="card-content">
+                        <ul class="course-list">
+                            <li><i class="fas fa-check-circle"></i> Yeoman of Signals</li>
+                            <li><i class="fas fa-check-circle"></i> Advanced Management</li>
+                            <li><i class="fas fa-check-circle"></i> Leadership Training</li>
+                        </ul>
+                        <a href="{{ url_for('main.registration') }}" class="btn btn-primary card-btn">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
