@@ -1,44 +1,513 @@
 {% extends 'base.html' %}
 {% block title %}Registration - Page 1{% endblock %}
+
 {% block content %}
-    <h1 class="text-center text-success mb-4">Student Registration - Page 1</h1>
-    <form method="post" action="{{ url_for('main.registration_page_1') }}" class="shadow-lg rounded-lg p-4 bg-white" enctype="multipart/form-data">
-        <h2 class="text-center mb-3">Personal Details</h2>
-        <div class="form-group">
-            <label for="passport" class="text-secondary">Passport Photograph:</label>
-            <input type="file" class="form-control" id="passport" name="passport" accept="image/*" required onchange="previewImage(this)">
-            <div id="passport-preview" style="margin-top: 10px; display: none;">
-                <img id="passport-img" src="#" alt="Passport Preview" style="max-width: 200px; max-height: 200px;">
+<div class="container-fluid py-5">
+    <!-- Progress Tracker -->
+    <div class="registration-progress mb-5">
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: 16.66%" aria-valuenow="16.66" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <div class="progress-steps">
+            <div class="progress-step active">
+                <div class="step-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span>Personal Details</span>
+            </div>
+            <div class="progress-step">
+                <div class="step-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <span>Service Info</span>
+            </div>
+            <div class="progress-step">
+                <div class="step-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <span>Education</span>
+            </div>
+            <div class="progress-step">
+                <div class="step-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <span>Next of Kin</span>
+            </div>
+            <div class="progress-step">
+                <div class="step-icon">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <span>Military Training</span>
+            </div>
+            <div class="progress-step">
+                <div class="step-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <span>Documents</span>
             </div>
         </div>
-        <div class="form-group">
-            <label for="personnel_number" class="text-secondary">Army /Personnel Number:</label>
-            <input type="text" class="form-control" id="personnel_number" name="personnel_number" placeholder="Enter Army/Personnel Number" required>
+    </div>
+
+    <!-- Registration Card -->
+    <div class="modern-course-card">
+        <div class="card-banner" style="background: linear-gradient(135deg, var(--dark-blue), var(--medium-blue))">
+            <img src="{{ url_for('static', filename='images/na_logo.png') }}" alt="Nigerian Army Logo" class="logo-img mb-3">
+            <h2 class="text-white mb-2">NIGERIAN ARMY SCHOOL OF SIGNALS</h2>
+            <p class="text-white-50">Personnel Registration Form</p>
         </div>
-        <div class="form-group">
-            <label for="rank" class="text-secondary">Rank:</label>
-            <input type="text" class="form-control" id="rank" name="rank" placeholder="Enter Rank" required>
+
+        <div class="card-content p-4">
+            <form method="post" action="{{ url_for('main.registration_page_1') }}" class="needs-validation" enctype="multipart/form-data" novalidate>
+                
+                <!-- Photo Upload Section -->
+                <div class="photo-upload-section mb-5">
+                    <div class="photo-preview-container">
+                        <img id="passport-preview" src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Passport Preview">
+                        <div class="upload-overlay">
+                            <label for="passport" class="upload-button">
+                                <i class="fas fa-camera"></i>
+                                <span>Upload Photo</span>
+                            </label>
+                            <input type="file" class="d-none" id="passport" name="passport" accept="image/*" required onchange="previewImage(this)">
+                        </div>
+                    </div>
+                    <div class="photo-requirements mt-3">
+                        <h6 class="text-muted">Photo Requirements:</h6>
+                        <ul class="requirements-list">
+                            <li><i class="fas fa-check-circle"></i> Recent passport photograph</li>
+                            <li><i class="fas fa-check-circle"></i> White background</li>
+                            <li><i class="fas fa-check-circle"></i> Service dress</li>
+                            <li><i class="fas fa-check-circle"></i> Max size: 2MB</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Service Information -->
+                <div class="form-section service-info mb-4">
+                    <h5 class="section-title">
+                        <i class="fas fa-shield-alt text-primary"></i> Service Information
+                    </h5>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="army_number" name="army_number" required>
+                                <label for="army_number">Army Number</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="rank" name="rank" required>
+                                    <option value="">Select Rank</option>
+                                    <optgroup label="Officers">
+                                        <option value="GEN">General</option>
+                                        <option value="LTGEN">Lieutenant General</option>
+                                        <option value="MAJGEN">Major General</option>
+                                        <option value="BRIG">Brigadier General</option>
+                                        <option value="COL">Colonel</option>
+                                        <option value="LTCOL">Lieutenant Colonel</option>
+                                        <option value="MAJ">Major</option>
+                                        <option value="CAPT">Captain</option>
+                                        <option value="LT">Lieutenant</option>
+                                        <option value="2LT">Second Lieutenant</option>
+                                    </optgroup>
+                                    <optgroup label="Non-Commissioned Officers">
+                                        <option value="WO1">Warrant Officer Class 1</option>
+                                        <option value="WO2">Warrant Officer Class 2</option>
+                                        <option value="SSGT">Staff Sergeant</option>
+                                        <option value="SGT">Sergeant</option>
+                                        <option value="CPL">Corporal</option>
+                                        <option value="LCPL">Lance Corporal</option>
+                                        <option value="PTE">Private</option>
+                                    </optgroup>
+                                </select>
+                                <label for="rank">Rank</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="service_type" name="service_type" required>
+                                    <option value="">Select Service Type</option>
+                                    <option value="regular">Regular Commission</option>
+                                    <option value="direct_regular_commission">Direct Regular Commission</option>
+                                    <option value="short_service">Short Service Commission</option>
+                                    <option value="direct_short_service">Direct Short Service Commission</option>
+                                    <option value="executive_commossion">Executive Commission</option>
+                                </select>
+                                <label for="service_type">Service Type</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information -->
+                <div class="form-section personal-info">
+                    <h5 class="section-title">
+                        <i class="fas fa-user text-primary"></i> Personal Information
+                    </h5>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="surname" name="surname" required>
+                                <label for="surname">Surname</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="firstname" name="firstname" required>
+                                <label for="firstname">First Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="othername" name="othername">
+                                <label for="othername">Other Names</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                                <label for="gender">Gender</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="dob" name="dob" required>
+                                <label for="dob">Date of Birth</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                                <label for="phone">Phone Number</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="form-section contact-info">
+                    <h5 class="section-title">
+                        <i class="fas fa-address-card text-primary"></i> Contact Information
+                    </h5>
+                    <div class="row g-4">
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" name="email" required>
+                                <label for="email">Email Address</label>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="home_address" name="home_address" rows="2" required></textarea>
+                                <label for="home_address">Home Address</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="country" name="country" required onchange="toggleStateField()">
+                                    <option value="">Select Country</option>
+                                    <option value="Nigeria" selected>Nigeria</option>
+                                    <!-- Add other countries as needed -->
+                                </select>
+                                <label for="country">Country</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4" id="stateFieldContainer">
+                            <div class="form-floating">
+                                <select class="form-select" id="state" name="state" required>
+                                    <option value="">Select State</option>
+                                    <option value="Abia">Abia</option>
+                                    <option value="Adamawa">Adamawa</option>
+                                    <option value="Akwa Ibom">Akwa Ibom</option>
+                                    <option value="Anambra">Anambra</option>
+                                    <option value="Bauchi">Bauchi</option>
+                                    <option value="Bayelsa">Bayelsa</option>
+                                    <option value="Benue">Benue</option>
+                                    <option value="Borno">Borno</option>
+                                    <option value="Cross River">Cross River</option>
+                                    <option value="Delta">Delta</option>
+                                    <option value="Ebonyi">Ebonyi</option>
+                                    <option value="Edo">Edo</option>
+                                    <option value="Ekiti">Ekiti</option>
+                                    <option value="Enugu">Enugu</option>
+                                    <option value="FCT">Federal Capital Territory</option>
+                                    <option value="Gombe">Gombe</option>
+                                    <option value="Imo">Imo</option>
+                                    <option value="Jigawa">Jigawa</option>
+                                    <option value="Kaduna">Kaduna</option>
+                                    <option value="Kano">Kano</option>
+                                    <option value="Katsina">Katsina</option>
+                                    <option value="Kebbi">Kebbi</option>
+                                    <option value="Kogi">Kogi</option>
+                                    <option value="Kwara">Kwara</option>
+                                    <option value="Lagos">Lagos</option>
+                                    <option value="Nasarawa">Nasarawa</option>
+                                    <option value="Niger">Niger</option>
+                                    <option value="Ogun">Ogun</option>
+                                    <option value="Ondo">Ondo</option>
+                                    <option value="Osun">Osun</option>
+                                    <option value="Oyo">Oyo</option>
+                                    <option value="Plateau">Plateau</option>
+                                    <option value="Rivers">Rivers</option>
+                                    <option value="Sokoto">Sokoto</option>
+                                    <option value="Taraba">Taraba</option>
+                                    <option value="Yobe">Yobe</option>
+                                    <option value="Zamfara">Zamfara</option>
+                                </select>
+                                <label for="state">State</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Navigation -->
+                <div class="form-navigation mt-5 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="name" class="text-secondary">Name in full: (Surname in Capital and Underline)</label>
-            <input type="text" class="form-control" id="name" name="name" placeholder="Enter Full Name" required>
-        </div>
-        <div class="form-group">
-            <label for="unit" class="text-secondary">Unit:</label>
-            <input type="text" class="form-control" id="unit" name="unit" placeholder="Enter Unit" required>
-        </div>
-        <div class="form-group">
-            <label for="dob" class="text-secondary">Date of Birth:</label>
-            <input type="date" class="form-control" id="dob" name="dob" required>
-        </div>
-        <div class="form-group">
-            <label for="year_in_rank" class="text-secondary">Year in Rank:</label>
-            <input type="text" class="form-control" id="year_in_rank" name="year_in_rank" placeholder="Enter Year in Rank" required>
-        </div>
-        <div class="form-group">
-            <label for="year_of_last_promotion" class="text-secondary">Year of Last Promotion:</label>
-            <input type="text" class="form-control" id="year_of_last_promotion" name="year_of_last_promotion" placeholder="Enter Year of Last Promotion" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Next</button>
-    </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --military-dark-blue: #1e3c72;
+    --military-light-blue: #87CEEB;
+    --military-green: #4B5320;
+    --military-gold: #CFB53B;
+}
+
+.container-fluid {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.registration-card {
+    background: white;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.military-header {
+    background: linear-gradient(135deg, var(--military-dark-blue), var(--military-light-blue));
+    color: white;
+    padding: 2rem;
+    border-radius: 15px 15px 0 0;
+}
+
+.na-logo {
+    width: 100px;
+    height: auto;
+}
+
+.progress-tracker {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.steps-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.step {
+    text-align: center;
+    flex: 1;
+    position: relative;
+}
+
+.step-circle {
+    width: 50px;
+    height: 50px;
+    background: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-circle {
+    background: var(--military-green);
+    color: white;
+    transform: scale(1.1);
+}
+
+.form-section {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.section-title {
+    color: var(--military-dark-blue);
+    border-bottom: 2px solid var(--military-light-blue);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.section-title i {
+    margin-right: 10px;
+    color: var(--military-green);
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--military-light-blue);
+    box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
+}
+
+.photo-upload-container {
+    text-align: center;
+}
+
+.photo-preview {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    margin: 0 auto;
+    border: 3px solid var(--military-dark-blue);
+}
+
+.photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.upload-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.7);
+    padding: 10px;
+    color: white;
+}
+
+.upload-btn {
+    cursor: pointer;
+    display: block;
+}
+
+.upload-btn i {
+    margin-right: 5px;
+}
+
+.photo-requirements {
+    margin-top: 15px;
+    text-align: left;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.photo-requirements ul {
+    padding-left: 20px;
+    margin-bottom: 0;
+}
+
+.btn-military {
+    background: var(--military-green);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-military:hover {
+    background: var(--military-dark-blue);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.form-navigation {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.bg-military {
+    background: var(--military-green) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .steps-container {
+        display: none;
+    }
+    
+    .form-section {
+        padding: 15px;
+    }
+    
+    .military-header {
+        padding: 1rem;
+    }
+    
+    .military-header h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('passport-preview').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Form validation
+(function() {
+    'use strict'
+    const forms = document.querySelectorAll('.needs-validation')
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
 {% endblock %}

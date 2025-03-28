@@ -1,311 +1,268 @@
-/* Registration Progress Bar */
-.registration-progress {
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    margin-bottom: 30px;
+/* Modern Variables */
+:root {
+    --primary: #2196F3;
+    --primary-dark: #1976D2;
+    --success: #4CAF50;
+    --danger: #f44336;
+    --dark: #333;
+    --light: #f5f5f5;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --gradient: linear-gradient(135deg, #2196F3, #1976D2);
 }
 
-.progress {
-    height: 10px !important;
-    background: rgba(0, 0, 0, 0.05) !important;
-    border-radius: 15px !important;
+/* Modern Card Design */
+.registration-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px var(--shadow);
     overflow: hidden;
+    margin: 2rem auto;
+    max-width: 1200px;
+}
+
+.card-header {
+    background: var(--gradient);
+    padding: 2.5rem;
+    text-align: center;
+    color: white;
+}
+
+.card-header h2 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.card-header p {
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+/* Progress Bar */
+.progress-container {
+    padding: 2rem;
+    background: white;
 }
 
 .progress-bar {
-    background: linear-gradient(45deg, #2196F3, #00BCD4) !important;
-    transition: width 0.5s ease-in-out;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.progress-fill {
+    position: absolute;
+    height: 100%;
+    background: var(--primary);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    width: 20%;
 }
 
 .progress-steps {
     display: flex;
     justify-content: space-between;
-    margin-top: 20px;
-    padding: 0 10px;
+    margin-top: -10px;
 }
 
-.progress-step {
-    text-align: center;
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
-    flex: 1;
+    width: 120px;
 }
 
-.step-icon {
-    width: 50px;
-    height: 50px;
+.step-circle {
+    width: 40px;
+    height: 40px;
     background: white;
+    border: 3px solid #e0e0e0;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    border: 2px solid #e0e0e0;
-}
-
-.progress-step.active .step-icon {
-    background: linear-gradient(45deg, #2196F3, #00BCD4);
-    border-color: transparent;
-    transform: scale(1.1);
-}
-
-.progress-step.active .step-icon i {
-    color: white;
-}
-
-.step-icon i {
-    font-size: 1.5rem;
-    color: #757575;
-}
-
-.step-label {
-    font-size: 0.9rem;
-    color: #757575;
-    font-weight: 500;
-    margin-top: 8px;
-    transition: all 0.3s ease;
-}
-
-.progress-step.active .step-label {
-    color: #2196F3;
-    font-weight: 600;
-}
-
-/* Registration Card */
-.registration-card {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    overflow: hidden;
-    margin-bottom: 30px;
-}
-
-.registration-header {
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    padding: 30px;
-    text-align: center;
-    color: white;
-}
-
-.registration-header h1 {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.registration-header h2 {
     font-size: 1.2rem;
-    opacity: 0.9;
-}
-
-.registration-body {
-    padding: 40px;
-    background: rgba(255, 255, 255, 0.98);
-}
-
-/* Photo Upload Section */
-.photo-upload-container {
-    text-align: center;
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.02);
-    border-radius: 15px;
-}
-
-.photo-frame {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    margin: 0 auto;
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    color: #999;
     transition: all 0.3s ease;
 }
 
-.photo-frame img {
+.step.active .step-circle {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 0 20px rgba(33, 150, 243, 0.3);
+}
+
+.step-text {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.step.active .step-text {
+    color: var(--primary);
+}
+
+/* Form Styling */
+.form-content {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-control {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
+    background: white;
+}
+
+.form-label {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    background: transparent;
+    padding: 0 0.5rem;
+    color: #666;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.form-control:focus + .form-label,
+.form-control:not(:placeholder-shown) + .form-label {
+    top: -0.5rem;
+    left: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--primary);
+    background: white;
+}
+
+/* Photo Upload */
+.photo-upload {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.photo-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    overflow: hidden;
+    border: 3px solid var(--primary);
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.photo-preview:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.photo-preview img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.upload-overlay {
+.photo-upload-icon {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: #2196F3;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.upload-overlay:hover {
-    transform: scale(1.1);
-    background: #1976D2;
-}
-
-.upload-overlay i {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(33, 150, 243, 0.9);
     color: white;
+    padding: 0.5rem;
     font-size: 1.2rem;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
 }
 
-/* Form Sections */
-.form-section {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
-.section-title {
-    color: #1e3c72;
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-/* Form Groups */
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    font-weight: 500;
-    color: #495057;
-    margin-bottom: 0.5rem;
-    display: block;
-}
-
-/* Form Controls */
-.form-control, .form-select {
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: #2196F3;
-    box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.15);
-}
-
-.form-control.is-invalid, .form-select.is-invalid {
-    border-color: #dc3545;
-    background-image: none;
-}
-
-/* Required Field Indicator */
-.text-danger {
-    color: #dc3545;
-}
-
-/* Form Text Helper */
-.form-text {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
+.photo-preview:hover .photo-upload-icon {
+    transform: translateY(0);
 }
 
 /* Buttons */
 .btn {
-    padding: 0.75rem 1.5rem;
-    font-weight: 500;
-    border-radius: 10px;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
     transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .btn-primary {
-    background: linear-gradient(45deg, #2196F3, #1976D2);
+    background: var(--gradient);
     border: none;
+    color: white;
+    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(45deg, #1976D2, #1565C0);
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: #757575;
-    border: none;
-}
-
-.btn-secondary:hover {
-    background: #616161;
-    transform: translateY(-1px);
-}
-
-/* Invalid Feedback */
-.invalid-feedback {
-    font-size: 0.875rem;
-    color: #dc3545;
-    display: none;
-    margin-top: 0.25rem;
-}
-
-.was-validated .form-control:invalid ~ .invalid-feedback,
-.was-validated .form-select:invalid ~ .invalid-feedback {
-    display: block;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .form-group {
-        margin-bottom: 1rem;
-    }
-
-    .btn {
-        padding: 0.5rem 1rem;
-    }
-}
-
-/* Animation for form fields */
-.form-control, .form-select {
-    transform-origin: left;
-    animation: slideIn 0.3s ease-out forwards;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .registration-progress {
-        padding: 15px;
+    .card-header {
+        padding: 1.5rem;
     }
 
-    .step-icon {
-        width: 40px;
-        height: 40px;
+    .card-header h2 {
+        font-size: 1.8rem;
     }
 
-    .step-label {
-        font-size: 0.8rem;
+    .progress-steps {
+        display: none;
     }
 
-    .registration-body {
-        padding: 20px;
+    .step-text {
+        display: none;
     }
 
-    .photo-frame {
-        width: 150px;
-        height: 150px;
+    .form-content {
+        padding: 1.5rem;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 1rem;
     }
 }
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+.form-group:nth-child(3) { animation-delay: 0.3s; }
+.form-group:nth-child(4) { animation-delay: 0.4s; }
+
+

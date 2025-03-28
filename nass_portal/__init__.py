@@ -24,7 +24,7 @@ def create_app():
         app.logger.setLevel(logging.INFO)
         app.logger.info('NASS Portal startup')
     
-    app.secret_key = "secret_key"
+    app.secret_key = os.environ.get('SECRET_KEY', 'dev')  # Change this in production!
     
     # Email configuration
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -38,11 +38,18 @@ def create_app():
     mail.init_app(app)
     
     # Database configuration
-    app.config['DATABASE'] = os.path.join('/home/Peemkay/nass_portal/nass_portal', 'database.db')
+    app.config['DATABASE'] = os.path.join(app.instance_path, 'database.db')
+    os.makedirs(app.instance_path, exist_ok=True)
     
+    # Initialize database
     from . import db
     db.init_app(app)
     
+    # Register commands
+    from . import commands
+    commands.init_app(app)
+    
+    # Register blueprint
     from .routes import bp
     app.register_blueprint(bp)
     

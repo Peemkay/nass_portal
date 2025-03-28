@@ -1,15 +1,101 @@
 {% extends 'base.html' %}
 {% block title %}About Us{% endblock %}
 {% block content %}
-    <h1 class="text-center text-info mb-4">About Nigerian Army School of Signals</h1>
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <p class="text-secondary text-justify">
-                The Nigerian Army School of Signals is a premier institution dedicated to training and educating personnel in the field of military communications and information technology. We provide cutting-edge training to equip our students with the skills necessary to excel in a rapidly evolving technological landscape. Our commitment is to foster a learning environment that promotes innovation, critical thinking, and professional development.
-            </p>
-            <p class="text-secondary text-justify">
-                Our programs are designed to meet the dynamic needs of the Nigerian Army, ensuring that our graduates are well-prepared to handle the challenges of modern communication systems. We strive for excellence in all our endeavors, and we are proud to contribute to the advancement of our nation's defense capabilities.
-            </p>
-        </div>
+    <!-- Hero Section -->
+    <div class="about-hero">
+        <h1 class="text-center mb-3">Nigerian Army School Of Signals</h1>
+        <p class="lead text-center">NASS stands as a beacon of professionalism, innovation, and strategic communication within the Nigerian Army.</p>
     </div>
+
+    <!-- Journey Section -->
+    <section class="about-section bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2 class="section-title">Our Journey</h2>
+                    <p class="section-text">
+                        The Nigerian Army School of Signals is a key institution within the Nigerian Army responsible for training personnel in the field of communication and information technology. It plays a crucial role in developing the skills and knowledge of soldiers to effectively handle modern communication systems, signal equipment, and information management.
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <div class="mission-card">
+                        <h3>Our Mission</h3>
+                        <p>To produce well trained and proficient personnel for the NA in the fields of Combat Communications, Electrical/Electronics Engineering, Telecommunications, ICT and related fields.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="features-grid">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Academic Excellence -->
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>Academic Excellence</h3>
+                        <p>Our academic programs are designed to equip students with the knowledge and skills necessary to excel in the dynamic field of military signal operations. The curriculum covers telecommunications, information technology, cryptography, and electronic warfare.</p>
+                    </div>
+                </div>
+
+                <!-- State-of-the-Art Facilities -->
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <h3>State-of-the-Art Facilities</h3>
+                        <p>NASS boasts state-of-the-art facilities that simulate real-world scenarios, providing students with hands-on experience in signal operations.</p>
+                    </div>
+                </div>
+
+                <!-- Specialized Courses -->
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3>Specialized Courses</h3>
+                        <p>From basic signal training to advanced courses, our programs cover the entire spectrum of signal operations, incorporating the latest technological advancements.</p>
+                    </div>
+                </div>
+
+                <!-- Research and Development -->
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <h3>Research and Development</h3>
+                        <p>NASS actively engages in research and development activities, collaborating on projects to enhance military communication capabilities.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section class="community-section">
+        <div class="container">
+            <div class="text-center">
+                <h2>Community Engagement</h2>
+                <p>NASS recognizes the importance of community engagement and strives to foster positive relationships with local communities through outreach programs and initiatives.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content text-center">
+                <h2>Join Us</h2>
+                <p>Shape the future of military communication and information technology with us.</p>
+                <a href="{{ url_for('main.contact') }}" class="btn btn-primary btn-lg">Contact Us</a>
+            </div>
+        </div>
+    </section>
 {% endblock %}
