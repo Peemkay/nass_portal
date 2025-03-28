@@ -123,6 +123,23 @@ def registration_page_4():
             return render_template('registration_page_4.html')
     return render_template('registration_page_4.html')
 
+@bp.route('/registration_page_5', methods=['GET', 'POST'])
+def registration_page_5():
+    if not session.get('nok_name_1'):  # Check if page 4 was completed
+        flash('Please complete previous steps first', 'error')
+        return redirect(url_for('main.registration_page_4'))
+    
+    if request.method == 'POST':
+        try:
+            # Add your page 5 form processing logic here
+            # Save form data to session
+            
+            return redirect(url_for('main.registration_page_6'))
+        except Exception as e:
+            flash('An error occurred. Please try again.', 'error')
+            return render_template('registration_page_5.html')
+    return render_template('registration_page_5.html')
+
 @bp.route('/courses')
 def courses():
     return render_template('courses.html')
