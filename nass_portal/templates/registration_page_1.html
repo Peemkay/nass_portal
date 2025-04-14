@@ -125,12 +125,17 @@
                                     <div class="invalid-feedback">Please select a rank</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="current_unit" class="form-label">Current Unit</label>
-                                    <input type="text" class="form-control" id="current_unit"
-                                           name="current_unit"
-                                           value="{{ form_data.get('current_unit', '') }}"
-                                           required>
-                                    <div class="invalid-feedback">Current unit is required</div>
+                                    <label for="nationality" class="form-label">
+                                        Nationality <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-flag"></i></span>
+                                        <input type="text" class="form-control" id="nationality"
+                                               name="nationality"
+                                               value="{{ form_data.get('nationality', 'Nigerian') }}"
+                                               required>
+                                    </div>
+                                    <div class="invalid-feedback">Nationality is required</div>
                                 </div>
                             </div>
                         </div>
@@ -220,17 +225,17 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="years_in_service" class="form-label">
-                                        Years in Service <span class="text-secondary">(Auto-calculated)</span>
+                                        Years in Service <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-clock"></i></span>
                                         <input type="number" class="form-control" id="years_in_service"
                                                name="years_in_service"
                                                value="{{ form_data.get('years_in_service', '') }}"
-                                               readonly
+                                               min="0" max="60"
                                                required>
                                     </div>
-                                    <small class="text-muted">This value is calculated automatically from the Date of Commission/Enlistment</small>
+                                    <small class="text-muted">Calculated automatically from Date of Commission/Enlistment, but can be adjusted if needed</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="current_unit" class="form-label">
