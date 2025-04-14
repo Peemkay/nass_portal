@@ -17,10 +17,10 @@
                 <div class="card-header bg-military text-white">
                     <h2 class="text-center mb-0">Next of Kin Information</h2>
                 </div>
-                
+
                 <!-- Progress Steps -->
                 <div class="px-4 pt-4">
-                    <div class="progress-steps">
+                    <div class="progress-steps" data-progress="3">
                         <div class="progress-step completed">
                             <div class="step-number">1</div>
                             <div class="step-label">Personal Info</div>
@@ -67,7 +67,7 @@
                 {% endwith %}
 
                 <!-- Registration Form -->
-                <form class="needs-validation" method="POST" 
+                <form class="needs-validation" method="POST"
                       action="{{ url_for('main.registration_page_4') }}" novalidate>
                     <div class="card-body">
                         <!-- Next of Kin Information -->
@@ -81,7 +81,7 @@
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                            <input type="text" class="form-control" id="nok_name_1" 
+                                            <input type="text" class="form-control" id="nok_name_1"
                                                    name="nok_name_1" value="{{ session.get('nok_name_1', '') }}"
                                                    placeholder="Enter full name of next of kin"
                                                    required>
@@ -109,8 +109,8 @@
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-home"></i></span>
-                                            <textarea class="form-control" id="nok_address_1" 
-                                                      name="nok_address_1" rows="3" 
+                                            <textarea class="form-control" id="nok_address_1"
+                                                      name="nok_address_1" rows="3"
                                                       placeholder="Enter full address of next of kin"
                                                       required>{{ session.get('nok_address_1', '') }}</textarea>
                                         </div>
@@ -122,7 +122,7 @@
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                            <input type="tel" class="form-control" id="nok_gsm_number_1" 
+                                            <input type="tel" class="form-control" id="nok_gsm_number_1"
                                                    name="nok_gsm_number_1" value="{{ session.get('nok_gsm_number_1', '') }}"
                                                    placeholder="Enter phone number"
                                                    required>
@@ -135,7 +135,7 @@
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                            <input type="email" class="form-control" id="nok_email_1" 
+                                            <input type="email" class="form-control" id="nok_email_1"
                                                    name="nok_email_1" value="{{ session.get('nok_email_1', '') }}"
                                                    placeholder="Enter email address (optional)">
                                         </div>
@@ -155,7 +155,7 @@
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                            <input type="text" class="form-control" id="nok_name_2" 
+                                            <input type="text" class="form-control" id="nok_name_2"
                                                    name="nok_name_2" value="{{ session.get('nok_name_2', '') }}"
                                                    placeholder="Enter full name of secondary next of kin">
                                         </div>
@@ -180,8 +180,8 @@
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-home"></i></span>
-                                            <textarea class="form-control" id="nok_address_2" 
-                                                      name="nok_address_2" rows="3" 
+                                            <textarea class="form-control" id="nok_address_2"
+                                                      name="nok_address_2" rows="3"
                                                       placeholder="Enter full address of secondary next of kin">{{ session.get('nok_address_2', '') }}</textarea>
                                         </div>
                                     </div>
@@ -191,7 +191,7 @@
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                            <input type="tel" class="form-control" id="nok_gsm_number_2" 
+                                            <input type="tel" class="form-control" id="nok_gsm_number_2"
                                                    name="nok_gsm_number_2" value="{{ session.get('nok_gsm_number_2', '') }}"
                                                    placeholder="Enter phone number">
                                         </div>
@@ -202,7 +202,7 @@
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                            <input type="email" class="form-control" id="nok_email_2" 
+                                            <input type="email" class="form-control" id="nok_email_2"
                                                    name="nok_email_2" value="{{ session.get('nok_email_2', '') }}"
                                                    placeholder="Enter email address (optional)">
                                         </div>
@@ -213,7 +213,7 @@
 
                         <!-- Navigation Buttons -->
                         <div class="form-navigation">
-                            <button type="button" class="btn btn-outline-military" 
+                            <button type="button" class="btn btn-outline-military"
                                     onclick="window.location.href='{{ url_for('main.registration_page_3') }}'">
                                 <i class="fas fa-arrow-left me-2"></i> Previous
                             </button>

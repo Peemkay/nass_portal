@@ -257,43 +257,39 @@ body {
     left: 40px;
     right: 40px;
     height: 4px;
-    background: linear-gradient(to right, var(--success) 0%, var(--success) 0%, var(--neutral-200) 0%);
+    background: var(--neutral-200);
     z-index: -1;
     border-radius: 4px;
+    transition: background 0.3s ease;
 }
 
 /* Create a dynamic progress bar based on active step */
-.progress-step:nth-child(1).active ~ .progress-steps::before,
-.progress-step:nth-child(1).completed ~ .progress-steps::before {
+/* We'll use data attributes to control the progress bar */
+.progress-steps[data-progress="0"]::before {
     background: linear-gradient(to right, var(--success) 0%, var(--neutral-200) 0%);
 }
 
-.progress-step:nth-child(2).active ~ .progress-steps::before,
-.progress-step:nth-child(2).completed ~ .progress-steps::before {
+.progress-steps[data-progress="1"]::before {
     background: linear-gradient(to right, var(--success) 16.66%, var(--neutral-200) 16.66%);
 }
 
-.progress-step:nth-child(3).active ~ .progress-steps::before,
-.progress-step:nth-child(3).completed ~ .progress-steps::before {
+.progress-steps[data-progress="2"]::before {
     background: linear-gradient(to right, var(--success) 33.33%, var(--neutral-200) 33.33%);
 }
 
-.progress-step:nth-child(4).active ~ .progress-steps::before,
-.progress-step:nth-child(4).completed ~ .progress-steps::before {
+.progress-steps[data-progress="3"]::before {
     background: linear-gradient(to right, var(--success) 50%, var(--neutral-200) 50%);
 }
 
-.progress-step:nth-child(5).active ~ .progress-steps::before,
-.progress-step:nth-child(5).completed ~ .progress-steps::before {
+.progress-steps[data-progress="4"]::before {
     background: linear-gradient(to right, var(--success) 66.66%, var(--neutral-200) 66.66%);
 }
 
-.progress-step:nth-child(6).active ~ .progress-steps::before,
-.progress-step:nth-child(6).completed ~ .progress-steps::before {
+.progress-steps[data-progress="5"]::before {
     background: linear-gradient(to right, var(--success) 83.33%, var(--neutral-200) 83.33%);
 }
 
-.progress-step:nth-child(7).active ~ .progress-steps::before {
+.progress-steps[data-progress="6"]::before {
     background: linear-gradient(to right, var(--success) 100%, var(--neutral-200) 100%);
 }
 

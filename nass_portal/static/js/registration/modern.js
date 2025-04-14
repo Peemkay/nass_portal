@@ -161,6 +161,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Progress steps interaction
     function initProgressSteps() {
         const progressSteps = document.querySelectorAll('.progress-step');
+        const progressBar = document.querySelector('.progress-steps');
+
+        if (progressBar) {
+            // Find the active step index
+            let activeIndex = 0;
+            progressSteps.forEach((step, index) => {
+                if (step.classList.contains('active')) {
+                    activeIndex = index;
+                }
+            });
+
+            // Set the progress bar data attribute
+            progressBar.setAttribute('data-progress', activeIndex);
+        }
 
         progressSteps.forEach((step, index) => {
             step.addEventListener('mouseenter', () => {
