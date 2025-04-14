@@ -1,0 +1,46 @@
+:root {
+    --military-dark-blue: #1e3c72;
+    --military-light-blue: #87CEEB;
+    --military-green: #4B5320;
+    --military-gold: #CFB53B;
+}
+
+.container-fluid {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.registration-card {
+    background: white;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.military-header {
+    background: linear-gradient(135deg, var(--military-dark-blue), var(--military-light-blue));
+    color: white;
+    padding: 2rem;
+    border-radius: 15px 15px 0 0;
+}
+
+/* ... rest of your CSS ... */
+
+@media (max-width: 768px) {
+    .steps-container {
+        display: none;
+    }
+    
+    .form-section {
+        padding: 15px;
+    }
+    
+    .military-header {
+        padding: 1rem;
+    }
+    
+    .military-header h2 {
+        font-size: 1.5rem;
+    }
+}

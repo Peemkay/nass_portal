@@ -1,40 +1,275 @@
 {% extends 'base.html' %}
-{% block title %}Registration - Page 4{% endblock %}
-{% block content %}
-    <h1 class="text-center text-success mb-4">Student Registration - Page 4</h1>
-    <form method="post" action="{{ url_for('main.registration_page_4') }}" class="shadow-lg rounded-lg p-4 bg-white">
-        <h2 class="text-center mb-3">Next of Kin Information</h2>
-        
-        <div class="form-group">
-            <label for="nok_name_1" class="text-secondary">Next of Kin Name:</label>
-            <input type="text" class="form-control" id="nok_name_1" name="nok_name_1" 
-                   value="{{ session.get('nok_name_1', '') }}" placeholder="Enter Next of Kin Name" required>
-            <div class="invalid-feedback">Next of Kin Name is required</div>
-        </div>
-        
-        <div class="form-group">
-            <label for="nok_address_1" class="text-secondary">Next of Kin Address:</label>
-            <textarea class="form-control" id="nok_address_1" name="nok_address_1" 
-                      placeholder="Enter Next of Kin Address" required>{{ session.get('nok_address_1', '') }}</textarea>
-            <div class="invalid-feedback">Next of Kin Address is required</div>
-        </div>
-        
-        <div class="form-group">
-            <label for="nok_gsm_number_1" class="text-secondary">Next of Kin Phone Number:</label>
-            <input type="tel" class="form-control" id="nok_gsm_number_1" name="nok_gsm_number_1" 
-                   value="{{ session.get('nok_gsm_number_1', '') }}" placeholder="Enter Next of Kin Phone Number" required>
-            <div class="invalid-feedback">Next of Kin Phone Number is required</div>
-        </div>
-        
-        <div class="form-group">
-            <label for="nok_email_1" class="text-secondary">Next of Kin Email:</label>
-            <input type="email" class="form-control" id="nok_email_1" name="nok_email_1" 
-                   value="{{ session.get('nok_email_1', '') }}" placeholder="Enter Next of Kin Email">
-        </div>
 
-        <div class="mt-4">
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('main.registration_page_3') }}'">Previous</button>
-            <button type="submit" class="btn btn-primary">Next</button>
+{% block title %}Registration - Next of Kin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/photo-preview.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="registration-card">
+                <!-- Header -->
+                <div class="card-header bg-military text-white">
+                    <h2 class="text-center mb-0">Next of Kin Information</h2>
+                </div>
+                
+                <!-- Progress Steps -->
+                <div class="px-4 pt-4">
+                    <div class="progress-steps">
+                        <div class="progress-step completed">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Personal Info</div>
+                        </div>
+                        <div class="progress-step completed">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Contact</div>
+                        </div>
+                        <div class="progress-step completed">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Social Media</div>
+                        </div>
+                        <div class="progress-step active">
+                            <div class="step-number">4</div>
+                            <div class="step-label">Next of Kin</div>
+                        </div>
+                        <div class="progress-step">
+                            <div class="step-number">5</div>
+                            <div class="step-label">Education</div>
+                        </div>
+                        <div class="progress-step">
+                            <div class="step-number">6</div>
+                            <div class="step-label">Military Training</div>
+                        </div>
+                        <div class="progress-step">
+                            <div class="step-number">7</div>
+                            <div class="step-label">Review</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="px-4 pt-3">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Registration Form -->
+                <form class="needs-validation" method="POST" 
+                      action="{{ url_for('main.registration_page_4') }}" novalidate>
+                    <div class="card-body">
+                        <!-- Next of Kin Information -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title mb-3">Primary Next of Kin</h4>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="nok_name_1" class="form-label">
+                                            Full Name <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control" id="nok_name_1" 
+                                                   name="nok_name_1" value="{{ session.get('nok_name_1', '') }}"
+                                                   placeholder="Enter full name of next of kin"
+                                                   required>
+                                        </div>
+                                        <div class="invalid-feedback">Next of kin name is required</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="nok_relationship_1" class="form-label">
+                                            Relationship <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                            <select class="form-select" id="nok_relationship_1" name="nok_relationship_1" required>
+                                                <option value="" {% if not session.get('nok_relationship_1') %}selected{% endif %}>Select Relationship</option>
+                                                {% for rel in ['Father', 'Mother', 'Spouse', 'Brother', 'Sister', 'Son', 'Daughter', 'Other'] %}
+                                                <option value="{{ rel }}" {% if session.get('nok_relationship_1') == rel %}selected{% endif %}>{{ rel }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="invalid-feedback">Please select a relationship</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="nok_address_1" class="form-label">
+                                            Address <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-home"></i></span>
+                                            <textarea class="form-control" id="nok_address_1" 
+                                                      name="nok_address_1" rows="3" 
+                                                      placeholder="Enter full address of next of kin"
+                                                      required>{{ session.get('nok_address_1', '') }}</textarea>
+                                        </div>
+                                        <div class="invalid-feedback">Address is required</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="nok_gsm_number_1" class="form-label">
+                                            Phone Number <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                            <input type="tel" class="form-control" id="nok_gsm_number_1" 
+                                                   name="nok_gsm_number_1" value="{{ session.get('nok_gsm_number_1', '') }}"
+                                                   placeholder="Enter phone number"
+                                                   required>
+                                        </div>
+                                        <div class="invalid-feedback">Phone number is required</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="nok_email_1" class="form-label">
+                                            Email Address
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control" id="nok_email_1" 
+                                                   name="nok_email_1" value="{{ session.get('nok_email_1', '') }}"
+                                                   placeholder="Enter email address (optional)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Next of Kin (Optional) -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h4 class="card-title mb-3">Secondary Next of Kin (Optional)</h4>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="nok_name_2" class="form-label">
+                                            Full Name
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control" id="nok_name_2" 
+                                                   name="nok_name_2" value="{{ session.get('nok_name_2', '') }}"
+                                                   placeholder="Enter full name of secondary next of kin">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="nok_relationship_2" class="form-label">
+                                            Relationship
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                            <select class="form-select" id="nok_relationship_2" name="nok_relationship_2">
+                                                <option value="" {% if not session.get('nok_relationship_2') %}selected{% endif %}>Select Relationship</option>
+                                                {% for rel in ['Father', 'Mother', 'Spouse', 'Brother', 'Sister', 'Son', 'Daughter', 'Other'] %}
+                                                <option value="{{ rel }}" {% if session.get('nok_relationship_2') == rel %}selected{% endif %}>{{ rel }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="nok_address_2" class="form-label">
+                                            Address
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-home"></i></span>
+                                            <textarea class="form-control" id="nok_address_2" 
+                                                      name="nok_address_2" rows="3" 
+                                                      placeholder="Enter full address of secondary next of kin">{{ session.get('nok_address_2', '') }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="nok_gsm_number_2" class="form-label">
+                                            Phone Number
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                            <input type="tel" class="form-control" id="nok_gsm_number_2" 
+                                                   name="nok_gsm_number_2" value="{{ session.get('nok_gsm_number_2', '') }}"
+                                                   placeholder="Enter phone number">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="nok_email_2" class="form-label">
+                                            Email Address
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control" id="nok_email_2" 
+                                                   name="nok_email_2" value="{{ session.get('nok_email_2', '') }}"
+                                                   placeholder="Enter email address (optional)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="form-navigation">
+                            <button type="button" class="btn btn-outline-military" 
+                                    onclick="window.location.href='{{ url_for('main.registration_page_3') }}'">
+                                <i class="fas fa-arrow-left me-2"></i> Previous
+                            </button>
+                            <button type="submit" class="btn btn-military">
+                                Next Step <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
-    </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include the modern registration JavaScript -->
+<script src="{{ url_for('static', filename='js/registration/modern.js') }}"></script>
+
+<script>
+// Add animation classes to cards
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation classes to cards
+    document.querySelectorAll('.card').forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in');
+    });
+
+    // Phone number formatting
+    document.getElementById('nok_gsm_number_1').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 0) {
+            if (!value.startsWith('234')) {
+                value = '234' + value;
+            }
+            // Format as: +234 XXX XXX XXXX
+            value = '+' + value.replace(/(\d{3})(\d{3})(\d{3})(\d{4})/, '$1 $2 $3 $4');
+        }
+        e.target.value = value;
+    });
+
+    // Optional secondary phone number formatting
+    const secondaryPhone = document.getElementById('nok_gsm_number_2');
+    if (secondaryPhone) {
+        secondaryPhone.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                if (!value.startsWith('234')) {
+                    value = '234' + value;
+                }
+                // Format as: +234 XXX XXX XXXX
+                value = '+' + value.replace(/(\d{3})(\d{3})(\d{3})(\d{4})/, '$1 $2 $3 $4');
+            }
+            e.target.value = value;
+        });
+    }
+});
+</script>
 {% endblock %}
