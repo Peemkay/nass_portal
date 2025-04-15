@@ -4,8 +4,10 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/styles.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css', v='1.1') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/photo-preview.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/progress-bar.css', v='1.0') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/enhanced-form.css', v='1.0') }}">
 {% endblock %}
 
 {% block content %}
@@ -126,6 +128,8 @@
                                                    name="nok_gsm_number_1" value="{{ session.get('nok_gsm_number_1', '') }}"
                                                    placeholder="Enter phone number"
                                                    required>
+                                            <!-- Hidden field for compatibility -->
+                                            <input type="hidden" name="nok_phone_1" id="nok_phone_1_hidden">
                                         </div>
                                         <div class="invalid-feedback">Phone number is required</div>
                                     </div>
@@ -232,6 +236,34 @@
 {% block scripts %}
 <!-- Include the modern registration JavaScript -->
 <script src="{{ url_for('static', filename='js/registration/modern.js') }}"></script>
+<!-- Include the progress bar JavaScript -->
+<script src="{{ url_for('static', filename='js/registration/progress-bar.js', v='1.0') }}"></script>
+<!-- Include enhanced animations -->
+<script src="{{ url_for('static', filename='js/registration/enhanced-animations.js', v='1.0') }}"></script>
+
+<!-- Fix for nok_phone_1 issue -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sync the phone fields
+        const mainPhoneField = document.getElementById('nok_gsm_number_1');
+        const hiddenPhoneField = document.getElementById('nok_phone_1_hidden');
+
+        if (mainPhoneField && hiddenPhoneField) {
+            // Initial sync
+            hiddenPhoneField.value = mainPhoneField.value;
+
+            // Sync on input
+            mainPhoneField.addEventListener('input', function() {
+                hiddenPhoneField.value = this.value;
+            });
+
+            // Sync on form submission
+            document.querySelector('form').addEventListener('submit', function() {
+                hiddenPhoneField.value = mainPhoneField.value;
+            });
+        }
+    });
+</script>
 
 <script>
 // Add animation classes to cards

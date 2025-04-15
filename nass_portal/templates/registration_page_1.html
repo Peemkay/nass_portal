@@ -4,8 +4,10 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/styles.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css', v='1.1') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/photo-preview.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/progress-bar.css', v='1.0') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/enhanced-form.css', v='1.0') }}">
 {% endblock %}
 
 {% block content %}
@@ -13,9 +15,13 @@
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="registration-card">
-                <!-- Header -->
-                <div class="card-header bg-military text-white">
-                    <h2 class="text-center mb-0">Personal Information</h2>
+                <!-- Enhanced Header -->
+                <div class="card-header bg-military text-white py-4">
+                    <h5 class="text-center mb-1">STUDENT REGISTRATION</h5>
+                    <h2 class="text-center mb-2">NIGERIAN ARMY SCHOOL OF SIGNALS</h2>
+                    <div class="text-center">
+                        <span class="badge bg-warning px-3 py-2 fs-6">NOTE: Registration must be completed within the first week of course for fresh students</span>
+                    </div>
                 </div>
 
                 <!-- Progress Steps -->
@@ -285,8 +291,12 @@
                                              alt="Preview" class="img-fluid">
                                         <div class="photo-upload-hint">
                                             <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
-                                            <p>Your photo will appear here</p>
+                                            <p>Drag & drop your photo here</p>
+                                            <p class="small text-muted">or click to browse</p>
                                         </div>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <span class="badge bg-primary"><i class="fas fa-info-circle"></i> Passport-style photo with plain background</span>
                                     </div>
                                 </div>
                             </div>
@@ -294,11 +304,21 @@
                     </div>
 
                     <!-- Navigation Buttons -->
-                    <div class="form-navigation">
-                        <div></div> <!-- Empty div for flex spacing -->
-                        <button type="submit" class="btn btn-military">
+                    <div class="form-navigation d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('main.registration') }}" class="btn btn-outline-military">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Registration
+                        </a>
+                        <button type="submit" class="btn btn-military btn-lg">
                             Next Step <i class="fas fa-arrow-right ms-2"></i>
                         </button>
+                    </div>
+
+                    <!-- Progress Indicator -->
+                    <div class="text-center mt-4">
+                        <p class="text-muted">
+                            <i class="fas fa-shield-alt text-primary me-2"></i>
+                            Your information is secure and will only be used for NASS registration purposes.
+                        </p>
                     </div>
                 </form>
             </div>
@@ -310,39 +330,54 @@
 {% block scripts %}
 <!-- Include the modern registration JavaScript -->
 <script src="{{ url_for('static', filename='js/registration/modern.js') }}"></script>
+<!-- Include the progress bar JavaScript -->
+<script src="{{ url_for('static', filename='js/registration/progress-bar.js', v='1.0') }}"></script>
+<!-- Include enhanced animations -->
+<script src="{{ url_for('static', filename='js/registration/enhanced-animations.js', v='1.0') }}"></script>
+<!-- Include enhanced photo preview -->
+<script src="{{ url_for('static', filename='js/registration/photo-preview.js', v='1.1') }}"></script>
 
 <script>
-// Photo preview enhancement
-document.getElementById('passport_photo').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        const previewImage = document.getElementById('preview-image');
-        const photoPreview = document.getElementById('photo-preview');
-        const uploadHint = photoPreview.querySelector('.photo-upload-hint');
+// Calculate Years in Service automatically
+document.addEventListener('DOMContentLoaded', function() {
+    const commissionDateInput = document.getElementById('date_of_commission');
+    if (commissionDateInput) {
+        commissionDateInput.addEventListener('change', calculateYearsInService);
+        // Calculate on page load
+        calculateYearsInService();
+    }
 
-        reader.onload = function(e) {
-            previewImage.src = e.target.result;
-            previewImage.style.display = 'block';
+    function calculateYearsInService() {
+        const commissionDateInput = document.getElementById('date_of_commission');
+        const yearsInServiceInput = document.getElementById('years_in_service');
 
-            // Hide the upload hint when image is loaded
-            if (uploadHint) {
-                uploadHint.style.display = 'none';
+        if (commissionDateInput && yearsInServiceInput && commissionDateInput.value) {
+            const commissionDate = new Date(commissionDateInput.value);
+            const today = new Date();
+
+            // Calculate the difference in years
+            let years = today.getFullYear() - commissionDate.getFullYear();
+
+            // Adjust for months and days
+            if (today.getMonth() < commissionDate.getMonth() ||
+                (today.getMonth() === commissionDate.getMonth() && today.getDate() < commissionDate.getDate())) {
+                years--;
             }
 
-            // Add a loaded class for animation
-            photoPreview.classList.add('loaded');
-        }
+            // Set the calculated value
+            yearsInServiceInput.value = years;
 
-        reader.readAsDataURL(file);
+            // Add visual feedback
+            yearsInServiceInput.classList.add('is-valid');
+            setTimeout(() => {
+                yearsInServiceInput.classList.remove('is-valid');
+            }, 2000);
+        }
     }
 });
+</script>
 
-// Calculate Years in Service automatically
-document.getElementById('date_of_commission').addEventListener('change', function() {
-    calculateYearsInService();
-});
-
+<script>
 // Function to calculate years in service based on date of commission/enlistment
 function calculateYearsInService() {
     const commissionDateInput = document.getElementById('date_of_commission');

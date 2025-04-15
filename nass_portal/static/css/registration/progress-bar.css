@@ -1,0 +1,179 @@
+/* Progress Bar Styles - New Lively Design */
+
+/* Progress Steps Container */
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    position: relative;
+    z-index: 1;
+    padding: 0 1rem;
+    overflow: hidden;
+}
+
+/* Progress Bar Line */
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 40px;
+    right: 40px;
+    height: 6px;
+    background: linear-gradient(to right, rgba(0,0,0,0.05), rgba(0,0,0,0.1));
+    z-index: -1;
+    border-radius: 10px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Progress Bar States */
+.progress-steps[data-progress="0"]::before {
+    background: linear-gradient(to right, #3c78c3 0%, transparent 0%);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.progress-steps[data-progress="1"]::before {
+    background: linear-gradient(to right, #3c78c3 16.66%, transparent 16.66%);
+    box-shadow: 0 0 10px rgba(30, 60, 114, 0.3), inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.progress-steps[data-progress="2"]::before {
+    background: linear-gradient(to right, #3c78c3 33.33%, transparent 33.33%);
+    box-shadow: 0 0 10px rgba(30, 60, 114, 0.3), inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.progress-steps[data-progress="3"]::before {
+    background: linear-gradient(to right, #3c78c3 50%, transparent 50%);
+    box-shadow: 0 0 10px rgba(30, 60, 114, 0.3), inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.progress-steps[data-progress="4"]::before {
+    background: linear-gradient(to right, #3c78c3 66.66%, transparent 66.66%);
+    box-shadow: 0 0 10px rgba(30, 60, 114, 0.3), inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.progress-steps[data-progress="5"]::before {
+    background: linear-gradient(to right, #3c78c3 83.33%, transparent 83.33%);
+    box-shadow: 0 0 10px rgba(30, 60, 114, 0.3), inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.progress-steps[data-progress="6"]::before {
+    background: linear-gradient(to right, #3c78c3 100%, transparent 100%);
+    box-shadow: 0 0 15px rgba(30, 60, 114, 0.4), inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Step Styles */
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.progress-step:hover {
+    transform: translateY(-3px);
+}
+
+/* Step Number Circle */
+.step-number {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #6c757d;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shine Effect on Hover */
+.step-number::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.progress-step:hover .step-number::before {
+    opacity: 1;
+}
+
+/* Active Step Styling */
+.progress-step.active .step-number {
+    background: #3c78c3;
+    border-color: #1e3c72;
+    color: white;
+    box-shadow: 0 0 0 5px rgba(30, 60, 114, 0.2), 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: scale(1.15);
+    animation: pulse 2s infinite;
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(30, 60, 114, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(30, 60, 114, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(30, 60, 114, 0);
+    }
+}
+
+/* Completed Step Styling */
+.progress-step.completed .step-number {
+    background: #4b96ec;
+    border-color: #3c78c3;
+    color: white;
+    position: relative;
+    transform: scale(1.05);
+}
+
+.progress-step.completed .step-number::after {
+    content: '✓';
+    position: absolute;
+    font-size: 1.3rem;
+    font-weight: bold;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Step Label Styling */
+.step-label {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+    text-align: center;
+    max-width: 90px;
+    line-height: 1.2;
+    transition: all 0.3s ease;
+}
+
+.progress-step.active .step-label {
+    color: #1e3c72;
+    font-weight: 700;
+    transform: scale(1.05);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}

@@ -1,33 +1,11 @@
-import sqlite3
+from nass_portal import create_app
+from nass_portal.db import init_db
 
-# Connect to the database
-conn = sqlite3.connect('database.db')
-cursor = conn.cursor()
+def main():
+    app = create_app()
+    with app.app_context():
+        init_db()
+        print("Database initialized successfully with the updated schema.")
 
-# SQL commands to create tables
-sql_commands = """
-DROP TABLE IF EXISTS students;
-DROP TABLE IF EXISTS admins;
-
-CREATE TABLE students (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    course TEXT NOT NULL,
-    email TEXT NOT NULL
-);
-
-CREATE TABLE admins (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    password TEXT NOT NULL
-);
-
-INSERT INTO admins (username, password) VALUES ('admin', 'password');  -- default admin user. CHANGE THIS PASSWORD.
-"""
-
-# Execute the SQL commands
-cursor.executescript(sql_commands)
-
-# Commit changes and close the connection
-conn.commit()
-conn.close()
+if __name__ == '__main__':
+    main()

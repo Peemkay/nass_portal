@@ -7,12 +7,15 @@ import logging
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
 from .db import get_db
+from .registration_utils import is_registration_open, get_registration_status
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
-def allowed_file(filename):
+def allowed_file(filename, extensions=None):
+    if extensions is None:
+        extensions = ALLOWED_EXTENSIONS
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1].lower() in extensions
 
 bp = Blueprint('main', __name__)
 
@@ -24,11 +27,18 @@ def index():
 def registration():
     # Clear any existing session data
     session.clear()
-    # Remove any deadline checks and directly render the registration page
-    return render_template('registration.html')
+
+    # Get registration status
+    reg_status = get_registration_status()
+
+    return render_template('registration.html', reg_status=reg_status)
 
 @bp.route('/registration_page_1', methods=['GET', 'POST'])
 def registration_page_1():
+    # Check if registration is open
+    if not is_registration_open():
+        flash('Registration is currently closed.', 'error')
+        return redirect(url_for('main.registration'))
     if request.method == 'POST':
         try:
             # Store form data temporarily
@@ -41,7 +51,8 @@ def registration_page_1():
                 'gender': request.form.get('gender'),
                 'current_unit': request.form.get('current_unit'),
                 'date_of_commission': request.form.get('date_of_commission'),
-                'years_in_service': request.form.get('years_in_service')
+                'years_in_service': request.form.get('years_in_service'),
+                'nationality': request.form.get('nationality', 'Nigerian')
             }
 
             # Validate required fields
@@ -54,7 +65,8 @@ def registration_page_1():
                 'gender': 'Gender',
                 'current_unit': 'Current Unit',
                 'date_of_commission': 'Date of Commission/Enlistment',
-                'years_in_service': 'Years in Service'
+                'years_in_service': 'Years in Service',
+                'nationality': 'Nationality'
             }
 
             # Check for missing fields
@@ -160,7 +172,9 @@ def registration_page_1():
                 filename = secure_filename(photo.filename)
                 # Create unique filename using service number and timestamp
                 file_ext = filename.rsplit('.', 1)[1].lower()
-                unique_filename = f"{form_data['service_number']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{file_ext}"
+                # Sanitize service number to remove any slashes or special characters
+                safe_service_number = secure_filename(form_data['service_number'])
+                unique_filename = f"{safe_service_number}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{file_ext}"
 
                 # Ensure upload directory exists
                 upload_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'passport_photos')
@@ -242,7 +256,7 @@ def registration_page_1():
     form_data = {}
     for field in ['service_number', 'rank', 'surname', 'other_names',
                   'date_of_birth', 'gender', 'current_unit',
-                  'date_of_commission', 'years_in_service']:
+                  'date_of_commission', 'years_in_service', 'nationality']:
         if field in session:
             form_data[field] = session[field]
 
@@ -250,6 +264,10 @@ def registration_page_1():
 
 @bp.route('/registration_page_2', methods=['GET', 'POST'])
 def registration_page_2():
+    # Check if registration is open
+    if not is_registration_open():
+        flash('Registration is currently closed.', 'error')
+        return redirect(url_for('main.registration'))
     if not session.get('page_1_complete'):
         flash('Please complete page 1 first', 'error')
         return redirect(url_for('main.registration_page_1'))
@@ -257,9 +275,18 @@ def registration_page_2():
     if request.method == 'POST':
         try:
             required_fields = [
-                'nationality', 'marital_status', 'state_of_origin',
+                'marital_status', 'state_of_origin',
                 'permanent_address', 'phone_number', 'email'
             ]
+
+            # Hard fix for nationality - ensure it's already in the session from page 1
+            if 'nationality' not in session or not session['nationality']:
+                # If nationality is missing, check if it's in the current form
+                if request.form.get('nationality'):
+                    session['nationality'] = request.form.get('nationality')
+                else:
+                    # Set a default value as a fallback
+                    session['nationality'] = 'Nigerian'
 
             for field in required_fields:
                 if not request.form.get(field):
@@ -281,6 +308,10 @@ def registration_page_2():
 
 @bp.route('/registration_page_3', methods=['GET', 'POST'])
 def registration_page_3():
+    # Check if registration is open
+    if not is_registration_open():
+        flash('Registration is currently closed.', 'error')
+        return redirect(url_for('main.registration'))
     if not session.get('page_2_complete'):
         flash('Please complete page 2 first', 'error')
         return redirect(url_for('main.registration_page_2'))
@@ -313,6 +344,10 @@ def registration_page_3():
 
 @bp.route('/registration_page_4', methods=['GET', 'POST'])
 def registration_page_4():
+    # Check if registration is open
+    if not is_registration_open():
+        flash('Registration is currently closed.', 'error')
+        return redirect(url_for('main.registration'))
     if not session.get('page_3_complete'):
         flash('Please complete page 3 first', 'error')
         return redirect(url_for('main.registration_page_3'))
@@ -321,8 +356,20 @@ def registration_page_4():
         try:
             # Validate required fields
             required_fields = ['nok_name_1', 'nok_relationship_1', 'nok_address_1', 'nok_gsm_number_1']
+
+            # Hard fix for nok_phone_1 issue - check both possible field names
+            if not request.form.get('nok_gsm_number_1') and not request.form.get('nok_phone_1'):
+                # If neither field is present, use a default value or show an error
+                if 'nok_phone_1' in request.form:
+                    request.form = request.form.copy()  # Make mutable
+                    request.form['nok_gsm_number_1'] = request.form['nok_phone_1']
+                else:
+                    flash('Next of Kin Phone Number is required', 'error')
+                    return render_template('registration_page_4.html', form_data=request.form)
+
+            # Continue with other validations
             for field in required_fields:
-                if not request.form.get(field):
+                if field != 'nok_gsm_number_1' and not request.form.get(field):  # Skip phone check as we handled it above
                     flash(f'{field.replace("_", " ").title()} is required', 'error')
                     return render_template('registration_page_4.html', form_data=request.form)
 
@@ -331,7 +378,13 @@ def registration_page_4():
                          'nok_name_2', 'nok_relationship_2', 'nok_address_2', 'nok_gsm_number_2', 'nok_email_2']
 
             for field in nok_fields:
-                session[field] = request.form.get(field, '').strip()
+                # Special handling for phone field
+                if field == 'nok_gsm_number_1' and not request.form.get(field) and request.form.get('nok_phone_1'):
+                    session[field] = request.form.get('nok_phone_1', '').strip()
+                    # Also store in the alternate field name for compatibility
+                    session['nok_phone_1'] = request.form.get('nok_phone_1', '').strip()
+                else:
+                    session[field] = request.form.get(field, '').strip()
 
             session['page_4_complete'] = True
 
@@ -346,6 +399,10 @@ def registration_page_4():
 
 @bp.route('/registration_page_5', methods=['GET', 'POST'])
 def registration_page_5():
+    # Check if registration is open
+    if not is_registration_open():
+        flash('Registration is currently closed.', 'error')
+        return redirect(url_for('main.registration'))
     if not session.get('page_4_complete'):  # Check for previous page completion
         flash('Please complete previous steps first', 'error')
         return redirect(url_for('main.registration_page_4'))
@@ -386,6 +443,10 @@ def registration_page_5():
 
 @bp.route('/registration_page_6', methods=['GET', 'POST'])
 def registration_page_6():
+    # Check if registration is open
+    if not is_registration_open():
+        flash('Registration is currently closed.', 'error')
+        return redirect(url_for('main.registration'))
     if not session.get('page_5_complete'):
         flash('Please complete previous steps first', 'error')
         return redirect(url_for('main.registration_page_5'))
@@ -440,6 +501,10 @@ def registration_page_6():
 
 @bp.route('/registration_page_7', methods=['GET', 'POST'])
 def registration_page_7():
+    # Check if registration is open
+    if not is_registration_open():
+        flash('Registration is currently closed.', 'error')
+        return redirect(url_for('main.registration'))
     if not session.get('page_6_complete'):
         flash('Please complete previous steps first', 'error')
         return redirect(url_for('main.registration_page_6'))
@@ -562,38 +627,33 @@ def contact():
 
 @bp.route('/admin', methods=['GET', 'POST'])
 def admin_login():
-    error = None
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        db = get_db()
-        admin = db.execute('SELECT * FROM admins WHERE username = ?', (username,)).fetchone()
-        if admin and check_password_hash(admin['password'], password):
-            session['logged_in'] = True
-            session['user_id'] = admin['id']
-            return redirect(url_for('main.admin_dashboard'))
-        else:
-            error = 'Invalid credentials'
-    return render_template('admin_login.html', error=error)
+    # Redirect to the new admin login page
+    return redirect(url_for('admin.login'))
 
 @bp.route('/admin_dashboard')
 def admin_dashboard():
-    if not session.get('logged_in'):
-        return redirect(url_for('main.admin_login'))
-    return render_template('admin.html')
+    # Redirect to the new admin dashboard
+    return redirect(url_for('admin.index'))
 
 @bp.route('/students')
 def student_list():
-    if not session.get('logged_in'):
-        return redirect(url_for('main.admin_login'))
+    # Check if user is logged in with the new admin system
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
     db = get_db()
     students = db.execute('SELECT * FROM students').fetchall()
     return render_template('student_list.html', students=students)
 
 @bp.route('/logout')
 def logout():
+    # Clear both old and new admin session variables
     session.pop('logged_in', None)
     session.pop('user_id', None)
+    session.pop('admin_logged_in', None)
+    session.pop('admin_id', None)
+    session.pop('admin_username', None)
+
     return redirect(url_for('main.index'))
 
 

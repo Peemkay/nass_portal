@@ -1,0 +1,47 @@
+<div class="form-section mb-4">
+    <h3 class="section-title mb-3">Personal Details</h3>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label for="personnel_number" class="form-label">Personnel Number*</label>
+            <input type="text" class="form-control" id="personnel_number" name="personnel_number" required>
+            <div class="invalid-feedback">Personnel number is required</div>
+        </div>
+        <div class="col-md-6">
+            <label for="rank" class="form-label">Rank*</label>
+            <select class="form-select" id="rank" name="rank" required>
+                <option value="">Select Rank</option>
+                <option value="private">Private</option>
+                <option value="lance_corporal">Lance Corporal</option>
+                <option value="corporal">Corporal</option>
+                <option value="sergeant">Sergeant</option>
+                <option value="staff_sergeant">Staff Sergeant</option>
+            </select>
+            <div class="invalid-feedback">Please select your rank</div>
+        </div>
+        <div class="col-12">
+            <label for="name" class="form-label">Full Name*</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+            <div class="invalid-feedback">Full name is required</div>
+        </div>
+        <div class="col-md-6">
+            <label for="unit" class="form-label">Unit*</label>
+            <input type="text" class="form-control" id="unit" name="unit" required>
+            <div class="invalid-feedback">Unit is required</div>
+        </div>
+        <div class="col-md-6">
+            <label for="dob" class="form-label">Date of Birth*</label>
+            <input type="date" class="form-control" id="dob" name="dob" required>
+            <div class="invalid-feedback">Date of birth is required</div>
+        </div>
+        <div class="col-md-6">
+            <label for="year_in_rank" class="form-label">Year in Rank*</label>
+            <input type="number" class="form-control" id="year_in_rank" name="year_in_rank" required>
+            <div class="invalid-feedback">Year in rank is required</div>
+        </div>
+        <div class="col-md-6">
+            <label for="year_of_last_promotion" class="form-label">Year of Last Promotion*</label>
+            <input type="number" class="form-control" id="year_of_last_promotion" name="year_of_last_promotion" required>
+            <div class="invalid-feedback">Year of last promotion is required</div>
+        </div>
+    </div>
+</div>

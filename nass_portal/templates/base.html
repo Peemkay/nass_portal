@@ -4,23 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}{% endblock %} - NASS Portal</title>
-    
+
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    
+
     <!-- Custom CSS - Make sure this comes after Bootstrap -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
+    <!-- Extra CSS -->
+    {% block extra_css %}{% endblock %}
+
     <!-- Enhanced Modern Navbar Styles -->
     <style>
         :root {
@@ -97,14 +100,14 @@
         .nav-link:hover::after {
             width: 80%;
         }
-        
+
         .nav-link i {
             font-size: 1.2rem;
             margin-right: 8px;
             transition: transform 0.3s ease;
             color: var(--brand-blue);
         }
-        
+
         .nav-link:hover {
             color: var(--brand-blue) !important;
             transform: translateY(-2px);
@@ -347,14 +350,14 @@
                     </ul>
                     <!-- Add map container -->
                     <div class="footer-map-container">
-                        <iframe 
+                        <iframe
                             src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3964.5667037073765!2d3.3572229761992753!3d6.448611094649097!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNsKwMjYnNTUuMCJOIDPCsDIxJzI2LjAiRQ!5e0!3m2!1sen!2sng!4v1709913331669!5m2!1sen!2sng&markers=color:red%7C6.448611,3.357223"
                             allowfullscreen=""
                             loading="lazy"
                             referrerpolicy="no-referrer-when-downgrade">
                         </iframe>
-                        <a href="https://maps.app.goo.gl/4pi5LYc2tW3bu1uZ9" 
-                           class="footer-map-link" 
+                        <a href="https://maps.app.goo.gl/4pi5LYc2tW3bu1uZ9"
+                           class="footer-map-link"
                            target="_blank"
                            rel="noopener noreferrer">
                             <i class="fas fa-directions"></i>

@@ -18,10 +18,48 @@ document.addEventListener('DOMContentLoaded', function() {
         // Bootstrap's built-in validation
         Array.from(forms).forEach(form => {
             form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
+                // Extra validation for required fields
+                const requiredFields = form.querySelectorAll('[required]');
+                let allValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.setCustomValidity('This field is required');
+                        allValid = false;
+                    } else {
+                        field.setCustomValidity('');
+                    }
+                });
+
+                // Special validation for Next of Kin page
+                if (window.location.href.includes('registration_page_4')) {
+                    const nokPhone = document.getElementById('nok_gsm_number_1');
+                    if (nokPhone && (!nokPhone.value || nokPhone.value.trim() === '')) {
+                        nokPhone.setCustomValidity('Phone number is required');
+                        allValid = false;
+                    }
+                }
+
+                if (!form.checkValidity() || !allValid) {
                     event.preventDefault();
                     event.stopPropagation();
+
+                    // Show error message
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                    errorMessage.innerHTML = 'Please fill in all required fields before proceeding.';
+
+                    // Only add if not already present
+                    if (!document.querySelector('.alert-danger')) {
+                        form.prepend(errorMessage);
+
+                        // Auto dismiss after 5 seconds
+                        setTimeout(() => {
+                            errorMessage.remove();
+                        }, 5000);
+                    }
                 }
+
                 form.classList.add('was-validated');
 
                 // Scroll to first invalid field

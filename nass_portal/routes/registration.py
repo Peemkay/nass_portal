@@ -148,26 +148,34 @@ def page_4():
 
 @registration_bp.route('/page-5', methods=['GET', 'POST'])
 def page_5():
-    # Check both for specific data and completion flag
     if not session.get('page_4_complete') or not session.get('nok_name_1'):
         flash('Please complete previous steps first', 'error')
         return redirect(url_for('registration.page_4'))
     
     if request.method == 'POST':
         try:
-            # Validate and save military training data
-            required_fields = ['military_courses', 'date_commissioned', 'service_number']
+            # Process academic records (at least one required)
+            academic_fields = ['uni_serial', 'uni_name', 'uni_year_from', 
+                             'uni_year_to', 'uni_cert', 'uni_grade', 'uni_remarks']
             
-            for field in required_fields:
-                if not request.form.get(field):
-                    flash(f'{field.replace("_", " ").title()} is required', 'error')
-                    return render_template('registration/page_5.html')
+            # Validate first academic record (required)
+            if not request.form.getlist('uni_name[]')[0]:
+                flash('At least one academic qualification is required', 'error')
+                return render_template('registration/page_5.html')
             
-            # Save military training data to session
-            for field in required_fields:
-                session[field] = request.form[field]
+            # Save academic records to session
+            for field in academic_fields:
+                session[field] = request.form.getlist(f'{field}[]')
             
-            # Add a completion flag for page 5
+            # Process professional qualifications (optional)
+            prof_fields = ['prof_serial', 'prof_qual', 'prof_inst', 
+                         'prof_year', 'prof_remarks']
+            
+            # Save professional qualifications to session
+            for field in prof_fields:
+                session[field] = request.form.getlist(f'{field}[]')
+            
+            # Add completion flag
             session['page_5_complete'] = True
             
             return redirect(url_for('registration.page_6'))
@@ -238,5 +246,8 @@ def submit():
 @registration_bp.route('/success')
 def success():
     return render_template('registration/success.html')
+
+
+
 
 

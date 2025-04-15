@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/components.css') }}">
+    {% block registration_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="registration-wrapper">
+    <nav class="registration-nav">
+        <div class="nav-logo">
+            <img src="{{ url_for('static', filename='images/na_logo.png') }}" alt="NA Logo">
+        </div>
+        <div class="nav-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ progress_percentage }}%"></div>
+            </div>
+            <div class="progress-steps">
+                {% for step in registration_steps %}
+                <div class="step {{ 'active' if step.active }} {{ 'completed' if step.completed }}">
+                    <div class="step-icon">
+                        <i class="{{ step.icon }}"></i>
+                    </div>
+                    <span class="step-label">{{ step.label }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="registration-content">
+        {% block registration_content %}{% endblock %}
+    </main>
+</div>
+<script src="{{ url_for('static', filename='js/registration/main.js') }}"></script>
+{% block registration_scripts %}{% endblock %}
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/registration/main.js') }}"></script>
+    {% block registration_scripts %}{% endblock %}
+{% endblock %}
+
+

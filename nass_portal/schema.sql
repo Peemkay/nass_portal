@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS students;
 DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS courses;
+DROP TABLE IF EXISTS registration_periods;
 
 CREATE TABLE admins (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -11,40 +12,18 @@ CREATE TABLE admins (
 
 CREATE TABLE students (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    personnel_number TEXT NOT NULL,
+    service_number TEXT NOT NULL,
     rank TEXT NOT NULL,
-    name TEXT NOT NULL,
-    unit TEXT NOT NULL,
-    dob TEXT NOT NULL,
-    year_in_rank TEXT NOT NULL,
-    year_of_last_promotion TEXT NOT NULL,
-    nationality TEXT NOT NULL,
-    marital_status TEXT NOT NULL,
-    state_of_origin TEXT NOT NULL,
-    permanent_address TEXT NOT NULL,
-    facebook TEXT,
-    twitter TEXT,
-    whatsapp TEXT,
-    instagram TEXT,
-    nok_name_1 TEXT NOT NULL,
-    nok_address_1 TEXT NOT NULL,
-    nok_gsm_number_1 TEXT NOT NULL,
-    nok_email_1 TEXT,
-    uni_serial TEXT,
-    uni_name TEXT,
-    uni_year_from TEXT,
-    uni_year_to TEXT,
-    uni_cert TEXT,
-    uni_grade TEXT,
-    uni_remarks TEXT,
-    military_serial TEXT,
-    military_name TEXT,
-    military_year_from TEXT,
-    military_year_to TEXT,
-    military_cert TEXT,
-    military_grade TEXT,
-    military_remarks TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    surname TEXT NOT NULL,
+    other_names TEXT NOT NULL,
+    date_of_birth TEXT NOT NULL,
+    gender TEXT NOT NULL,
+    current_unit TEXT NOT NULL,
+    date_of_commission TEXT NOT NULL,
+    years_in_service INTEGER NOT NULL,
+    passport_photo TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP
 );
 
 CREATE TABLE courses (
@@ -56,11 +35,31 @@ CREATE TABLE courses (
 );
 
 -- Create indexes for better query performance
-CREATE INDEX idx_students_personnel_number ON students(personnel_number);
-CREATE INDEX idx_students_name ON students(name);
+CREATE INDEX idx_students_service_number ON students(service_number);
+CREATE INDEX idx_students_surname ON students(surname);
 CREATE INDEX idx_students_rank ON students(rank);
-CREATE INDEX idx_students_unit ON students(unit);
+CREATE INDEX idx_students_current_unit ON students(current_unit);
 
--- Insert default admin user with hashed password
-INSERT INTO admins (username, password) 
-VALUES ('admin', 'pbkdf2:sha256:260000$wgVnGBi0mZIkLHtJ$4e8d3f9ab8c6f936b8106c47e4f2a568f0e0c2c0a53a4e8c5f19b4d0e6f7c8d9');
+-- Create registration_periods table for managing registration deadlines
+CREATE TABLE registration_periods (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    quarter TEXT NOT NULL,  -- 'first', 'second', 'third'
+    year INTEGER NOT NULL,
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT 0,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- Insert default registration periods
+INSERT INTO registration_periods (quarter, year, start_date, end_date, is_active, description)
+VALUES
+('first', 2025, '2025-01-01', '2025-04-30', 1, 'First Quarter Registration Period'),
+('second', 2025, '2025-05-01', '2025-08-31', 0, 'Second Quarter Registration Period'),
+('third', 2025, '2025-09-01', '2025-12-31', 0, 'Third Quarter Registration Period');
+
+-- Insert default admin user with hashed password (password: admin123)
+INSERT INTO admins (username, password)
+VALUES ('admin', 'pbkdf2:sha256:150000$LnrTXNNj$d119fae74dc2817dd7c3c5bd9a27ebf2c1a7a5b237b0ecdd2c2a1e906c4c7f4f');

@@ -4,8 +4,10 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/styles.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css', v='1.1') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/photo-preview.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/progress-bar.css', v='1.0') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/enhanced-form.css', v='1.0') }}">
 {% endblock %}
 
 {% block content %}

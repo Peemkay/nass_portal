@@ -1,58 +1,62 @@
 from flask import Flask
 from flask_mail import Mail
-import os
 from dotenv import load_dotenv
 import logging
-from logging.handlers import RotatingFileHandler
+import sys
+import os
+from nass_portal.config import Config  # Update this import
 
 # Load environment variables
 load_dotenv()
 
 mail = Mail()
 
-def create_app():
+def create_app(config_class=Config):
     app = Flask(__name__)
-    
+    app.config.from_object(config_class)
+
     # Configure logging
     if not app.debug:
-        file_handler = RotatingFileHandler('nass_portal.log', maxBytes=10240, backupCount=10)
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-        ))
-        file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
-        app.logger.setLevel(logging.INFO)
-        app.logger.info('NASS Portal startup')
-    
-    app.secret_key = os.environ.get('SECRET_KEY', 'dev')  # Change this in production!
-    
-    # Email configuration
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
-    
+        try:
+            # Use a stream handler instead of file handler to avoid permission issues
+            stream_handler = logging.StreamHandler(sys.stdout)
+            stream_handler.setFormatter(logging.Formatter(
+                '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+            ))
+            stream_handler.setLevel(logging.INFO)
+            app.logger.addHandler(stream_handler)
+            app.logger.setLevel(logging.INFO)
+            app.logger.info('NASS Portal startup')
+        except Exception as e:
+            print(f"Logging setup error: {e}")
+
     # Initialize extensions
     mail.init_app(app)
-    
-    # Database configuration
-    app.config['DATABASE'] = os.path.join(app.instance_path, 'database.db')
-    os.makedirs(app.instance_path, exist_ok=True)
-    
+
+    # Ensure instance and upload folders exist
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    os.makedirs(os.path.dirname(app.config['DATABASE']), exist_ok=True)
+
     # Initialize database
     from . import db
     db.init_app(app)
-    
+
     # Register commands
     from . import commands
     commands.init_app(app)
-    
-    # Register blueprint
+
+    # Register blueprints
     from .routes import bp
     app.register_blueprint(bp)
-    
+
+    # Register admin blueprint
+    from .admin_routes import admin_bp
+    app.register_blueprint(admin_bp)
+
+    @app.context_processor
+    def utility_processor():
+        return dict(len=len)
+
     return app
 
 app = create_app()

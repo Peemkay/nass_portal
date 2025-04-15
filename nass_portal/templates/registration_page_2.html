@@ -75,19 +75,7 @@
                         <div class="card-body">
                             <h4 class="card-title mb-3">Personal Details</h4>
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="nationality" class="form-label">
-                                        Nationality <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-flag"></i></span>
-                                        <input type="text" class="form-control" id="nationality"
-                                               name="nationality" value="{{ session.get('nationality', '') }}"
-                                               placeholder="Enter your nationality"
-                                               required>
-                                    </div>
-                                    <div class="invalid-feedback">Nationality is required</div>
-                                </div>
+                                <!-- Nationality field moved to page 1 -->
                                 <div class="col-md-6">
                                     <label for="marital_status" class="form-label">
                                         Marital Status <span class="text-danger">*</span>
