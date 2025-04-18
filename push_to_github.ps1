@@ -33,8 +33,14 @@ if (-not $remoteExists) {
     git remote add origin $repoUrl
 }
 
+# Get the current branch name
+$currentBranch = git branch --show-current
+if (-not $currentBranch) {
+    $currentBranch = "main"
+}
+
 # Push to GitHub
-Write-Host "Pushing to GitHub..."
-git push -u origin master
+Write-Host "Pushing to GitHub on branch $currentBranch..."
+git push -u origin $currentBranch
 
 Write-Host "Done!"
