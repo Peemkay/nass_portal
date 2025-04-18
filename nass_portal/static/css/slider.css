@@ -1,0 +1,105 @@
+/* Simple CSS-only slider */
+.css-slider {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+/* Hide all slides by default */
+.css-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease;
+}
+
+/* Show only the first slide initially */
+.css-slide:first-child {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Animation for automatic sliding */
+@keyframes cycleSlides {
+    0%, 25% {
+        opacity: 1;
+        visibility: visible;
+        z-index: 5;
+    }
+    30%, 100% {
+        opacity: 0;
+        visibility: hidden;
+        z-index: 0;
+    }
+}
+
+/* Apply animation to each slide with different delays */
+.css-slide {
+    animation: cycleSlides 15s infinite;
+    animation-fill-mode: both;
+}
+
+/* First slide shows immediately */
+.css-slide:nth-child(1) {
+    animation-delay: 0s;
+}
+
+/* Second slide shows after 5 seconds */
+.css-slide:nth-child(2) {
+    animation-delay: 5s;
+}
+
+/* Third slide shows after 10 seconds */
+.css-slide:nth-child(3) {
+    animation-delay: 10s;
+}
+
+/* Additional slides if needed */
+.css-slide:nth-child(4) {
+    animation-delay: 15s;
+    animation-duration: 20s;
+}
+
+.css-slide:nth-child(5) {
+    animation-delay: 20s;
+    animation-duration: 25s;
+}
+
+/* Make sure the announcement slide content fits properly */
+.css-slide .announcement-slide {
+    height: 100%;
+}
+
+/* Ensure links cover the entire slide */
+.css-slide .announcement-link {
+    display: block;
+    height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .css-slider {
+        height: 400px;
+    }
+
+    .css-slide .announcement-slide {
+        flex-direction: column;
+    }
+
+    .css-slide .announcement-image,
+    .css-slide .announcement-content {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .css-slide .announcement-image {
+        height: 150px;
+    }
+}

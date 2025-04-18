@@ -1,0 +1,270 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Edit Student{% endblock %}
+
+{% block styles %}
+<style>
+    .edit-form-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .form-section-header {
+        background-color: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .form-section-body {
+        padding: 20px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .photo-preview-container {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin: 0 auto 15px;
+        border: 3px solid #f8f9fa;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+    
+    .photo-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .photo-upload-btn {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    
+    .photo-upload-btn:hover {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .action-buttons {
+        position: sticky;
+        bottom: 20px;
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        margin-top: 2rem;
+    }
+    
+    .hidden-file-input {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.students') }}">Students</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.student_detail', student_id=student.id) }}">Student Details</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Student</li>
+                </ol>
+            </nav>
+            <h1 class="h2 mb-0">Edit Student Information</h1>
+            <p class="text-muted">Update student details and information</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a href="{{ url_for('admin.student_detail', student_id=student.id) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Student Details
+            </a>
+        </div>
+    </div>
+
+    <div class="edit-form-container">
+        <form action="{{ url_for('admin.edit_student', student_id=student.id) }}" method="POST" enctype="multipart/form-data">
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i> Personal Information</h5>
+                </div>
+                <div class="form-section-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <div class="photo-preview-container">
+                                {% if student.passport_photo %}
+                                <img src="{{ url_for('static', filename='uploads/passport_photos/' + student.passport_photo) }}" class="photo-preview" id="photoPreview" alt="Student Photo">
+                                {% else %}
+                                <img src="{{ url_for('static', filename='images/placeholder-user.png') }}" class="photo-preview" id="photoPreview" alt="Student Photo">
+                                {% endif %}
+                                <label for="passport_photo" class="photo-upload-btn">
+                                    <i class="fas fa-camera"></i>
+                                </label>
+                            </div>
+                            <input type="file" name="passport_photo" id="passport_photo" class="hidden-file-input" accept="image/png,image/jpeg,image/jpg">
+                            <p class="small text-muted">Click on the camera icon to change photo</p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="service_number" class="form-label">Service Number</label>
+                                    <input type="text" class="form-control" id="service_number" name="service_number" value="{{ student.service_number }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="rank" class="form-label">Rank</label>
+                                    <select class="form-select" id="rank" name="rank" required>
+                                        <!-- Non-Commissioned Officers -->
+                                        <optgroup label="Non-Commissioned Officers">
+                                            <option value="Private" {% if student.rank == 'Private' %}selected{% endif %}>Private</option>
+                                            <option value="Lance Corporal" {% if student.rank == 'Lance Corporal' %}selected{% endif %}>Lance Corporal</option>
+                                            <option value="Corporal" {% if student.rank == 'Corporal' %}selected{% endif %}>Corporal</option>
+                                            <option value="Sergeant" {% if student.rank == 'Sergeant' %}selected{% endif %}>Sergeant</option>
+                                            <option value="Staff Sergeant" {% if student.rank == 'Staff Sergeant' %}selected{% endif %}>Staff Sergeant</option>
+                                            <option value="Warrant Officer" {% if student.rank == 'Warrant Officer' %}selected{% endif %}>Warrant Officer</option>
+                                            <option value="Master Warrant Officer" {% if student.rank == 'Master Warrant Officer' %}selected{% endif %}>Master Warrant Officer</option>
+                                            <option value="Army Warrant Officer" {% if student.rank == 'Army Warrant Officer' %}selected{% endif %}>Army Warrant Officer</option>
+                                        </optgroup>
+                                        <!-- Commissioned Officers -->
+                                        <optgroup label="Commissioned Officers">
+                                            <option value="Second Lieutenant" {% if student.rank == 'Second Lieutenant' %}selected{% endif %}>Second Lieutenant</option>
+                                            <option value="Lieutenant" {% if student.rank == 'Lieutenant' %}selected{% endif %}>Lieutenant</option>
+                                            <option value="Captain" {% if student.rank == 'Captain' %}selected{% endif %}>Captain</option>
+                                            <option value="Major" {% if student.rank == 'Major' %}selected{% endif %}>Major</option>
+                                            <option value="Lieutenant Colonel" {% if student.rank == 'Lieutenant Colonel' %}selected{% endif %}>Lieutenant Colonel</option>
+                                            <option value="Colonel" {% if student.rank == 'Colonel' %}selected{% endif %}>Colonel</option>
+                                            <option value="Brigadier General" {% if student.rank == 'Brigadier General' %}selected{% endif %}>Brigadier General</option>
+                                            <option value="Major General" {% if student.rank == 'Major General' %}selected{% endif %}>Major General</option>
+                                            <option value="Lieutenant General" {% if student.rank == 'Lieutenant General' %}selected{% endif %}>Lieutenant General</option>
+                                            <option value="General" {% if student.rank == 'General' %}selected{% endif %}>General</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="surname" class="form-label">Surname</label>
+                                    <input type="text" class="form-control" id="surname" name="surname" value="{{ student.surname }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="other_names" class="form-label">Other Names</label>
+                                    <input type="text" class="form-control" id="other_names" name="other_names" value="{{ student.other_names }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="date_of_birth" class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ student.date_of_birth }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="gender" class="form-label">Gender</label>
+                                    <select class="form-select" id="gender" name="gender" required>
+                                        <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                                        <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Military Information Section -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i> Military Information</h5>
+                </div>
+                <div class="form-section-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="corps" class="form-label">Corps</label>
+                            <select class="form-select" id="corps" name="corps">
+                                <option value="" {% if not student.corps %}selected{% endif %}>Select Corps</option>
+                                <option value="Infantry" {% if student.corps == 'Infantry' %}selected{% endif %}>Infantry Corps</option>
+                                <option value="Artillery" {% if student.corps == 'Artillery' %}selected{% endif %}>Artillery Corps</option>
+                                <option value="Armour" {% if student.corps == 'Armour' %}selected{% endif %}>Armour Corps</option>
+                                <option value="Signals" {% if student.corps == 'Signals' %}selected{% endif %}>Signals Corps</option>
+                                <option value="Engineers" {% if student.corps == 'Engineers' %}selected{% endif %}>Engineers Corps</option>
+                                <option value="Supply and Transport" {% if student.corps == 'Supply and Transport' %}selected{% endif %}>Supply and Transport Corps</option>
+                                <option value="Military Police" {% if student.corps == 'Military Police' %}selected{% endif %}>Military Police Corps</option>
+                                <option value="Intelligence" {% if student.corps == 'Intelligence' %}selected{% endif %}>Intelligence Corps</option>
+                                <option value="Medical" {% if student.corps == 'Medical' %}selected{% endif %}>Medical Corps</option>
+                                <option value="Electrical and Mechanical Engineers" {% if student.corps == 'Electrical and Mechanical Engineers' %}selected{% endif %}>Electrical and Mechanical Engineers</option>
+                                <option value="Education" {% if student.corps == 'Education' %}selected{% endif %}>Education Corps</option>
+                                <option value="Finance" {% if student.corps == 'Finance' %}selected{% endif %}>Finance Corps</option>
+                                <option value="Ordnance" {% if student.corps == 'Ordnance' %}selected{% endif %}>Ordnance Corps</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="current_unit" class="form-label">Current Unit</label>
+                            <input type="text" class="form-control" id="current_unit" name="current_unit" value="{{ student.current_unit }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date_of_commission" class="form-label">Date of Commission/Enlistment</label>
+                            <input type="date" class="form-control" id="date_of_commission" name="date_of_commission" value="{{ student.date_of_commission }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons text-center">
+                <button type="button" class="btn btn-outline-secondary me-2" onclick="window.history.back();">
+                    <i class="fas fa-times me-2"></i> Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Photo preview functionality
+        const photoInput = document.getElementById('passport_photo');
+        const photoPreview = document.getElementById('photoPreview');
+        
+        photoInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    photoPreview.src = e.target.result;
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Date of commission change - could add automatic years in service calculation
+        const dateOfCommission = document.getElementById('date_of_commission');
+        dateOfCommission.addEventListener('change', function() {
+            // Could add automatic calculation of years in service here if needed
+        });
+    });
+</script>
+{% endblock %}

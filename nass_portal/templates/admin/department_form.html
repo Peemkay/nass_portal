@@ -1,0 +1,141 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ 'Edit' if department else 'Add' }} Department{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ 'Edit' if department else 'Add' }} Department</h1>
+        <a href="{{ url_for('admin.departments') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Departments
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Department Information</h6>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Department Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ department.name if department else '' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required>{{ department.description if department else '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="icon" class="form-label">Icon <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i id="icon-preview" class="fas {{ department.icon if department else 'fa-building' }}"></i></span>
+                                <input type="text" class="form-control" id="icon" name="icon" value="{{ department.icon if department else 'fa-building' }}" required>
+                            </div>
+                            <small class="form-text text-muted">Enter a Font Awesome icon class (e.g., fa-building, fa-satellite-dish). <a href="https://fontawesome.com/icons?d=gallery&s=solid" target="_blank">Browse icons</a></small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="color" class="form-label">Color <span class="text-danger">*</span></label>
+                            <select class="form-select" id="color" name="color" required>
+                                <option value="primary" {% if department and department.color == 'primary' %}selected{% endif %}>Primary (Blue)</option>
+                                <option value="secondary" {% if department and department.color == 'secondary' %}selected{% endif %}>Secondary (Gray)</option>
+                                <option value="success" {% if department and department.color == 'success' %}selected{% endif %}>Success (Green)</option>
+                                <option value="danger" {% if department and department.color == 'danger' %}selected{% endif %}>Danger (Red)</option>
+                                <option value="warning" {% if department and department.color == 'warning' %}selected{% endif %}>Warning (Yellow)</option>
+                                <option value="info" {% if department and department.color == 'info' %}selected{% endif %}>Info (Light Blue)</option>
+                                <option value="dark" {% if department and department.color == 'dark' %}selected{% endif %}>Dark (Black)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="display_order" class="form-label">Display Order</label>
+                            <input type="number" class="form-control" id="display_order" name="display_order" value="{{ department.display_order if department else '0' }}" min="0">
+                            <small class="form-text text-muted">Lower numbers appear first.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="is_active" class="form-label">Status</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if not department or department.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">Active</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Department Image</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                            <small class="form-text text-muted">Recommended size: 800x400 pixels. Leave empty to keep current image.</small>
+                        </div>
+                        
+                        {% if department and department.image_url %}
+                        <div class="mb-3">
+                            <label class="form-label">Current Image</label>
+                            <div class="card">
+                                <img src="{{ url_for('static', filename=department.image_url) }}" class="card-img-top" alt="{{ department.name }}">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="delete_image" name="delete_image">
+                                        <label class="form-check-label" for="delete_image">Delete current image</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> {{ 'Update' if department else 'Save' }} Department
+                    </button>
+                    <a href="{{ url_for('admin.departments') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Update icon preview when icon input changes
+        $('#icon').on('input', function() {
+            var iconClass = $(this).val();
+            $('#icon-preview').attr('class', 'fas ' + iconClass);
+        });
+        
+        // Preview uploaded image
+        $('#image').change(function() {
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    if ($('.image-preview').length) {
+                        $('.image-preview').attr('src', e.target.result);
+                    } else {
+                        $('<div class="mb-3"><label class="form-label">Image Preview</label><div class="card"><img src="' + e.target.result + '" class="card-img-top image-preview" alt="Preview"></div></div>').insertAfter('#image').closest('.mb-3');
+                    }
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    });
+</script>
+{% endblock %}

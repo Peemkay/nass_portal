@@ -1,0 +1,146 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Edit Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    .level-officers, .level-soldiers {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Edit Course</h1>
+        <a href="{{ url_for('admin.courses') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Courses
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Course Information</h6>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('admin.edit_course', course_id=course.id) }}">
+                <div class="form-group">
+                    <label for="name">Course Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ course.name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="description" name="description" rows="4" required>{{ course.description }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="duration">Duration</label>
+                    <input type="text" class="form-control" id="duration" name="duration" value="{{ course.duration }}" placeholder="e.g., 6 weeks, 3 months">
+                    <small class="form-text text-muted">Specify the duration of the course</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category <span class="text-danger">*</span></label>
+                    <select class="form-control" id="category" name="category" required onchange="updateLevelOptions()">
+                        <option value="">Select a category</option>
+                        <option value="Officers" {% if course.category == 'Officers' %}selected{% endif %}>Officers Courses</option>
+                        <option value="Soldiers" {% if course.category == 'Soldiers' %}selected{% endif %}>Soldiers Courses</option>
+                        <option value="General" {% if course.category == 'General' %}selected{% endif %}>General Courses</option>
+                    </select>
+                    <small class="form-text text-muted">Select the category this course belongs to</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="level">Level <span class="text-danger">*</span></label>
+                    <select class="form-control" id="level" name="level" required>
+                        <option value="">Select a level</option>
+
+                        <!-- General levels -->
+                        <optgroup label="General Levels" class="level-general">
+                            <option value="General" class="level-general" {% if course.level == 'General' %}selected{% endif %}>General</option>
+                            <option value="Introductory" class="level-general" {% if course.level == 'Introductory' %}selected{% endif %}>Introductory</option>
+                            <option value="Intermediate" class="level-general" {% if course.level == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                            <option value="Advanced" class="level-general" {% if course.level == 'Advanced' %}selected{% endif %}>Advanced</option>
+                        </optgroup>
+
+                        <!-- Officers levels -->
+                        <optgroup label="Officers Levels" class="level-officers">
+                            <option value="Junior" class="level-officers" {% if course.level == 'Junior' %}selected{% endif %}>Junior Level (Lieutenant)</option>
+                            <option value="Mid" class="level-officers" {% if course.level == 'Mid' %}selected{% endif %}>Mid Level (Captain)</option>
+                            <option value="Senior" class="level-officers" {% if course.level == 'Senior' %}selected{% endif %}>Senior Level (Major+)</option>
+                            <option value="Command" class="level-officers" {% if course.level == 'Command' %}selected{% endif %}>Command Level</option>
+                            <option value="Staff" class="level-officers" {% if course.level == 'Staff' %}selected{% endif %}>Staff Level</option>
+                        </optgroup>
+
+                        <!-- Soldiers levels -->
+                        <optgroup label="Soldiers Levels" class="level-soldiers">
+                            <option value="Basic" class="level-soldiers" {% if course.level == 'Basic' %}selected{% endif %}>Basic Level (Private-Corporal)</option>
+                            <option value="Medium" class="level-soldiers" {% if course.level == 'Medium' %}selected{% endif %}>Medium Level (Sergeant)</option>
+                            <option value="Advanced" class="level-soldiers" {% if course.level == 'Advanced' %}selected{% endif %}>Advanced Level (Staff Sergeant+)</option>
+                            <option value="Technical" class="level-soldiers" {% if course.level == 'Technical' %}selected{% endif %}>Technical Level</option>
+                            <option value="Specialist" class="level-soldiers" {% if course.level == 'Specialist' %}selected{% endif %}>Specialist Level</option>
+                        </optgroup>
+                    </select>
+                    <small class="form-text text-muted">Select the level of this course</small>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Course
+                    </button>
+                    <a href="{{ url_for('admin.courses') }}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateLevelOptions() {
+        const category = document.getElementById('category').value;
+        const levelSelect = document.getElementById('level');
+        const currentLevel = '{{ course.level }}';
+
+        // Hide all optgroups first
+        document.querySelectorAll('#level optgroup').forEach(group => {
+            group.style.display = 'none';
+        });
+
+        // Show only the relevant optgroup based on selected category
+        if (category === 'Officers') {
+            document.querySelector('#level optgroup.level-officers').style.display = 'block';
+        } else if (category === 'Soldiers') {
+            document.querySelector('#level optgroup.level-soldiers').style.display = 'block';
+        } else if (category === 'General') {
+            document.querySelector('#level optgroup.level-general').style.display = 'block';
+        }
+
+        // Check if the current level belongs to the selected category
+        let levelBelongsToCategory = false;
+
+        if (category === 'Officers') {
+            levelBelongsToCategory = document.querySelector(`#level optgroup.level-officers option[value="${currentLevel}"]`) !== null;
+        } else if (category === 'Soldiers') {
+            levelBelongsToCategory = document.querySelector(`#level optgroup.level-soldiers option[value="${currentLevel}"]`) !== null;
+        } else if (category === 'General') {
+            levelBelongsToCategory = document.querySelector(`#level optgroup.level-general option[value="${currentLevel}"]`) !== null;
+        }
+
+        // If the current level doesn't belong to the selected category, reset the selection
+        if (!levelBelongsToCategory) {
+            levelSelect.value = '';
+        }
+    }
+
+    // Initialize the level options when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        updateLevelOptions();
+    });
+</script>
+{% endblock %}

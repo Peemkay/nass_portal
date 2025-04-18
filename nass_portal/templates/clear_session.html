@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Session</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background-color: #0b5ed7;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Session Management</h1>
+
+        {% if cleared %}
+        <div class="message success">
+            <p>Your session has been cleared successfully!</p>
+        </div>
+        {% endif %}
+
+        <p>Use this page to clear your session cookies and test the maintenance mode functionality.</p>
+
+        <form method="post">
+            <button type="submit" class="btn">Clear Session</button>
+        </form>
+
+        <a href="{{ url_for('main.index') }}" class="btn" style="margin-left: 10px;">Go to Home Page</a>
+    </div>
+
+    <script>
+        // This script will clear all cookies when the form is submitted
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // Get all cookies
+            var cookies = document.cookie.split(";");
+
+            // Delete each cookie
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i];
+                var eqPos = cookie.indexOf("=");
+                var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+            }
+        });
+    </script>
+</body>
+</html>

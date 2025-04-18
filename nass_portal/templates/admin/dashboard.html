@@ -157,35 +157,84 @@
                             </a>
                         </div>
                         <div class="col-md-3 mb-4">
-                            <a href="#" class="card h-100 admin-action-card">
+                            <a href="{{ url_for('admin.students') }}" class="card h-100 admin-action-card">
                                 <div class="card-body text-center">
                                     <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md mb-3">
                                         <i class="fas fa-user-graduate text-lg opacity-10" aria-hidden="true"></i>
                                     </div>
                                     <h5 class="text-success">Manage Students</h5>
                                     <p class="text-sm mb-0">View and manage student records</p>
+                                    <div class="mt-3">
+                                        <span class="badge bg-success p-2">
+                                            {{ student_count }} Students
+                                        </span>
+                                    </div>
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-3 mb-4">
-                            <a href="#" class="card h-100 admin-action-card">
+                            <a href="{{ url_for('admin.courses') }}" class="card h-100 admin-action-card">
                                 <div class="card-body text-center">
                                     <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md mb-3">
                                         <i class="fas fa-book-open text-lg opacity-10" aria-hidden="true"></i>
                                     </div>
                                     <h5 class="text-info">Manage Courses</h5>
                                     <p class="text-sm mb-0">Add, edit, or remove courses</p>
+                                    <div class="mt-3">
+                                        <span class="badge bg-info p-2">
+                                            {{ course_count }} Courses
+                                        </span>
+                                    </div>
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-3 mb-4">
-                            <a href="#" class="card h-100 admin-action-card">
+                            <a href="{{ url_for('admin.settings') }}" class="card h-100 admin-action-card">
                                 <div class="card-body text-center">
                                     <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-md mb-3">
                                         <i class="fas fa-cog text-lg opacity-10" aria-hidden="true"></i>
                                     </div>
                                     <h5 class="text-warning">System Settings</h5>
                                     <p class="text-sm mb-0">Configure system parameters</p>
+                                    <div class="mt-3">
+                                        <span class="badge bg-warning text-dark p-2">
+                                            <i class="fas fa-tools me-1"></i> Maintenance
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-3 mb-4">
+                            <a href="{{ url_for('admin.announcements') }}" class="card h-100 admin-action-card">
+                                <div class="card-body text-center">
+                                    <div class="icon icon-shape bg-gradient-danger shadow text-center border-radius-md mb-3">
+                                        <i class="fas fa-bullhorn text-lg opacity-10" aria-hidden="true"></i>
+                                    </div>
+                                    <h5 class="text-danger">Announcements</h5>
+                                    <p class="text-sm mb-0">Manage home page announcements</p>
+                                    <div class="mt-3">
+                                        <span class="badge bg-danger p-2">
+                                            <i class="fas fa-megaphone me-1"></i> Slider Content
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-3 mb-4">
+                            <a href="{{ url_for('admin.document_requirements') }}" class="card h-100 admin-action-card">
+                                <div class="card-body text-center">
+                                    <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md mb-3">
+                                        <i class="fas fa-file-alt text-lg opacity-10" aria-hidden="true"></i>
+                                    </div>
+                                    <h5 class="text-primary">Document Requirements</h5>
+                                    <p class="text-sm mb-0">Manage required documents</p>
+                                    <div class="mt-3">
+                                        <span class="badge bg-primary p-2">
+                                            <i class="fas fa-upload me-1"></i> Registration Docs
+                                        </span>
+                                    </div>
                                 </div>
                             </a>
                         </div>

@@ -1,0 +1,281 @@
+/* Compact Tables Styling for Registration Page 5 */
+
+/* Main container styling */
+.education-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+/* Section headers */
+.section-header {
+    background-color: var(--military-dark-blue);
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-header h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.section-description {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin: 8px 15px;
+}
+
+/* Table container */
+.table-container {
+    padding: 10px 15px;
+}
+
+/* Table styling */
+.compact-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+.compact-table thead {
+    background-color: #f8f9fa;
+}
+
+.compact-table th {
+    font-weight: 600;
+    padding: 6px 8px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.compact-table td {
+    padding: 5px 6px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.compact-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.compact-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.compact-table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Form controls */
+.compact-table .form-control {
+    height: calc(1.5em + 0.5rem + 2px);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.2s ease;
+}
+
+.compact-table .form-control:focus {
+    border-color: var(--military-green);
+    box-shadow: 0 0 0 0.15rem rgba(76, 175, 80, 0.15);
+}
+
+.compact-table .form-control.is-invalid {
+    border-color: #dc3545;
+    background-size: calc(0.5em + 0.375rem) calc(0.5em + 0.375rem);
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+.compact-table .form-control.is-valid {
+    border-color: #28a745;
+    background-size: calc(0.5em + 0.375rem) calc(0.5em + 0.375rem);
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+/* Serial number column */
+.serial-number {
+    width: 40px;
+    text-align: center;
+    font-weight: 600;
+    color: #6c757d;
+}
+
+/* Action buttons */
+.btn-add-row {
+    background-color: var(--military-green);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-add-row i {
+    margin-right: 4px;
+}
+
+.btn-add-row:hover {
+    background-color: var(--military-dark-green);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.btn-remove-row {
+    background-color: transparent;
+    color: #dc3545;
+    border: none;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.btn-remove-row:hover {
+    color: #c82333;
+    transform: scale(1.1);
+}
+
+/* Month-Year Picker Styling */
+.monthyear-picker {
+    position: relative;
+}
+
+.monthyear-picker .form-control {
+    padding-right: 24px;
+}
+
+.monthyear-picker::after {
+    content: '\f133';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    pointer-events: none;
+    font-size: 0.75rem;
+}
+
+/* Animation for new rows */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.new-row {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* Error Messages */
+.table-error-message {
+    color: #dc3545;
+    font-size: 0.75rem;
+    margin: 5px 0;
+    padding: 0 15px;
+}
+
+/* NASS Information section */
+.nass-info-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.nass-info-header {
+    background-color: var(--military-dark-blue);
+    color: white;
+    padding: 10px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nass-info-header h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.nass-info-body {
+    padding: 15px;
+}
+
+/* Navigation buttons */
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+.btn-nav {
+    padding: 0.375rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-nav:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .compact-table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .section-header .btn-add-row {
+        margin-top: 8px;
+        align-self: flex-end;
+    }
+    
+    .form-navigation {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-nav {
+        width: 100%;
+    }
+}

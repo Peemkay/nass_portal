@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}Maintenance Mode{% endblock %}
+
+{% block extra_css %}
+<style>
+    .maintenance-container {
+        padding: 5rem 0;
+        text-align: center;
+    }
+
+    .maintenance-icon {
+        font-size: 5rem;
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+
+    .maintenance-title {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        color: #343a40;
+    }
+
+    .maintenance-message {
+        font-size: 1.2rem;
+        max-width: 800px;
+        margin: 0 auto 2rem;
+        color: #495057;
+    }
+
+    .maintenance-info {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto 2rem;
+    }
+
+    .maintenance-info h3 {
+        margin-bottom: 1rem;
+        color: #343a40;
+    }
+
+    .maintenance-info p {
+        margin-bottom: 0.5rem;
+    }
+
+    .maintenance-contact {
+        background-color: #e9ecef;
+        border-radius: 10px;
+        padding: 1.5rem;
+        max-width: 600px;
+        margin: 0 auto 2rem;
+    }
+
+    .maintenance-footer {
+        margin-top: 3rem;
+        color: #6c757d;
+    }
+
+    .countdown {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+    }
+
+    .countdown-item {
+        margin: 0 1rem;
+        text-align: center;
+    }
+
+    .countdown-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #343a40;
+        background-color: #e9ecef;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .countdown-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .maintenance-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .maintenance-title {
+            font-size: 2rem;
+        }
+
+        .maintenance-message {
+            font-size: 1rem;
+        }
+
+        .countdown {
+            flex-wrap: wrap;
+        }
+
+        .countdown-item {
+            margin: 0.5rem;
+        }
+
+        .countdown-number {
+            font-size: 2rem;
+            padding: 0.4rem 0.8rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .maintenance-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .maintenance-title {
+            font-size: 1.8rem;
+        }
+
+        .countdown-number {
+            font-size: 1.5rem;
+            padding: 0.3rem 0.6rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="maintenance-container">
+        <div class="maintenance-icon">
+            <i class="fas fa-tools"></i>
+        </div>
+
+        <h1 class="maintenance-title">Site Under Maintenance</h1>
+
+        <div class="maintenance-message">
+            {{ message }}
+        </div>
+
+        {% if maintenance %}
+        <div class="maintenance-info">
+            <h3>{{ maintenance.title }}</h3>
+            <p>{{ maintenance.description }}</p>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <p><strong>Started:</strong> {{ maintenance.start_datetime.replace('T', ' ') }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Expected Completion:</strong> {{ maintenance.end_datetime.replace('T', ' ') }}</p>
+                </div>
+            </div>
+
+            {% if maintenance.show_countdown %}
+            <div class="countdown" id="countdown">
+                <div class="countdown-item">
+                    <span class="countdown-number" id="countdown-hours">00</span>
+                    <span class="countdown-label">Hours</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="countdown-minutes">00</span>
+                    <span class="countdown-label">Minutes</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="countdown-seconds">00</span>
+                    <span class="countdown-label">Seconds</span>
+                </div>
+            </div>
+            <script>
+                // Initialize countdown as soon as the element is available
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Set the date we're counting down to
+                    var countDownDate = new Date("{{ maintenance.end_datetime.replace('T', ' ') }}").getTime();
+
+                    // Update the countdown every 1 second
+                    var x = setInterval(function() {
+                        // Get current date and time
+                        var now = new Date().getTime();
+
+                        // Find the distance between now and the countdown date
+                        var distance = countDownDate - now;
+
+                        // If the countdown is finished, show completed message
+                        if (distance < 0) {
+                            clearInterval(x);
+                            document.getElementById("countdown").innerHTML = "<div class='alert alert-success'>Maintenance should be completed. Please refresh the page.</div>";
+                            return;
+                        }
+
+                        // Time calculations for hours, minutes and seconds
+                        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                        // Display the result
+                        document.getElementById("countdown-hours").innerHTML = hours.toString().padStart(2, '0');
+                        document.getElementById("countdown-minutes").innerHTML = minutes.toString().padStart(2, '0');
+                        document.getElementById("countdown-seconds").innerHTML = seconds.toString().padStart(2, '0');
+                    }, 1000);
+                });
+            </script>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if contact_email or contact_phone %}
+        <div class="maintenance-contact">
+            <h4>Need assistance?</h4>
+            {% if contact_email %}
+            <p><i class="fas fa-envelope me-2"></i> <a href="mailto:{{ contact_email }}">{{ contact_email }}</a></p>
+            {% endif %}
+            {% if contact_phone %}
+            <p><i class="fas fa-phone me-2"></i> {{ contact_phone }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="maintenance-footer">
+            <p>Nigerian Army School of Signals</p>
+            <p><small>Please check back later or contact the administrator if this persists.</small></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Scripts moved inline for better loading performance -->
+{% endblock %}

@@ -1,11 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
-from flask_mail import Message
-from . import mail
 import os
+import time
 from datetime import datetime
-import logging
 from werkzeug.utils import secure_filename
-from werkzeug.security import check_password_hash
 from .db import get_db
 from .registration_utils import is_registration_open, get_registration_status
 
@@ -14,14 +11,94 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename, extensions=None):
     if extensions is None:
         extensions = ALLOWED_EXTENSIONS
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in extensions
+
+    # Debug logging
+    current_app.logger.info(f"Checking file: {filename}, extensions: {extensions}")
+
+    if '.' not in filename:
+        current_app.logger.warning(f"No extension found in filename: {filename}")
+        return False
+
+    ext = filename.rsplit('.', 1)[1].lower()
+    result = ext in extensions
+
+    current_app.logger.info(f"File extension: {ext}, allowed: {result}")
+    return result
 
 bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    return render_template('index.html')
+    # Get current year for footer
+    now = datetime.now()
+
+    # Get active announcements
+    db = get_db()
+    announcements = db.execute(
+        'SELECT * FROM announcements WHERE is_active = 1 ORDER BY display_order LIMIT 10'
+    ).fetchall()
+
+    # Get courses
+    courses = db.execute('SELECT * FROM courses ORDER BY name').fetchall()
+
+    # Get departments
+    departments = db.execute(
+        'SELECT * FROM departments WHERE is_active = 1 ORDER BY display_order'
+    ).fetchall()
+
+    return render_template('index.html', now=now, announcements=announcements, courses=courses, departments=departments)
+
+
+@bp.route('/clear-session', methods=['GET', 'POST'])
+def clear_session():
+    """Clear the user's session data"""
+    cleared = False
+
+    if request.method == 'POST':
+        # Clear the session
+        session.clear()
+        cleared = True
+
+    return render_template('clear_session.html', cleared=cleared)
+
+
+@bp.route('/courses/<int:course_id>')
+def view_course(course_id):
+    """View course details"""
+    db = get_db()
+    course = db.execute('SELECT * FROM courses WHERE id = ?', (course_id,)).fetchone()
+
+    if course is None:
+        flash('Course not found', 'error')
+        return redirect(url_for('main.index'))
+
+    # Get related courses (same category and level)
+    related_courses = db.execute(
+        'SELECT * FROM courses WHERE (category = ? OR level = ?) AND id != ? LIMIT 3',
+        (course.category, course.level, course_id)
+    ).fetchall()
+
+    return render_template('course_detail.html', course=course, related_courses=related_courses)
+
+
+@bp.route('/announcement/<int:announcement_id>')
+def view_announcement(announcement_id):
+    """View a single announcement"""
+    # Get the announcement
+    db = get_db()
+    announcement = db.execute('SELECT * FROM announcements WHERE id = ? AND is_active = 1', (announcement_id,)).fetchone()
+
+    if not announcement:
+        flash('Announcement not found', 'error')
+        return redirect(url_for('main.index'))
+
+    # Get other recent announcements
+    recent_announcements = db.execute(
+        'SELECT * FROM announcements WHERE id != ? AND is_active = 1 ORDER BY display_order LIMIT 3',
+        (announcement_id,)
+    ).fetchall()
+
+    return render_template('announcement_detail.html', announcement=announcement, recent_announcements=recent_announcements)
 
 @bp.route('/registration')
 def registration():
@@ -49,6 +126,7 @@ def registration_page_1():
                 'other_names': request.form.get('other_names'),
                 'date_of_birth': request.form.get('date_of_birth'),
                 'gender': request.form.get('gender'),
+                'corps': request.form.get('corps'),
                 'current_unit': request.form.get('current_unit'),
                 'date_of_commission': request.form.get('date_of_commission'),
                 'years_in_service': request.form.get('years_in_service'),
@@ -63,6 +141,7 @@ def registration_page_1():
                 'other_names': 'Other Names',
                 'date_of_birth': 'Date of Birth',
                 'gender': 'Gender',
+                'corps': 'Corps',
                 'current_unit': 'Current Unit',
                 'date_of_commission': 'Date of Commission/Enlistment',
                 'years_in_service': 'Years in Service',
@@ -206,14 +285,14 @@ def registration_page_1():
                     db.execute('''
                         UPDATE students SET
                             rank = ?, surname = ?, other_names = ?,
-                            date_of_birth = ?, gender = ?, current_unit = ?,
+                            date_of_birth = ?, gender = ?, corps = ?, current_unit = ?,
                             date_of_commission = ?, years_in_service = ?,
                             passport_photo = ?, updated_at = CURRENT_TIMESTAMP
                         WHERE service_number = ?
                     ''', (
                         form_data['rank'], form_data['surname'],
                         form_data['other_names'], form_data['date_of_birth'],
-                        form_data['gender'], form_data['current_unit'],
+                        form_data['gender'], form_data['corps'], form_data['current_unit'],
                         form_data['date_of_commission'], form_data['years_in_service'],
                         session['passport_photo'], form_data['service_number']
                     ))
@@ -222,15 +301,16 @@ def registration_page_1():
                     db.execute('''
                         INSERT INTO students (
                             service_number, rank, surname, other_names,
-                            date_of_birth, gender, current_unit,
+                            date_of_birth, gender, corps, current_unit,
                             date_of_commission, years_in_service,
                             passport_photo, created_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                     ''', (
                         form_data['service_number'], form_data['rank'],
                         form_data['surname'], form_data['other_names'],
                         form_data['date_of_birth'], form_data['gender'],
-                        form_data['current_unit'], form_data['date_of_commission'],
+                        form_data['corps'], form_data['current_unit'],
+                        form_data['date_of_commission'],
                         form_data['years_in_service'], session['passport_photo']
                     ))
 
@@ -359,13 +439,15 @@ def registration_page_4():
 
             # Hard fix for nok_phone_1 issue - check both possible field names
             if not request.form.get('nok_gsm_number_1') and not request.form.get('nok_phone_1'):
-                # If neither field is present, use a default value or show an error
-                if 'nok_phone_1' in request.form:
-                    request.form = request.form.copy()  # Make mutable
-                    request.form['nok_gsm_number_1'] = request.form['nok_phone_1']
-                else:
-                    flash('Next of Kin Phone Number is required', 'error')
-                    return render_template('registration_page_4.html', form_data=request.form)
+                flash('Next of Kin Phone Number is required', 'error')
+                return render_template('registration_page_4.html', form_data=request.form)
+
+            # Ensure both fields have the same value for compatibility
+            request_form = request.form.copy()  # Make mutable
+            if request_form.get('nok_gsm_number_1') and not request_form.get('nok_phone_1'):
+                request_form['nok_phone_1'] = request_form['nok_gsm_number_1']
+            elif request_form.get('nok_phone_1') and not request_form.get('nok_gsm_number_1'):
+                request_form['nok_gsm_number_1'] = request_form['nok_phone_1']
 
             # Continue with other validations
             for field in required_fields:
@@ -378,13 +460,14 @@ def registration_page_4():
                          'nok_name_2', 'nok_relationship_2', 'nok_address_2', 'nok_gsm_number_2', 'nok_email_2']
 
             for field in nok_fields:
-                # Special handling for phone field
-                if field == 'nok_gsm_number_1' and not request.form.get(field) and request.form.get('nok_phone_1'):
-                    session[field] = request.form.get('nok_phone_1', '').strip()
-                    # Also store in the alternate field name for compatibility
-                    session['nok_phone_1'] = request.form.get('nok_phone_1', '').strip()
-                else:
-                    session[field] = request.form.get(field, '').strip()
+                session[field] = request_form.get(field, '').strip()
+
+            # Ensure both phone field versions are saved for compatibility
+            if request_form.get('nok_gsm_number_1'):
+                session['nok_phone_1'] = request_form.get('nok_gsm_number_1', '').strip()
+            elif request_form.get('nok_phone_1'):
+                session['nok_gsm_number_1'] = request_form.get('nok_phone_1', '').strip()
+                session['nok_phone_1'] = request_form.get('nok_phone_1', '').strip()
 
             session['page_4_complete'] = True
 
@@ -409,28 +492,68 @@ def registration_page_5():
 
     if request.method == 'POST':
         try:
-            # Educational Records
+            # Educational Records - new field names
             education_fields = [
-                'uni_serial', 'uni_name', 'uni_year_from', 'uni_year_to',
-                'uni_cert', 'uni_grade', 'uni_remarks',
-                'sec_serial', 'sec_name', 'sec_year_from', 'sec_year_to',
-                'sec_cert', 'sec_grade', 'sec_remarks',
-                'mil_serial', 'mil_name', 'mil_year_from', 'mil_year_to',
-                'mil_cert', 'mil_grade', 'mil_remarks'
+                # Tertiary education
+                'tertiary_name', 'tertiary_start_date', 'tertiary_end_date',
+                'tertiary_cert', 'tertiary_grade', 'tertiary_remarks',
+                # Secondary education
+                'secondary_name', 'secondary_start_date', 'secondary_end_date',
+                'secondary_cert', 'secondary_grade', 'secondary_remarks',
+                # Military courses
+                'military_name', 'military_start_date', 'military_end_date',
+                'military_cert', 'military_grade', 'military_remarks'
             ]
 
             # Save all form data to session
             for field in education_fields:
                 session[field] = request.form.getlist(f'{field}[]')
+                current_app.logger.debug(f"Saved {field}: {session[field]}")
 
             # Save NASS specific information
             session['nass_course'] = request.form.get('nass_course')
             session['nass_department'] = request.form.get('nass_department')
 
-            # Validate required fields
-            if not session.get('uni_name')[0]:
+            # Validate required fields - at least one tertiary education entry is required
+            tertiary_names = session.get('tertiary_name', [])
+            has_valid_entry = False
+
+            for name in tertiary_names:
+                if name.strip():
+                    has_valid_entry = True
+                    break
+
+            if not has_valid_entry:
                 flash('At least one university/polytechnic entry is required', 'error')
                 return render_template('registration_page_5.html')
+
+            # For backward compatibility with existing code
+            # Map new field names to old field names
+            field_mapping = {
+                'tertiary_name': 'uni_name',
+                'tertiary_start_date': 'uni_year_from',
+                'tertiary_end_date': 'uni_year_to',
+                'tertiary_cert': 'uni_cert',
+                'tertiary_grade': 'uni_grade',
+                'tertiary_remarks': 'uni_remarks',
+                'secondary_name': 'sec_name',
+                'secondary_start_date': 'sec_year_from',
+                'secondary_end_date': 'sec_year_to',
+                'secondary_cert': 'sec_cert',
+                'secondary_grade': 'sec_grade',
+                'secondary_remarks': 'sec_remarks',
+                'military_name': 'mil_name',
+                'military_start_date': 'mil_year_from',
+                'military_end_date': 'mil_year_to',
+                'military_cert': 'mil_cert',
+                'military_grade': 'mil_grade',
+                'military_remarks': 'mil_remarks'
+            }
+
+            # Create legacy fields for backward compatibility
+            for new_field, old_field in field_mapping.items():
+                if session.get(new_field):
+                    session[old_field] = session[new_field]
 
             session['page_5_complete'] = True
             return redirect(url_for('main.registration_page_6'))
@@ -451,28 +574,75 @@ def registration_page_6():
         flash('Please complete previous steps first', 'error')
         return redirect(url_for('main.registration_page_5'))
 
+    # Get document requirements from database
+    db = get_db()
+    document_requirements = db.execute('SELECT * FROM document_requirements WHERE is_active = 1 ORDER BY display_order').fetchall()
+
     if request.method == 'POST':
         try:
-            # Handle file uploads
-            allowed_extensions = {'jpg', 'jpeg', 'png', 'pdf'}
-            max_file_size = 2 * 1024 * 1024  # 2MB for images
-            max_pdf_size = 5 * 1024 * 1024   # 5MB for PDFs
+            # Handle document uploads
 
-            # Required files validation
-            if 'passport_photo' not in request.files or not request.files['passport_photo'].filename:
-                flash('Passport photograph is required', 'error')
-                return render_template('registration_page_6.html')
+            # Process each document requirement
+            uploaded_documents = []
 
-            # Process passport photo
-            passport_photo = request.files['passport_photo']
-            if not allowed_file(passport_photo.filename, {'jpg', 'jpeg', 'png'}):
-                flash('Invalid passport photo format. Please use JPG or PNG', 'error')
-                return render_template('registration_page_6.html')
+            for req in document_requirements:
+                field_name = f'document_{req["id"]}'
 
-            if len(passport_photo.read()) > max_file_size:
-                flash('Passport photo must be less than 2MB', 'error')
-                return render_template('registration_page_6.html')
-            passport_photo.seek(0)  # Reset file pointer
+                # Check if file was uploaded
+                if field_name in request.files and request.files[field_name].filename:
+                    document_file = request.files[field_name]
+
+                    # Validate file type
+                    allowed_types = set(req['file_types'].split(','))
+                    current_app.logger.info(f"Processing document: {req['name']}, file: {document_file.filename}, allowed types: {allowed_types}")
+
+                    if not allowed_file(document_file.filename, allowed_types):
+                        flash(f'Invalid file format for {req["name"]}. Allowed formats: {req["file_types"].upper()}', 'error')
+                        return render_template('registration_page_6.html', document_requirements=document_requirements)
+
+                    # Validate file size
+                    document_file.seek(0, os.SEEK_END)
+                    file_size = document_file.tell()
+                    document_file.seek(0)  # Reset file pointer
+
+                    if file_size > req['max_file_size']:
+                        max_size_mb = req['max_file_size'] / (1024 * 1024)
+                        flash(f'{req["name"]} file must be less than {max_size_mb}MB', 'error')
+                        return render_template('registration_page_6.html', document_requirements=document_requirements)
+
+                    # Generate unique filename
+                    filename = secure_filename(document_file.filename)
+                    file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+                    unique_filename = f"{session.get('service_number')}_{req['id']}_{int(time.time())}.{file_ext}"
+
+                    # Save file
+                    upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'documents')
+                    os.makedirs(upload_folder, exist_ok=True)
+                    file_path = os.path.join(upload_folder, unique_filename)
+
+                    try:
+                        current_app.logger.info(f"Saving document to: {file_path}")
+                        document_file.save(file_path)
+                        current_app.logger.info(f"Document saved successfully")
+                    except Exception as e:
+                        current_app.logger.error(f"Error saving document: {str(e)}")
+                        flash(f'Error saving {req["name"]}: {str(e)}', 'error')
+                        return render_template('registration_page_6.html', document_requirements=document_requirements)
+
+                    # Add to uploaded documents list
+                    uploaded_documents.append({
+                        'requirement_id': req['id'],
+                        'file_path': os.path.join('documents', unique_filename),
+                        'original_filename': filename,
+                        'file_size': file_size,
+                        'file_type': file_ext
+                    })
+                elif req['is_required']:
+                    flash(f'{req["name"]} is required', 'error')
+                    return render_template('registration_page_6.html', document_requirements=document_requirements)
+
+            # Store uploaded documents in session
+            session['uploaded_documents'] = uploaded_documents
 
             # Save form data to session
             session['has_special_needs'] = request.form.get('has_special_needs')
@@ -486,10 +656,6 @@ def registration_page_6():
             session['blood_group'] = request.form.get('blood_group')
             session['genotype'] = request.form.get('genotype')
 
-            # Save files to appropriate storage (implement your file storage logic here)
-            # Example:
-            # save_file(passport_photo, 'passport_photos', session.get('service_number'))
-
             session['page_6_complete'] = True
             return redirect(url_for('main.registration_page_7'))
 
@@ -497,7 +663,7 @@ def registration_page_6():
             current_app.logger.error(f"Error in registration page 6: {str(e)}")
             flash('An error occurred. Please try again.', 'error')
 
-    return render_template('registration_page_6.html')
+    return render_template('registration_page_6.html', document_requirements=document_requirements)
 
 @bp.route('/registration_page_7', methods=['GET', 'POST'])
 def registration_page_7():
@@ -535,7 +701,8 @@ def registration_page_7():
                 # Next of Kin Information (Page 4)
                 'nok_name_1': session.get('nok_name_1'),
                 'nok_relationship_1': session.get('nok_relationship_1'),
-                'nok_phone_1': session.get('nok_phone_1'),
+                'nok_phone_1': session.get('nok_phone_1') or session.get('nok_gsm_number_1'),
+                'nok_gsm_number_1': session.get('nok_gsm_number_1') or session.get('nok_phone_1'),
                 'nok_address_1': session.get('nok_address_1'),
 
                 # Military Information (Page 5)
@@ -566,8 +733,55 @@ def registration_page_7():
                 flash(f'Missing required information: {", ".join(missing_fields)}', 'error')
                 return render_template('registration_page_7.html', data=registration_data)
 
-            # If everything is valid, save to database (implement your database logic here)
-            # save_registration(registration_data)
+            # If everything is valid, save to database
+            try:
+                db = get_db()
+
+                # Check if service number already exists
+                existing_student = db.execute('SELECT id FROM students WHERE service_number = ?',
+                                             (registration_data['service_number'],)).fetchone()
+                if existing_student:
+                    flash('A student with this service number already exists.', 'error')
+                    return render_template('registration_page_7.html', data=registration_data)
+
+                # Calculate years in service
+                enlistment_date = datetime.strptime(registration_data['date_of_enlistment'], '%Y-%m-%d')
+                years_in_service = datetime.now().year - enlistment_date.year
+
+                # Insert into students table
+                db.execute(
+                    'INSERT INTO students (service_number, rank, surname, other_names, date_of_birth, gender, corps, '
+                    'current_unit, date_of_commission, years_in_service, passport_photo) '
+                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    (registration_data['service_number'], registration_data['rank'],
+                     registration_data['surname'], registration_data['other_names'],
+                     registration_data['date_of_birth'], registration_data['gender'],
+                     registration_data.get('corps', ''), registration_data['current_unit'],
+                     registration_data['date_of_enlistment'],
+                     years_in_service, session.get('passport_photo', ''))
+                )
+
+                # Get the student ID
+                student_id = db.execute('SELECT id FROM students WHERE service_number = ?',
+                                       (registration_data['service_number'],)).fetchone()['id']
+
+                # Save uploaded documents
+                if 'uploaded_documents' in session and session['uploaded_documents']:
+                    for doc in session['uploaded_documents']:
+                        db.execute(
+                            'INSERT INTO student_documents (student_id, requirement_id, file_path, original_filename, '
+                            'file_size, file_type) VALUES (?, ?, ?, ?, ?, ?)',
+                            (student_id, doc['requirement_id'], doc['file_path'], doc['original_filename'],
+                             doc['file_size'], doc['file_type'])
+                        )
+
+                db.commit()
+                current_app.logger.info(f"Student registered successfully: {registration_data['service_number']}")
+            except Exception as e:
+                db.rollback()
+                current_app.logger.error(f"Database error during registration: {str(e)}")
+                flash('An error occurred while saving your registration. Please try again.', 'error')
+                return render_template('registration_page_7.html', data=registration_data)
 
             # Clear the session after successful submission
             session.clear()
@@ -582,6 +796,10 @@ def registration_page_7():
 
     return render_template('registration_page_7.html', data=session)
 
+@bp.route('/registration_success')
+def registration_success():
+    return render_template('success.html')
+
 @bp.route('/courses')
 def courses():
     return render_template('courses.html')
@@ -590,38 +808,348 @@ def courses():
 def about():
     return render_template('about.html')
 
-@bp.route('/contact', methods=['GET', 'POST'])
-def contact():
+@bp.route('/test-carousel')
+def test_carousel():
+    return render_template('test_carousel.html')
+
+
+@bp.route('/simple-contact', methods=['GET', 'POST'])
+def simple_contact():
+    """A simplified contact form that uses a different approach for sending emails"""
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
         subject = request.form.get('subject')
         message = request.form.get('message')
 
-        try:
-            # Create email message
-            msg = Message(
-                subject=f"Contact Form: {subject}",
-                sender=email,
-                recipients=[os.environ.get('MAIL_DEFAULT_SENDER')],
-                body=f"""
-                From: {name} <{email}>
+        # Log the form submission
+        current_app.logger.info(f"Simple contact form submitted by {name} ({email})")
 
-                Message:
-                {message}
-                """
+        # Validate form data
+        if not name or not email or not subject or not message:
+            flash('Please fill in all fields', 'error')
+            return render_template('simple_contact.html')
+
+        try:
+            # Get mail settings directly from the database
+            from .db import get_db
+            db = get_db()
+
+            # Get mail settings
+            mail_settings = {}
+            settings = db.execute('SELECT setting_key, setting_value, setting_type FROM settings WHERE category = ?', ('mail',)).fetchall()
+
+            for setting in settings:
+                key = setting['setting_key']
+                value = setting['setting_value']
+
+                # Convert value based on type
+                if setting['setting_type'] == 'boolean':
+                    value = value.lower() == 'true'
+                elif setting['setting_type'] == 'number':
+                    try:
+                        value = int(value)
+                    except (ValueError, TypeError):
+                        try:
+                            value = float(value)
+                        except (ValueError, TypeError):
+                            value = 0
+
+                mail_settings[key] = value
+
+            # Configure Flask-Mail with the settings
+            current_app.config['MAIL_SERVER'] = mail_settings.get('mail_server', 'smtp.mail.yahoo.com')
+            current_app.config['MAIL_PORT'] = int(mail_settings.get('mail_port', 587))
+            current_app.config['MAIL_USE_TLS'] = mail_settings.get('mail_use_tls', True)
+            current_app.config['MAIL_USE_SSL'] = mail_settings.get('mail_use_ssl', False)
+            current_app.config['MAIL_USERNAME'] = mail_settings.get('mail_username', '')
+            current_app.config['MAIL_PASSWORD'] = mail_settings.get('mail_password', '')
+            current_app.config['MAIL_DEFAULT_SENDER'] = f"{mail_settings.get('mail_sender_name', 'NASS Portal')} <{mail_settings.get('mail_default_sender', 'noreply@nassportal.mil.ng')}>"
+
+            # Log mail settings (without password)
+            safe_settings = {k: v for k, v in current_app.config.items() if k.startswith('MAIL_') and k != 'MAIL_PASSWORD'}
+            current_app.logger.info(f"Mail settings: {safe_settings}")
+
+            # Get recipients
+            recipients_str = mail_settings.get('mail_contact_form_recipients', '')
+            recipients = [e.strip() for e in recipients_str.split(',')] if recipients_str else []
+
+            if not recipients:
+                default_sender = mail_settings.get('mail_default_sender', 'noreply@nassportal.mil.ng')
+                recipients = [default_sender]
+
+            current_app.logger.info(f"Recipients: {recipients}")
+
+            # Create message
+            from flask_mail import Message
+            from . import mail
+
+            msg = Message(
+                subject=f"{mail_settings.get('mail_contact_form_subject_prefix', '[NASS Portal Contact]')} {subject}",
+                recipients=recipients,
+                reply_to=email,
+                body=f"""From: {name} <{email}>
+
+Subject: {subject}
+
+Message:
+{message}
+""",
+                html=f"""<h3>New Contact Form Submission</h3>
+<p><strong>From:</strong> {name} &lt;{email}&gt;</p>
+<p><strong>Subject:</strong> {subject}</p>
+<p><strong>Message:</strong></p>
+<div style="padding: 15px; border-left: 4px solid #ccc; background-color: #f9f9f9;">
+    {message.replace('\n', '<br>')}
+</div>
+<p style="color: #777; font-size: 12px; margin-top: 20px;">
+    This message was sent from the NASS Portal simple contact form.
+</p>"""
             )
 
             # Send email
+            current_app.logger.info("Attempting to send email")
             mail.send(msg)
+            current_app.logger.info("Email sent successfully")
 
             flash('Thank you for your message. We will get back to you soon!', 'success')
-            return redirect(url_for('main.contact'))
+        except Exception as e:
+            import traceback
+            current_app.logger.error(f"Error sending email: {str(e)}")
+            current_app.logger.error(traceback.format_exc())
+            flash(f'An error occurred while sending your message: {str(e)}', 'error')
+
+        return render_template('simple_contact.html')
+
+    return render_template('simple_contact.html')
+
+
+@bp.route('/direct-contact', methods=['GET', 'POST'])
+def direct_contact():
+    """A direct contact form that uses smtplib directly"""
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        subject = request.form.get('subject')
+        message = request.form.get('message')
+
+        # Log the form submission
+        current_app.logger.info(f"Direct contact form submitted by {name} ({email})")
+
+        # Validate form data
+        if not name or not email or not subject or not message:
+            flash('Please fill in all fields', 'error')
+            return render_template('direct_contact.html')
+
+        try:
+            import smtplib
+            from email.mime.text import MIMEText
+            from email.mime.multipart import MIMEMultipart
+
+            # Yahoo Mail credentials - hardcoded for reliability
+            yahoo_email = "chakin700@yahoo.com"
+            yahoo_password = "xswwpjaotwholron"  # App password
+
+            # Use a different recipient email to avoid Yahoo's self-sending restrictions
+            # You can change this to any email address you want to receive the contact form submissions
+            recipient_email = "ariespeemkay@gmail.com"  # Your Gmail address
+
+            # If no recipient is specified, use a default one
+            if not recipient_email:
+                recipient_email = "nass.portal.contact@gmail.com"
+
+            # Create message
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = f"[NASS Portal Contact] {subject}"
+            msg['From'] = f"NASS Portal <{yahoo_email}>"
+            msg['To'] = recipient_email
+            msg['Reply-To'] = email
+
+            # Create plain text and HTML versions of the message
+            text_content = f"""From: {name} <{email}>
+
+Subject: {subject}
+
+Message:
+{message}
+"""
+
+            html_content = f"""<h3>New Contact Form Submission</h3>
+<p><strong>From:</strong> {name} &lt;{email}&gt;</p>
+<p><strong>Subject:</strong> {subject}</p>
+<p><strong>Message:</strong></p>
+<div style="padding: 15px; border-left: 4px solid #ccc; background-color: #f9f9f9;">
+    {message.replace('\n', '<br>')}
+</div>
+<p style="color: #777; font-size: 12px; margin-top: 20px;">
+    This message was sent from the NASS Portal direct contact form.
+</p>"""
+
+            # Attach both plain text and HTML versions
+            part1 = MIMEText(text_content, 'plain')
+            part2 = MIMEText(html_content, 'html')
+            msg.attach(part1)
+            msg.attach(part2)
+
+            # Connect to Yahoo Mail's SMTP server
+            current_app.logger.info("Connecting to smtp.mail.yahoo.com:587...")
+            server = smtplib.SMTP('smtp.mail.yahoo.com', 587)
+
+            # Start TLS encryption
+            current_app.logger.info("Starting TLS...")
+            server.starttls()
+
+            # Login to Yahoo Mail
+            current_app.logger.info(f"Logging in as {yahoo_email}...")
+            server.login(yahoo_email, yahoo_password)
+
+            # Send email
+            current_app.logger.info(f"Sending email to {recipient_email}...")
+            server.sendmail(yahoo_email, recipient_email, msg.as_string())
+
+            # Close connection
+            server.quit()
+            current_app.logger.info("Email sent successfully!")
+
+            flash('Thank you for your message. We will get back to you soon!', 'success')
+        except Exception as e:
+            import traceback
+            current_app.logger.error(f"Error sending email: {str(e)}")
+            current_app.logger.error(traceback.format_exc())
+            flash(f'An error occurred while sending your message: {str(e)}', 'error')
+
+        return render_template('direct_contact.html')
+
+    return render_template('direct_contact.html')
+
+
+@bp.route('/brevo-contact', methods=['GET', 'POST'])
+def brevo_contact():
+    """A contact form that uses Brevo API for sending emails"""
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        subject = request.form.get('subject')
+        message = request.form.get('message')
+
+        # Log the form submission
+        current_app.logger.info(f"Brevo contact form submitted by {name} ({email})")
+
+        # Validate form data
+        if not name or not email or not subject or not message:
+            flash('Please fill in all fields', 'error')
+            return render_template('brevo_contact.html')
+
+        # Use our Brevo implementation to send the contact form email
+        from .brevo_mail import send_contact_form_email
+        success, error_message = send_contact_form_email(name, email, subject, message)
+
+        if success:
+            flash('Thank you for your message. We will get back to you soon!', 'success')
+        else:
+            current_app.logger.error(f"Error sending contact form email: {error_message}")
+            flash(f'An error occurred while sending your message: {error_message}', 'error')
+
+        return render_template('brevo_contact.html')
+
+    return render_template('brevo_contact.html')
+
+
+@bp.route('/formsubmit-contact')
+def formsubmit_contact():
+    """A contact form that uses FormSubmit.co for processing"""
+    return render_template('formsubmit_contact.html')
+
+
+@bp.route('/thank-you')
+def thank_you():
+    """Thank you page after form submission"""
+    flash('Thank you for your message. We will get back to you soon!', 'success')
+    return render_template('thank_you.html')
+
+
+@bp.route('/local-contact', methods=['GET', 'POST'])
+def local_contact():
+    """A contact form that stores messages in the local database"""
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        subject = request.form.get('subject')
+        message = request.form.get('message')
+
+        # Log the form submission
+        current_app.logger.info(f"Local contact form submitted by {name} ({email})")
+
+        # Validate form data
+        if not name or not email or not subject or not message:
+            flash('Please fill in all fields', 'error')
+            return render_template('local_contact.html')
+
+        try:
+            # Store the message in the database
+            from .db import get_db
+            db = get_db()
+
+            db.execute(
+                'INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
+                (name, email, subject, message)
+            )
+            db.commit()
+
+            current_app.logger.info("Contact message stored in database")
+            flash('Thank you for your message. We will get back to you soon!', 'success')
 
         except Exception as e:
-            print(f"Error sending email: {str(e)}")  # For debugging
-            flash('An error occurred while sending your message. Please try again.', 'error')
-            return redirect(url_for('main.contact'))
+            import traceback
+            current_app.logger.error(f"Error storing contact message: {str(e)}")
+            current_app.logger.error(traceback.format_exc())
+            flash('An error occurred while processing your message. Please try again.', 'error')
+
+        return render_template('local_contact.html')
+
+    return render_template('local_contact.html')
+
+@bp.route('/contact', methods=['GET', 'POST'])
+def contact():
+    if request.method == 'POST':
+        # Log the form submission for debugging
+        current_app.logger.info("Contact form submitted")
+
+        # Get form data
+        name = request.form.get('name')
+        email = request.form.get('email')
+        subject = request.form.get('subject')
+        message = request.form.get('message')
+
+        # Log the form data for debugging
+        current_app.logger.info(f"Form data: name={name}, email={email}, subject={subject}")
+
+        # Validate form data
+        if not name or not email or not subject or not message:
+            flash('Please fill in all fields', 'error')
+            return render_template('contact.html')
+
+        try:
+            # Store the message in the database
+            from .db import get_db
+            db = get_db()
+
+            db.execute(
+                'INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
+                (name, email, subject, message)
+            )
+            db.commit()
+
+            current_app.logger.info("Contact message stored in database")
+            flash('Thank you for your message. We will get back to you soon!', 'success')
+
+        except Exception as e:
+            import traceback
+            current_app.logger.error(f"Error storing contact message: {str(e)}")
+            current_app.logger.error(traceback.format_exc())
+            flash('An error occurred while processing your message. Please try again.', 'error')
+
+        return render_template('contact.html')
 
     return render_template('contact.html')
 
@@ -656,10 +1184,59 @@ def logout():
 
     return redirect(url_for('main.index'))
 
+@bp.route('/maintenance')
+def maintenance():
+    """Show maintenance page"""
+    db = get_db()
 
+    # Get maintenance message and contact information
+    message_setting = db.execute('SELECT setting_value FROM settings WHERE setting_key = ?', ('maintenance_message',)).fetchone()
+    maintenance_message = 'The system is currently undergoing scheduled maintenance. Please check back later.'
 
+    if message_setting:
+        maintenance_message = message_setting['setting_value']
 
+    # Get contact information
+    contact_email = db.execute('SELECT setting_value FROM settings WHERE setting_key = ?', ('maintenance_contact_email',)).fetchone()
+    contact_phone = db.execute('SELECT setting_value FROM settings WHERE setting_key = ?', ('maintenance_contact_phone',)).fetchone()
 
+    # Get active maintenance details if available
+    active_maintenance = db.execute(
+        'SELECT * FROM scheduled_maintenance WHERE status = "in_progress" ORDER BY start_datetime LIMIT 1'
+    ).fetchone()
 
+    return render_template('maintenance.html',
+                          message=maintenance_message,
+                          contact_email=contact_email['setting_value'] if contact_email else None,
+                          contact_phone=contact_phone['setting_value'] if contact_phone else None,
+                          maintenance=active_maintenance)
 
+@bp.route('/enable-maintenance')
+def enable_maintenance():
+    """Enable maintenance mode - for testing only"""
+    db = get_db()
 
+    # Set maintenance mode to true
+    db.execute('UPDATE settings SET setting_value = ? WHERE setting_key = ?', ('true', 'maintenance_mode'))
+    db.commit()
+
+    # Log the action
+    current_app.logger.info("Maintenance mode manually enabled")
+
+    # Redirect to maintenance page
+    return redirect(url_for('main.maintenance'))
+
+@bp.route('/disable-maintenance')
+def disable_maintenance():
+    """Disable maintenance mode - for testing only"""
+    db = get_db()
+
+    # Set maintenance mode to false
+    db.execute('UPDATE settings SET setting_value = ? WHERE setting_key = ?', ('false', 'maintenance_mode'))
+    db.commit()
+
+    # Log the action
+    current_app.logger.info("Maintenance mode manually disabled")
+
+    # Redirect to home page
+    return redirect(url_for('main.index'))

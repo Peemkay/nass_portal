@@ -1,0 +1,412 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Student Details{% endblock %}
+
+{% block styles %}
+<style>
+    .student-header {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .student-photo {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .student-name {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .student-rank {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+
+    .student-info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .info-item {
+        background-color: white;
+        border-radius: 8px;
+        padding: 10px 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        font-weight: 600;
+    }
+
+    .detail-card {
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .detail-card .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eee;
+        padding: 15px 20px;
+    }
+
+    .detail-card .card-title {
+        margin-bottom: 0;
+        font-weight: 600;
+    }
+
+    .detail-row {
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .action-buttons {
+        position: sticky;
+        bottom: 20px;
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.students') }}">Students</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Student Details</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-primary" id="printBtn">
+                    <i class="fas fa-print"></i> Print Profile
+                </button>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteStudentModal">
+                    <i class="fas fa-trash"></i> Delete Student
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Header -->
+    <div class="student-header">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                {% if student.passport_photo %}
+                <img src="{{ url_for('static', filename='uploads/passport_photos/' + student.passport_photo) }}" class="student-photo" alt="Student Photo">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/placeholder-user.png') }}" class="student-photo" alt="Student Photo">
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h1 class="student-name">{{ student.surname }}, {{ student.other_names }}</h1>
+                <div class="student-rank">{{ student.rank }}</div>
+                <div class="student-info">
+                    <div class="info-item">
+                        <div class="info-label">Service Number</div>
+                        <div class="info-value">{{ student.service_number }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Current Unit</div>
+                        <div class="info-value">{{ student.current_unit }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Years in Service</div>
+                        <div class="info-value">{{ student.years_in_service }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Quick Actions</h5>
+                        <div class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-envelope me-2"></i> Send Email
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-certificate me-2"></i> Generate Certificate
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-book me-2"></i> Assign to Course
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Personal Information -->
+        <div class="col-md-6">
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-user me-2"></i> Personal Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row detail-row">
+                        <div class="col-md-4 detail-label">Full Name</div>
+                        <div class="col-md-8">{{ student.surname }}, {{ student.other_names }}</div>
+                    </div>
+                    <div class="row detail-row">
+                        <div class="col-md-4 detail-label">Service Number</div>
+                        <div class="col-md-8">{{ student.service_number }}</div>
+                    </div>
+                    <div class="row detail-row">
+                        <div class="col-md-4 detail-label">Rank</div>
+                        <div class="col-md-8">{{ student.rank }}</div>
+                    </div>
+                    <div class="row detail-row">
+                        <div class="col-md-4 detail-label">Gender</div>
+                        <div class="col-md-8">{{ student.gender }}</div>
+                    </div>
+                    <div class="row detail-row">
+                        <div class="col-md-4 detail-label">Date of Birth</div>
+                        <div class="col-md-8">{{ student.date_of_birth }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Military Information -->
+        <div class="col-md-6">
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-shield-alt me-2"></i> Military Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row detail-row">
+                        <div class="col-md-4 detail-label">Current Unit</div>
+                        <div class="col-md-8">{{ student.current_unit }}</div>
+                    </div>
+                    <div class="row detail-row">
+                        <div class="col-md-4 detail-label">Date of Commission</div>
+                        <div class="col-md-8">{{ student.date_of_commission }}</div>
+                    </div>
+                    <div class="row detail-row">
+                        <div class="col-md-4 detail-label">Years in Service</div>
+                        <div class="col-md-8">{{ student.years_in_service }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Course History -->
+        <div class="col-md-12">
+            <div class="card detail-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-graduation-cap me-2"></i> Course History
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> No course history available for this student.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons text-center">
+        <a href="{{ url_for('admin.edit_student', student_id=student.id) }}" class="btn btn-primary">
+            <i class="fas fa-edit me-2"></i> Edit Student Information
+        </a>
+    </div>
+</div>
+
+<!-- Edit Student Modal -->
+<div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Student Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editStudentForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="service_number" class="form-label">Service Number</label>
+                            <input type="text" class="form-control" id="service_number" value="{{ student.service_number }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="rank" class="form-label">Rank</label>
+                            <select class="form-select" id="rank">
+                                <!-- Non-Commissioned Officers -->
+                                <option value="Private" {% if student.rank == 'Private' %}selected{% endif %}>Private</option>
+                                <option value="Lance Corporal" {% if student.rank == 'Lance Corporal' %}selected{% endif %}>Lance Corporal</option>
+                                <option value="Corporal" {% if student.rank == 'Corporal' %}selected{% endif %}>Corporal</option>
+                                <option value="Sergeant" {% if student.rank == 'Sergeant' %}selected{% endif %}>Sergeant</option>
+                                <option value="Staff Sergeant" {% if student.rank == 'Staff Sergeant' %}selected{% endif %}>Staff Sergeant</option>
+                                <option value="Warrant Officer" {% if student.rank == 'Warrant Officer' %}selected{% endif %}>Warrant Officer</option>
+                                <option value="Master Warrant Officer" {% if student.rank == 'Master Warrant Officer' %}selected{% endif %}>Master Warrant Officer</option>
+                                <option value="Army Warrant Officer" {% if student.rank == 'Army Warrant Officer' %}selected{% endif %}>Army Warrant Officer</option>
+
+                                <!-- Commissioned Officers -->
+                                <option value="Second Lieutenant" {% if student.rank == 'Second Lieutenant' %}selected{% endif %}>Second Lieutenant</option>
+                                <option value="Lieutenant" {% if student.rank == 'Lieutenant' %}selected{% endif %}>Lieutenant</option>
+                                <option value="Captain" {% if student.rank == 'Captain' %}selected{% endif %}>Captain</option>
+                                <option value="Major" {% if student.rank == 'Major' %}selected{% endif %}>Major</option>
+                                <option value="Lieutenant Colonel" {% if student.rank == 'Lieutenant Colonel' %}selected{% endif %}>Lieutenant Colonel</option>
+                                <option value="Colonel" {% if student.rank == 'Colonel' %}selected{% endif %}>Colonel</option>
+                                <option value="Brigadier General" {% if student.rank == 'Brigadier General' %}selected{% endif %}>Brigadier General</option>
+                                <option value="Major General" {% if student.rank == 'Major General' %}selected{% endif %}>Major General</option>
+                                <option value="Lieutenant General" {% if student.rank == 'Lieutenant General' %}selected{% endif %}>Lieutenant General</option>
+                                <option value="General" {% if student.rank == 'General' %}selected{% endif %}>General</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="surname" class="form-label">Surname</label>
+                            <input type="text" class="form-control" id="surname" value="{{ student.surname }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="other_names" class="form-label">Other Names</label>
+                            <input type="text" class="form-control" id="other_names" value="{{ student.other_names }}">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender">
+                                <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="date_of_birth" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="date_of_birth" value="{{ student.date_of_birth }}">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="corps" class="form-label">Corps</label>
+                            <select class="form-select" id="corps">
+                                <option value="" {% if not student.corps %}selected{% endif %}>Select Corps</option>
+                                <option value="Infantry" {% if student.corps == 'Infantry' %}selected{% endif %}>Infantry Corps</option>
+                                <option value="Artillery" {% if student.corps == 'Artillery' %}selected{% endif %}>Artillery Corps</option>
+                                <option value="Armour" {% if student.corps == 'Armour' %}selected{% endif %}>Armour Corps</option>
+                                <option value="Signals" {% if student.corps == 'Signals' %}selected{% endif %}>Signals Corps</option>
+                                <option value="Engineers" {% if student.corps == 'Engineers' %}selected{% endif %}>Engineers Corps</option>
+                                <option value="Supply and Transport" {% if student.corps == 'Supply and Transport' %}selected{% endif %}>Supply and Transport Corps</option>
+                                <option value="Military Police" {% if student.corps == 'Military Police' %}selected{% endif %}>Military Police Corps</option>
+                                <option value="Intelligence" {% if student.corps == 'Intelligence' %}selected{% endif %}>Intelligence Corps</option>
+                                <option value="Medical" {% if student.corps == 'Medical' %}selected{% endif %}>Medical Corps</option>
+                                <option value="Electrical and Mechanical Engineers" {% if student.corps == 'Electrical and Mechanical Engineers' %}selected{% endif %}>Electrical and Mechanical Engineers</option>
+                                <option value="Education" {% if student.corps == 'Education' %}selected{% endif %}>Education Corps</option>
+                                <option value="Finance" {% if student.corps == 'Finance' %}selected{% endif %}>Finance Corps</option>
+                                <option value="Ordnance" {% if student.corps == 'Ordnance' %}selected{% endif %}>Ordnance Corps</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="current_unit" class="form-label">Current Unit</label>
+                            <input type="text" class="form-control" id="current_unit" value="{{ student.current_unit }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date_of_commission" class="form-label">Date of Commission</label>
+                            <input type="date" class="form-control" id="date_of_commission" value="{{ student.date_of_commission }}">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveChanges">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Student Modal -->
+<div class="modal fade" id="deleteStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Warning: This action cannot be undone.
+                </div>
+                <p>Are you sure you want to delete the following student?</p>
+                <p><strong>{{ student.surname }}, {{ student.other_names }}</strong> ({{ student.service_number }})</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete Student</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Print functionality
+        document.getElementById('printBtn').addEventListener('click', function() {
+            window.print();
+        });
+
+        // Edit student functionality
+        document.getElementById('saveChanges').addEventListener('click', function() {
+            // In a real app, you'd send the form data to the server
+            alert('Changes saved successfully');
+            bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
+        });
+
+        // Delete student functionality
+        document.getElementById('confirmDelete').addEventListener('click', function() {
+            // In a real app, you'd send a request to delete the student
+            alert('Student deleted successfully');
+            window.location.href = "{{ url_for('admin.students') }}";
+        });
+    });
+</script>
+{% endblock %}

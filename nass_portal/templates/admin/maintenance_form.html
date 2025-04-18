@@ -1,0 +1,133 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{% if edit_mode %}Edit{% else %}Schedule{% endif %} Maintenance - NASS Portal Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{% if edit_mode %}Edit{% else %}Schedule{% endif %} Maintenance</h1>
+        <a href="{{ url_for('admin.maintenance') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Maintenance
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">{% if edit_mode %}Edit{% else %}Schedule{% endif %} Maintenance</h6>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% if edit_mode %}{{ url_for('admin.edit_maintenance', maintenance_id=maintenance.id) }}{% else %}{{ url_for('admin.add_maintenance') }}{% endif %}">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required
+                               value="{% if edit_mode %}{{ maintenance.title }}{% endif %}"
+                               placeholder="e.g., System Upgrade">
+                        <div class="form-text">A short, descriptive title for the maintenance.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {% if edit_mode %}
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="scheduled" {% if maintenance.status == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                            <option value="in_progress" {% if maintenance.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                            <option value="completed" {% if maintenance.status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="cancelled" {% if maintenance.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                        <div class="form-text">Current status of the maintenance.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" required
+                              placeholder="Detailed description of the maintenance activities...">{% if edit_mode %}{{ maintenance.description }}{% endif %}</textarea>
+                    <div class="form-text">Provide details about what will be done during the maintenance period.</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" required
+                               value="{% if edit_mode %}{{ start_date }}{% else %}{{ default_start_date }}{% endif %}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="start_time" class="form-label">Start Time</label>
+                        <input type="time" class="form-control" id="start_time" name="start_time" required
+                               value="{% if edit_mode %}{{ start_time }}{% else %}{{ default_start_time }}{% endif %}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" required
+                               value="{% if edit_mode %}{{ end_date }}{% else %}{{ default_end_date }}{% endif %}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="end_time" class="form-label">End Time</label>
+                        <input type="time" class="form-control" id="end_time" name="end_time" required
+                               value="{% if edit_mode %}{{ end_time }}{% else %}{{ default_end_time }}{% endif %}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="notification_days" class="form-label">Notification Days Before</label>
+                        <input type="number" class="form-control" id="notification_days" name="notification_days" min="0" max="30" required
+                               value="{% if edit_mode %}{{ maintenance.notification_days_before }}{% else %}3{% endif %}">
+                        <div class="form-text">How many days before the maintenance to start showing notifications.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="show_countdown" name="show_countdown" value="1"
+                                   {% if edit_mode and maintenance.show_countdown %}checked{% elif not edit_mode %}checked{% endif %}>
+                            <label class="form-check-label" for="show_countdown">
+                                Show Countdown Timer
+                            </label>
+                            <div class="form-text">Display a countdown timer to users before and during maintenance.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('admin.maintenance') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">{% if edit_mode %}Update{% else %}Schedule{% endif %} Maintenance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Validate that end date/time is after start date/time
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const startDate = document.getElementById('start_date').value;
+        const startTime = document.getElementById('start_time').value;
+        const endDate = document.getElementById('end_date').value;
+        const endTime = document.getElementById('end_time').value;
+        
+        const startDateTime = new Date(`${startDate}T${startTime}`);
+        const endDateTime = new Date(`${endDate}T${endTime}`);
+        
+        if (endDateTime <= startDateTime) {
+            e.preventDefault();
+            alert('End date/time must be after start date/time');
+        }
+    });
+</script>
+{% endblock %}

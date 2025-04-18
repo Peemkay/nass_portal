@@ -1,0 +1,238 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Manage Announcements{% endblock %}
+
+{% block styles %}
+<style>
+    .announcement-card {
+        transition: all 0.3s ease;
+        border-left: 5px solid #007bff;
+    }
+    
+    .announcement-card:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .announcement-card.inactive {
+        border-left-color: #6c757d;
+        opacity: 0.7;
+    }
+    
+    .announcement-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .announcement-content {
+        max-height: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+    
+    .announcement-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    
+    .announcement-list {
+        min-height: 300px;
+    }
+    
+    .sortable-ghost {
+        opacity: 0.4;
+        background-color: #f8f9fa;
+    }
+    
+    .drag-handle {
+        cursor: grab;
+        color: #6c757d;
+    }
+    
+    .drag-handle:hover {
+        color: #343a40;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h2 mb-0">Manage Announcements</h1>
+            <p class="text-muted">Create and manage announcements for the home page</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a href="{{ url_for('admin.add_announcement') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i> Add New Announcement
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">All Announcements</h5>
+                        <span class="badge bg-primary">{{ announcements|length }} Total</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if announcements %}
+                    <p class="text-muted small mb-3">
+                        <i class="fas fa-info-circle me-1"></i> Drag and drop to reorder announcements. Changes are saved automatically.
+                    </p>
+                    <div class="announcement-list" id="sortableAnnouncements">
+                        <div class="row">
+                            {% for announcement in announcements %}
+                            <div class="col-md-4 mb-4" data-id="{{ announcement.id }}">
+                                <div class="card announcement-card h-100 {% if not announcement.is_active %}inactive{% endif %}">
+                                    {% if announcement.image_url %}
+                                    <img src="{{ url_for('static', filename=announcement.image_url) }}" class="announcement-image card-img-top" alt="{{ announcement.title }}">
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="card-title mb-0">{{ announcement.title }}</h5>
+                                            <div class="drag-handle">
+                                                <i class="fas fa-grip-vertical"></i>
+                                            </div>
+                                        </div>
+                                        <div class="announcement-content mb-3">
+                                            {{ announcement.content }}
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                {% if announcement.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                <span class="badge bg-secondary">Inactive</span>
+                                                {% endif %}
+                                                <small class="text-muted ms-2">Order: {{ announcement.display_order }}</small>
+                                            </div>
+                                            <div class="announcement-actions">
+                                                <a href="{{ url_for('admin.edit_announcement', announcement_id=announcement.id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger delete-announcement" 
+                                                        data-id="{{ announcement.id }}" 
+                                                        data-title="{{ announcement.title }}" 
+                                                        title="Delete">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-bullhorn fa-3x text-muted"></i>
+                        </div>
+                        <h4>No Announcements Yet</h4>
+                        <p class="text-muted">Create your first announcement to display on the home page.</p>
+                        <a href="{{ url_for('admin.add_announcement') }}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i> Add New Announcement
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteAnnouncementModal" tabindex="-1" aria-labelledby="deleteAnnouncementModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAnnouncementModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the announcement "<span id="announcementTitle"></span>"?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteAnnouncementForm" method="POST">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Sortable
+        const sortableList = document.getElementById('sortableAnnouncements');
+        if (sortableList) {
+            const sortable = new Sortable(sortableList, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'sortable-ghost',
+                onEnd: function(evt) {
+                    saveNewOrder();
+                }
+            });
+        }
+        
+        // Save the new order
+        function saveNewOrder() {
+            const items = document.querySelectorAll('#sortableAnnouncements > .row > [data-id]');
+            const order = Array.from(items).map(item => parseInt(item.dataset.id));
+            
+            fetch('{{ url_for("admin.reorder_announcements") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ order: order }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Optional: Show a success message
+                    console.log('Order saved successfully');
+                } else {
+                    console.error('Error saving order:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        // Delete announcement confirmation
+        const deleteButtons = document.querySelectorAll('.delete-announcement');
+        const deleteForm = document.getElementById('deleteAnnouncementForm');
+        const announcementTitleSpan = document.getElementById('announcementTitle');
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const title = this.dataset.title;
+                
+                deleteForm.action = `/admin/announcements/${id}/delete`;
+                announcementTitleSpan.textContent = title;
+                
+                const deleteModal = new bootstrap.Modal(document.getElementById('deleteAnnouncementModal'));
+                deleteModal.show();
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -5,7 +5,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/styles.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css', v='1.1') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/photo-preview.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/document-upload.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/progress-bar.css', v='1.0') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/enhanced-form.css', v='1.0') }}">
 {% endblock %}
@@ -129,6 +129,36 @@
                                         </optgroup>
                                     </select>
                                     <div class="invalid-feedback">Please select a rank</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="corps" class="form-label">
+                                        Corps <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
+                                        <select class="form-select" id="corps" name="corps" required>
+                                            <option value="">Select Corps</option>
+                                            <option value="Infantry" {% if form_data.get('corps') == 'Infantry' %}selected{% endif %}>Infantry Corps</option>
+                                            <option value="Artillery" {% if form_data.get('corps') == 'Artillery' %}selected{% endif %}>Artillery Corps</option>
+                                            <option value="Armour" {% if form_data.get('corps') == 'Armour' %}selected{% endif %}>Armour Corps</option>
+                                            <option value="Signals" {% if form_data.get('corps') == 'Signals' %}selected{% endif %}>Signals Corps</option>
+                                            <option value="Engineers" {% if form_data.get('corps') == 'Engineers' %}selected{% endif %}>Engineers Corps</option>
+                                            <option value="Supply and Transport" {% if form_data.get('corps') == 'Supply and Transport' %}selected{% endif %}>Supply and Transport Corps</option>
+                                            <option value="Military Police" {% if form_data.get('corps') == 'Military Police' %}selected{% endif %}>Military Police Corps</option>
+                                            <option value="Intelligence" {% if form_data.get('corps') == 'Intelligence' %}selected{% endif %}>Intelligence Corps</option>
+                                            <option value="Medical" {% if form_data.get('corps') == 'Medical' %}selected{% endif %}>Medical Corps</option>
+                                            <option value="Electrical and Mechanical Engineers" {% if form_data.get('corps') == 'Electrical and Mechanical Engineers' %}selected{% endif %}>Electrical and Mechanical Engineers Corps</option>
+                                            <option value="Finance" {% if form_data.get('corps') == 'Finance' %}selected{% endif %}>Finance Corps</option>
+                                            <option value="Education" {% if form_data.get('corps') == 'Education' %}selected{% endif %}>Education Corps</option>
+                                            <option value="Ordnance" {% if form_data.get('corps') == 'Ordnance' %}selected{% endif %}>Ordnance Corps</option>
+                                            <option value="Chaplain Services" {% if form_data.get('corps') == 'Chaplain Services' %}selected{% endif %}>Chaplain Services</option>
+                                            <option value="Legal Services" {% if form_data.get('corps') == 'Legal Services' %}selected{% endif %}>Legal Services</option>
+                                            <option value="Physical Training" {% if form_data.get('corps') == 'Physical Training' %}selected{% endif %}>Physical Training Corps</option>
+                                            <option value="Band" {% if form_data.get('corps') == 'Band' %}selected{% endif %}>Band Corps</option>
+                                            <option value="Special Forces" {% if form_data.get('corps') == 'Special Forces' %}selected{% endif %}>Special Forces Corps</option>
+                                        </select>
+                                    </div>
+                                    <div class="invalid-feedback">Corps is required</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="nationality" class="form-label">
@@ -274,7 +304,8 @@
                                         <div class="input-group mb-3">
                                             <span class="input-group-text"><i class="fas fa-camera"></i></span>
                                             <input type="file" class="form-control" id="passport_photo"
-                                                   name="passport_photo" accept="image/png,image/jpeg,image/jpg" required>
+                                                   name="passport_photo" accept="image/png,image/jpeg,image/jpg"
+                                                   onchange="previewImage(this)" required>
                                         </div>
                                         <div class="invalid-feedback">Please upload a passport photograph</div>
                                         <div class="form-text">
@@ -337,20 +368,16 @@
 <!-- Include enhanced photo preview -->
 <script src="{{ url_for('static', filename='js/registration/photo-preview.js', v='1.1') }}"></script>
 
+
+
 <script>
 // Calculate Years in Service automatically
 document.addEventListener('DOMContentLoaded', function() {
     const commissionDateInput = document.getElementById('date_of_commission');
-    if (commissionDateInput) {
-        commissionDateInput.addEventListener('change', calculateYearsInService);
-        // Calculate on page load
-        calculateYearsInService();
-    }
+    const yearsInServiceInput = document.getElementById('years_in_service');
 
+    // Function to calculate years in service
     function calculateYearsInService() {
-        const commissionDateInput = document.getElementById('date_of_commission');
-        const yearsInServiceInput = document.getElementById('years_in_service');
-
         if (commissionDateInput && yearsInServiceInput && commissionDateInput.value) {
             const commissionDate = new Date(commissionDateInput.value);
             const today = new Date();
@@ -372,47 +399,31 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 yearsInServiceInput.classList.remove('is-valid');
             }, 2000);
+
+            console.log('Years in service calculated:', years);
+        } else {
+            console.log('Unable to calculate years in service - missing input values');
+            if (yearsInServiceInput) yearsInServiceInput.value = '';
         }
     }
+
+    // Add event listener for date change
+    if (commissionDateInput) {
+        commissionDateInput.addEventListener('change', calculateYearsInService);
+        console.log('Added change event listener to date of commission field');
+    } else {
+        console.log('Date of commission field not found');
+    }
+
+    // Calculate on page load
+    console.log('Calculating years in service on page load');
+    calculateYearsInService();
 });
 </script>
 
 <script>
-// Function to calculate years in service based on date of commission/enlistment
-function calculateYearsInService() {
-    const commissionDateInput = document.getElementById('date_of_commission');
-    const yearsInServiceInput = document.getElementById('years_in_service');
-
-    if (commissionDateInput.value) {
-        const commissionDate = new Date(commissionDateInput.value);
-        const today = new Date();
-
-        // Calculate the difference in years
-        let years = today.getFullYear() - commissionDate.getFullYear();
-
-        // Adjust for months and days
-        if (today.getMonth() < commissionDate.getMonth() ||
-            (today.getMonth() === commissionDate.getMonth() && today.getDate() < commissionDate.getDate())) {
-            years--;
-        }
-
-        // Set the calculated value
-        yearsInServiceInput.value = years;
-
-        // Add visual feedback
-        yearsInServiceInput.classList.add('is-valid');
-        setTimeout(() => {
-            yearsInServiceInput.classList.remove('is-valid');
-        }, 2000);
-    } else {
-        yearsInServiceInput.value = '';
-    }
-}
-
-// Calculate years in service on page load if date is already set
+// Add animation classes to cards on page load
 window.addEventListener('DOMContentLoaded', function() {
-    calculateYearsInService();
-
     // Add animation classes to cards
     document.querySelectorAll('.card').forEach((card, index) => {
         card.style.animationDelay = `${index * 0.1}s`;

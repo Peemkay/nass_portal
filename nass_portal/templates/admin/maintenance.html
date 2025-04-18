@@ -1,0 +1,318 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Maintenance Management - NASS Portal Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Maintenance Management</h1>
+        <a href="{{ url_for('admin.add_maintenance') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Schedule Maintenance
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Maintenance Settings Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Maintenance Settings</h6>
+            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                <i class="fas fa-edit me-1"></i> Edit Settings
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Auto-Enable Maintenance</h5>
+                            <p class="card-text">
+                                {% if auto_enable == 'true' %}
+                                <span class="badge bg-success">Enabled</span>
+                                {% else %}
+                                <span class="badge bg-danger">Disabled</span>
+                                {% endif %}
+                            </p>
+                            <p class="text-muted small">When enabled, maintenance mode will automatically activate at the scheduled start time.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Notification Banner</h5>
+                            <p class="card-text">
+                                {% if notification_enabled == 'true' %}
+                                <span class="badge bg-success">Enabled</span>
+                                {% else %}
+                                <span class="badge bg-danger">Disabled</span>
+                                {% endif %}
+                            </p>
+                            <p class="text-muted small">When enabled, users will see a notification about upcoming maintenance.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Notification Style</h5>
+                            <p class="card-text">
+                                <span class="badge bg-primary">{{ notification_style|capitalize }}</span>
+                            </p>
+                            <p class="text-muted small">The style of notification shown to users about upcoming maintenance.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- In Progress Maintenance -->
+    {% if in_progress %}
+    <div class="card shadow mb-4 border-left-danger">
+        <div class="card-header py-3 bg-danger text-white">
+            <h6 class="m-0 font-weight-bold">Maintenance In Progress</h6>
+        </div>
+        <div class="card-body">
+            {% for maintenance in in_progress %}
+            <div class="maintenance-item mb-3 pb-3 {% if not loop.last %}border-bottom{% endif %}">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="mb-0">{{ maintenance.title }}</h5>
+                    <div>
+                        <a href="{{ url_for('admin.edit_maintenance', maintenance_id=maintenance.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="{{ url_for('admin.toggle_maintenance_status', maintenance_id=maintenance.id) }}" method="post" class="d-inline">
+                            <input type="hidden" name="status" value="completed">
+                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Mark this maintenance as completed?');">
+                                <i class="fas fa-check"></i> Complete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <p>{{ maintenance.description }}</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Started:</strong> {{ maintenance.start_datetime.replace('T', ' ') }}</p>
+                        <p><strong>Expected End:</strong> {{ maintenance.end_datetime.replace('T', ' ') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="progress">
+                            <script>
+                                // Calculate progress percentage using JavaScript
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    var startTime = new Date("{{ maintenance.start_datetime.replace('T', ' ') }}").getTime();
+                                    var endTime = new Date("{{ maintenance.end_datetime.replace('T', ' ') }}").getTime();
+                                    var now = new Date().getTime();
+
+                                    var totalDuration = endTime - startTime;
+                                    var elapsed = now - startTime;
+
+                                    var percent = Math.min(Math.floor(elapsed / totalDuration * 100), 100);
+                                    if (percent < 0) percent = 0;
+
+                                    var progressBar = document.getElementById('maintenance-progress-{{ maintenance.id }}');
+                                    progressBar.style.width = percent + '%';
+                                    progressBar.setAttribute('aria-valuenow', percent);
+                                    progressBar.textContent = percent + '%';
+                                });
+                            </script>
+                            <div id="maintenance-progress-{{ maintenance.id }}" class="progress-bar bg-danger" role="progressbar" style="width: 0%"
+                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Scheduled Maintenance -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Scheduled Maintenance</h6>
+        </div>
+        <div class="card-body">
+            {% if scheduled %}
+            <div class="table-responsive">
+                <table class="table table-bordered" id="scheduledTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Notification</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for maintenance in scheduled %}
+                        <tr>
+                            <td>{{ maintenance.title }}</td>
+                            <td>{{ maintenance.start_datetime.replace('T', ' ') }}</td>
+                            <td>{{ maintenance.end_datetime.replace('T', ' ') }}</td>
+                            <td>{{ maintenance.notification_days_before }} days before</td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_maintenance', maintenance_id=maintenance.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ url_for('admin.toggle_maintenance_status', maintenance_id=maintenance.id) }}" method="post" class="d-inline">
+                                    <input type="hidden" name="status" value="in_progress">
+                                    <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Start this maintenance now?');">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('admin.toggle_maintenance_status', maintenance_id=maintenance.id) }}" method="post" class="d-inline">
+                                    <input type="hidden" name="status" value="cancelled">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this maintenance?');">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                <p class="mb-0">No scheduled maintenance periods.</p>
+                <a href="{{ url_for('admin.add_maintenance') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus me-1"></i> Schedule Maintenance
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Completed/Cancelled Maintenance -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Maintenance History</h6>
+        </div>
+        <div class="card-body">
+            {% if completed %}
+            <div class="table-responsive">
+                <table class="table table-bordered" id="historyTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for maintenance in completed %}
+                        <tr>
+                            <td>{{ maintenance.title }}</td>
+                            <td>{{ maintenance.start_datetime.replace('T', ' ') }}</td>
+                            <td>{{ maintenance.end_datetime.replace('T', ' ') }}</td>
+                            <td>
+                                {% if maintenance.status == 'completed' %}
+                                <span class="badge bg-success">Completed</span>
+                                {% else %}
+                                <span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('admin.delete_maintenance', maintenance_id=maintenance.id) }}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this maintenance record?');">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                <p class="mb-0">No maintenance history.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="settingsModalLabel">Maintenance Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('admin.update_maintenance_settings') }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoEnable" name="auto_enable" value="true" {% if auto_enable == 'true' %}checked{% endif %}>
+                            <label class="form-check-label" for="autoEnable">Auto-Enable Maintenance Mode</label>
+                        </div>
+                        <div class="form-text">When enabled, maintenance mode will automatically activate at the scheduled start time.</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="notificationEnabled" name="notification_enabled" value="true" {% if notification_enabled == 'true' %}checked{% endif %}>
+                            <label class="form-check-label" for="notificationEnabled">Show Notification Banner</label>
+                        </div>
+                        <div class="form-text">When enabled, users will see a notification about upcoming maintenance.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notificationStyle" class="form-label">Notification Style</label>
+                        <select class="form-select" id="notificationStyle" name="notification_style">
+                            <option value="banner" {% if notification_style == 'banner' %}selected{% endif %}>Banner (Top of page)</option>
+                            <option value="popup" {% if notification_style == 'popup' %}selected{% endif %}>Popup (Modal)</option>
+                            <option value="subtle" {% if notification_style == 'subtle' %}selected{% endif %}>Subtle (Corner notification)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contactEmail" class="form-label">Contact Email During Maintenance</label>
+                        <input type="email" class="form-control" id="contactEmail" name="contact_email" value="{{ contact_email }}">
+                        <div class="form-text">Email address displayed to users during maintenance.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contactPhone" class="form-label">Contact Phone During Maintenance</label>
+                        <input type="text" class="form-control" id="contactPhone" name="contact_phone" value="{{ contact_phone }}">
+                        <div class="form-text">Phone number displayed to users during maintenance.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#scheduledTable').DataTable({
+            order: [[1, 'asc']]
+        });
+
+        $('#historyTable').DataTable({
+            order: [[1, 'desc']]
+        });
+    });
+</script>
+{% endblock %}

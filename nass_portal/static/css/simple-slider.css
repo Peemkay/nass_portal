@@ -1,0 +1,85 @@
+/* Very simple CSS-only slider */
+.simple-slider {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.simple-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+/* Show first slide by default */
+.simple-slide:first-child {
+    opacity: 1;
+}
+
+/* Animation for slides */
+@keyframes simpleSlide {
+    0% { opacity: 0; }
+    4% { opacity: 1; }
+    33.33% { opacity: 1; }
+    37.33% { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* Apply animation to all slides */
+.simple-slider.animated .simple-slide {
+    animation-name: simpleSlide;
+    animation-timing-function: ease;
+    animation-iteration-count: infinite;
+    animation-duration: 15s;
+}
+
+/* Set different delays for each slide */
+.simple-slider.animated .simple-slide:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.simple-slider.animated .simple-slide:nth-child(2) {
+    animation-delay: 5s;
+}
+
+.simple-slider.animated .simple-slide:nth-child(3) {
+    animation-delay: 10s;
+}
+
+/* Make sure content fits properly */
+.simple-slide .announcement-slide {
+    height: 100%;
+}
+
+/* Ensure links cover the entire slide */
+.simple-slide .announcement-link {
+    display: block;
+    height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .simple-slider {
+        height: 400px;
+    }
+    
+    .simple-slide .announcement-slide {
+        flex-direction: column;
+    }
+    
+    .simple-slide .announcement-image,
+    .simple-slide .announcement-content {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    .simple-slide .announcement-image {
+        height: 150px;
+    }
+}

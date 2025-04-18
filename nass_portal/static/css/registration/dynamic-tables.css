@@ -1,0 +1,216 @@
+/* Dynamic Tables Styling for Registration Page 5 */
+
+/* Education Section Styling */
+.education-section {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    padding: 0;
+    overflow: hidden;
+}
+
+.education-section-header {
+    background-color: var(--military-dark-blue);
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.education-section-header h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.education-section-body {
+    padding: 15px;
+}
+
+.education-section-description {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+/* Table Styling */
+.education-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    margin-bottom: 0;
+}
+
+.education-table thead {
+    background-color: #f8f9fa;
+}
+
+.education-table th {
+    font-weight: 600;
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.education-table td {
+    padding: 6px 8px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.education-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.education-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.education-table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Form Controls */
+.education-table .form-control {
+    height: calc(1.5em + 0.5rem + 2px);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.2s ease;
+}
+
+.education-table .form-control:focus {
+    border-color: var(--military-green);
+    box-shadow: 0 0 0 0.15rem rgba(76, 175, 80, 0.15);
+}
+
+.education-table .form-control.is-invalid {
+    border-color: #dc3545;
+    background-size: calc(0.5em + 0.375rem) calc(0.5em + 0.375rem);
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+.education-table .form-control.is-valid {
+    border-color: #28a745;
+    background-size: calc(0.5em + 0.375rem) calc(0.5em + 0.375rem);
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+/* Action Buttons */
+.btn-add-row {
+    background-color: var(--military-green);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-add-row i {
+    margin-right: 4px;
+}
+
+.btn-add-row:hover {
+    background-color: var(--military-dark-green);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.btn-remove-row {
+    background-color: transparent;
+    color: #dc3545;
+    border: none;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.btn-remove-row:hover {
+    color: #c82333;
+    transform: scale(1.1);
+}
+
+/* Month-Year Picker Styling */
+.monthyear-picker {
+    position: relative;
+}
+
+.monthyear-picker .form-control {
+    padding-right: 24px;
+}
+
+.monthyear-picker::after {
+    content: '\f133';
+    font-family: 'Font Awesome 5 Free';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    pointer-events: none;
+    font-size: 0.75rem;
+}
+
+/* Animation for new rows */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.new-row {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* Error Messages */
+.table-error-message {
+    color: #dc3545;
+    font-size: 0.75rem;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .education-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .education-table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    .education-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .education-section-header .btn-add-row {
+        margin-top: 8px;
+        align-self: flex-end;
+    }
+}

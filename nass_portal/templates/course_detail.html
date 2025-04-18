@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-header {
+        position: relative;
+        color: white;
+        padding: 4rem 0;
+        overflow: hidden;
+    }
+
+    .course-header.officers {
+        background-color: #4e73df; /* Primary blue */
+    }
+
+    .course-header.soldiers {
+        background-color: #f6c23e; /* Warning yellow */
+        color: #212529;
+    }
+
+    .course-header.general {
+        background-color: #858796; /* Secondary gray */
+    }
+
+    .course-header:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('/static/images/pattern.png');
+        opacity: 0.1;
+        z-index: 1;
+    }
+
+    .course-header-content {
+        position: relative;
+        z-index: 3;
+    }
+
+    .course-meta {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .course-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .course-meta-item i {
+        font-size: 1.2rem;
+    }
+
+    .course-content {
+        padding: 3rem 0;
+    }
+
+    .course-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .course-section h3 {
+        margin-bottom: 1.5rem;
+        color: var(--brand-blue);
+        font-weight: 600;
+    }
+
+    .course-section p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        margin-bottom: 1.5rem;
+    }
+
+    .course-features {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 2rem;
+    }
+
+    .course-features h4 {
+        margin-bottom: 1.5rem;
+        color: var(--brand-blue);
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .feature-list li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+    }
+
+    .feature-list li:last-child {
+        border-bottom: none;
+    }
+
+    .feature-list li i {
+        color: var(--brand-blue);
+        margin-right: 1rem;
+    }
+
+    .registration-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .registration-card h4 {
+        margin-bottom: 1.5rem;
+        color: var(--brand-blue);
+    }
+
+    .registration-card .btn {
+        width: 100%;
+        padding: 0.75rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+    }
+
+    .related-courses {
+        padding: 4rem 0;
+        background-color: #f8f9fa;
+    }
+
+    .related-course-card {
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+    }
+
+    .related-course-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .related-course-header {
+        padding: 1.5rem;
+        background-color: var(--brand-blue);
+        color: white;
+    }
+
+    .related-course-body {
+        padding: 1.5rem;
+    }
+
+    .related-course-footer {
+        padding: 1.5rem;
+        border-top: 1px solid #e9ecef;
+        text-align: center;
+    }
+
+    .back-to-courses {
+        display: inline-flex;
+        align-items: center;
+        color: var(--brand-blue);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .back-to-courses i {
+        margin-right: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .course-meta {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .registration-card {
+            margin-top: 2rem;
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Course Header -->
+    <header class="course-header {% if course.category == 'Officers' %}officers{% elif course.category == 'Soldiers' %}soldiers{% else %}general{% endif %}">
+        <div class="container">
+            <div class="course-header-content">
+                <a href="{{ url_for('main.index') }}#dynamic-courses" class="back-to-courses">
+                    <i class="fas fa-arrow-left"></i> Back to Courses
+                </a>
+                <h1>{{ course.name }}</h1>
+                <div class="course-meta">
+                    {% if course.category %}
+                    <div class="course-meta-item">
+                        <i class="fas {% if course.category == 'Officers' %}fa-user-tie{% elif course.category == 'Soldiers' %}fa-user-shield{% else %}fa-graduation-cap{% endif %}"></i>
+                        <span>{{ course.category }} Courses</span>
+                    </div>
+                    {% endif %}
+
+                    {% if course.level %}
+                    <div class="course-meta-item">
+                        <i class="fas {% if course.level == 'Junior' %}fa-user-graduate{% elif course.level == 'Mid' %}fa-chart-line{% elif course.level == 'Senior' %}fa-star{% elif course.level == 'Basic' %}fa-layer-group{% elif course.level == 'Medium' %}fa-cogs{% elif course.level == 'Advanced' %}fa-rocket{% else %}fa-layer-group{% endif %}"></i>
+                        <span>{{ course.level }} Level</span>
+                    </div>
+                    {% endif %}
+
+                    {% if course.duration %}
+                    <div class="course-meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>{{ course.duration }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Course Content -->
+    <section class="course-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="course-section">
+                        <h3>Course Description</h3>
+                        <p>{{ course.description }}</p>
+                    </div>
+
+                    <div class="course-section">
+                        <h3>What You Will Learn</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="feature-list">
+                                    <li><i class="fas fa-check-circle"></i> Comprehensive understanding of core concepts</li>
+                                    <li><i class="fas fa-check-circle"></i> Practical skills development</li>
+                                    <li><i class="fas fa-check-circle"></i> Hands-on experience with equipment</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="feature-list">
+                                    <li><i class="fas fa-check-circle"></i> Problem-solving techniques</li>
+                                    <li><i class="fas fa-check-circle"></i> Team collaboration strategies</li>
+                                    <li><i class="fas fa-check-circle"></i> Leadership development</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="course-section">
+                        <h3>Course Requirements</h3>
+                        <ul class="feature-list">
+                            {% if course.category == 'Officers' %}
+                                <li><i class="fas fa-check-circle"></i> Must be a commissioned officer</li>
+                                {% if course.level == 'Junior' %}
+                                    <li><i class="fas fa-check-circle"></i> Rank of Lieutenant or equivalent</li>
+                                    <li><i class="fas fa-check-circle"></i> 1-3 years of service</li>
+                                {% elif course.level == 'Mid' %}
+                                    <li><i class="fas fa-check-circle"></i> Rank of Captain or equivalent</li>
+                                    <li><i class="fas fa-check-circle"></i> 4-10 years of service</li>
+                                {% elif course.level == 'Senior' %}
+                                    <li><i class="fas fa-check-circle"></i> Rank of Major or above</li>
+                                    <li><i class="fas fa-check-circle"></i> 10+ years of service</li>
+                                {% endif %}
+                            {% elif course.category == 'Soldiers' %}
+                                <li><i class="fas fa-check-circle"></i> Must be an enlisted personnel</li>
+                                {% if course.level == 'Basic' %}
+                                    <li><i class="fas fa-check-circle"></i> Rank of Private to Corporal</li>
+                                    <li><i class="fas fa-check-circle"></i> 1-3 years of service</li>
+                                {% elif course.level == 'Medium' %}
+                                    <li><i class="fas fa-check-circle"></i> Rank of Sergeant or equivalent</li>
+                                    <li><i class="fas fa-check-circle"></i> 4-8 years of service</li>
+                                {% elif course.level == 'Advanced' %}
+                                    <li><i class="fas fa-check-circle"></i> Rank of Staff Sergeant or above</li>
+                                    <li><i class="fas fa-check-circle"></i> 8+ years of service</li>
+                                {% endif %}
+                            {% else %}
+                                <li><i class="fas fa-check-circle"></i> Open to all military personnel</li>
+                                <li><i class="fas fa-check-circle"></i> No specific rank requirements</li>
+                            {% endif %}
+                            <li><i class="fas fa-check-circle"></i> Good standing with your unit</li>
+                            <li><i class="fas fa-check-circle"></i> Commanding officer's recommendation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="registration-card">
+                        <h4>Course Registration</h4>
+                        <div class="course-features">
+                            <ul class="feature-list">
+                                <li><i class="fas fa-users"></i> Limited seats available</li>
+                                <li><i class="fas fa-certificate"></i> Official certification upon completion</li>
+                                <li><i class="fas fa-calendar-alt"></i> Next intake: Coming soon</li>
+                                {% if course.category %}
+                                <li><i class="fas {% if course.category == 'Officers' %}fa-user-tie{% elif course.category == 'Soldiers' %}fa-user-shield{% else %}fa-graduation-cap{% endif %}"></i> {{ course.category }} Course</li>
+                                {% endif %}
+                                {% if course.level %}
+                                <li><i class="fas {% if course.level == 'Junior' %}fa-user-graduate{% elif course.level == 'Mid' %}fa-chart-line{% elif course.level == 'Senior' %}fa-star{% elif course.level == 'Basic' %}fa-layer-group{% elif course.level == 'Medium' %}fa-cogs{% elif course.level == 'Advanced' %}fa-rocket{% else %}fa-layer-group{% endif %}"></i> {{ course.level }} Level</li>
+                                {% endif %}
+                                {% if course.duration %}
+                                <li><i class="fas fa-clock"></i> Duration: {{ course.duration }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <a href="{{ url_for('main.registration') }}" class="btn {% if course.category == 'Officers' %}btn-primary{% elif course.category == 'Soldiers' %}btn-warning{% else %}btn-secondary{% endif %}">
+                            <i class="fas fa-sign-in-alt me-2"></i> Register Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Courses -->
+    {% if related_courses %}
+    <section class="related-courses">
+        <div class="container">
+            <h2 class="mb-4">Related Courses</h2>
+            <div class="row">
+                {% for related in related_courses %}
+                <div class="col-md-4 mb-4">
+                    <div class="related-course-card">
+                        <div class="related-course-header">
+                            <h5>{{ related.name }}</h5>
+                        </div>
+                        <div class="related-course-body">
+                            <p>{{ related.description | truncate(100) }}</p>
+                            {% if related.duration %}
+                            <p><i class="fas fa-clock me-2"></i> {{ related.duration }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="related-course-footer">
+                            <a href="{{ url_for('main.view_course', course_id=related.id) }}" class="btn btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+{% endblock %}

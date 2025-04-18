@@ -45,22 +45,36 @@
             <div class="col-lg-6 mb-4">
                 <div class="contact-form-container shadow-sm">
                     <h2>Send us a Message</h2>
-                    <form id="contactForm">
+                    <form id="contactForm" method="post" action="{{ url_for('main.contact') }}">
+                        <!-- Display flash messages inside the form -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
                         <div class="form-group">
                             <label for="name">Full Name</label>
-                            <input type="text" class="form-control" id="name" required>
+                            <input type="text" class="form-control" id="name" name="name" required>
                         </div>
                         <div class="form-group">
                             <label for="email">Email Address</label>
-                            <input type="email" class="form-control" id="email" required>
+                            <input type="email" class="form-control" id="email" name="email" required>
                         </div>
                         <div class="form-group">
                             <label for="subject">Subject</label>
-                            <input type="text" class="form-control" id="subject" required>
+                            <input type="text" class="form-control" id="subject" name="subject" required>
                         </div>
                         <div class="form-group">
                             <label for="message">Message</label>
-                            <textarea class="form-control" id="message" rows="5" required></textarea>
+                            <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
                         </div>
                         <button type="submit" class="submit-btn">
                             Send Message
@@ -78,7 +92,7 @@
                         <p>Find us at the Nigerian Army School of Signals, Apapa</p>
                     </div>
                     <div class="map-wrapper">
-                        <iframe 
+                        <iframe
                             src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3964.5667037073765!2d3.3572229761992753!3d6.448611094649097!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNsKwMjYnNTUuMCJOIDPCsDIxJzI2LjAiRQ!5e0!3m2!1sen!2sng!4v1709913331669!5m2!1sen!2sng&markers=color:red%7C6.448611,3.357223"
                             allowfullscreen=""
                             loading="lazy"
@@ -96,4 +110,29 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Wait for the document to be ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the contact form
+        const contactForm = document.getElementById('contactForm');
+
+        // Add submit event listener
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(event) {
+                // Let the form submit normally - no need to prevent default
+                // The server will handle the submission and redirect
+
+                // Optional: Show a loading indicator
+                const submitBtn = contactForm.querySelector('.submit-btn');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                    submitBtn.disabled = true;
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

@@ -16,19 +16,18 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     # Configure logging
-    if not app.debug:
-        try:
-            # Use a stream handler instead of file handler to avoid permission issues
-            stream_handler = logging.StreamHandler(sys.stdout)
-            stream_handler.setFormatter(logging.Formatter(
-                '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-            ))
-            stream_handler.setLevel(logging.INFO)
-            app.logger.addHandler(stream_handler)
-            app.logger.setLevel(logging.INFO)
-            app.logger.info('NASS Portal startup')
-        except Exception as e:
-            print(f"Logging setup error: {e}")
+    try:
+        # Use a stream handler instead of file handler to avoid permission issues
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        ))
+        stream_handler.setLevel(logging.DEBUG)  # Set to DEBUG for more detailed logs
+        app.logger.addHandler(stream_handler)
+        app.logger.setLevel(logging.DEBUG)  # Set to DEBUG for more detailed logs
+        app.logger.info('NASS Portal startup')
+    except Exception as e:
+        print(f"Logging setup error: {e}")
 
     # Initialize extensions
     mail.init_app(app)
@@ -53,9 +52,36 @@ def create_app(config_class=Config):
     from .admin_routes import admin_bp
     app.register_blueprint(admin_bp)
 
+    # Register middleware for maintenance mode
+    from .middleware import check_maintenance_mode
+    @app.before_request
+    def before_request():
+        maintenance_response = check_maintenance_mode()
+        if maintenance_response:
+            return maintenance_response
+
+    # Always start maintenance scheduler
+    try:
+        from .maintenance_tasks import start_scheduler
+        start_scheduler()
+        app.logger.info('Maintenance scheduler started')
+    except Exception as e:
+        app.logger.error(f'Error starting maintenance scheduler: {e}')
+
     @app.context_processor
     def utility_processor():
         return dict(len=len)
+
+    # Add custom Jinja2 filters
+    @app.template_filter('strptime')
+    def _jinja2_filter_strptime(date_string, format_string):
+        from datetime import datetime
+        return datetime.strptime(date_string, format_string)
+
+    @app.template_filter('now')
+    def _jinja2_filter_now():
+        from datetime import datetime
+        return datetime.now()
 
     return app
 

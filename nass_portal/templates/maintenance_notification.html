@@ -1,0 +1,149 @@
+{% if g.show_maintenance_notification and g.upcoming_maintenance %}
+    {% if g.notification_style == 'banner' %}
+    <div class="maintenance-notification-banner" id="maintenance-notification">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-tools me-2"></i>
+                    <strong>Scheduled Maintenance:</strong>
+                    {{ g.upcoming_maintenance.title }} -
+                    {{ g.upcoming_maintenance.start_datetime.replace('T', ' ') }} to
+                    {{ g.upcoming_maintenance.end_datetime.replace('T', ' ') }}
+                </div>
+                <button type="button" class="btn-close" aria-label="Close" onclick="document.getElementById('maintenance-notification').style.display='none';"></button>
+            </div>
+        </div>
+    </div>
+    {% elif g.notification_style == 'popup' %}
+    <div class="modal fade" id="maintenanceModal" tabindex="-1" aria-labelledby="maintenanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="maintenanceModalLabel">
+                        <i class="fas fa-tools me-2"></i>
+                        Scheduled Maintenance
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h5>{{ g.upcoming_maintenance.title }}</h5>
+                    <p>{{ g.upcoming_maintenance.description }}</p>
+                    <div class="alert alert-info">
+                        <p><strong>Start:</strong> {{ g.upcoming_maintenance.start_datetime.replace('T', ' ') }}</p>
+                        <p><strong>End:</strong> {{ g.upcoming_maintenance.end_datetime.replace('T', ' ') }}</p>
+                    </div>
+                    <p class="mb-0">During this time, the site may be unavailable. We apologize for any inconvenience.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Show the modal when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            var maintenanceModal = new bootstrap.Modal(document.getElementById('maintenanceModal'));
+            maintenanceModal.show();
+        });
+    </script>
+    {% elif g.notification_style == 'subtle' %}
+    <div class="maintenance-notification-subtle" id="maintenance-notification-subtle">
+        <div class="maintenance-notification-subtle-content">
+            <div class="maintenance-notification-subtle-header">
+                <i class="fas fa-tools me-2"></i>
+                <strong>Scheduled Maintenance</strong>
+                <button type="button" class="btn-close btn-sm" aria-label="Close" onclick="document.getElementById('maintenance-notification-subtle').style.display='none';"></button>
+            </div>
+            <div class="maintenance-notification-subtle-body">
+                <p><strong>{{ g.upcoming_maintenance.title }}</strong></p>
+                <p><small>{{ g.upcoming_maintenance.start_datetime.replace('T', ' ') }}</small></p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <style>
+        /* Banner Style */
+        .maintenance-notification-banner {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px 0;
+            border-bottom: 1px solid #ffeeba;
+            position: relative;
+            z-index: 1030;
+        }
+
+        /* Subtle Corner Notification */
+        .maintenance-notification-subtle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1050;
+            overflow: hidden;
+        }
+
+        .maintenance-notification-subtle-header {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .maintenance-notification-subtle-body {
+            padding: 15px;
+        }
+
+        .maintenance-notification-subtle-body p {
+            margin-bottom: 5px;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .maintenance-notification-banner {
+                font-size: 0.9rem;
+                padding: 8px 0;
+            }
+
+            .maintenance-notification-subtle {
+                width: 250px;
+                bottom: 15px;
+                right: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .maintenance-notification-banner {
+                font-size: 0.8rem;
+                padding: 6px 0;
+            }
+
+            .maintenance-notification-banner strong {
+                display: block;
+                margin-bottom: 3px;
+            }
+
+            .maintenance-notification-subtle {
+                width: 200px;
+                bottom: 10px;
+                right: 10px;
+            }
+
+            .maintenance-notification-subtle-header {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            .maintenance-notification-subtle-body {
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+{% endif %}

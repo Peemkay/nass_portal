@@ -1,0 +1,211 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Edit Announcement{% endblock %}
+
+{% block styles %}
+<style>
+    .form-section {
+        margin-bottom: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .form-section-header {
+        background-color: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .form-section-body {
+        padding: 20px;
+    }
+    
+    .image-preview-container {
+        width: 100%;
+        height: 200px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 15px;
+        border: 3px solid #f8f9fa;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .image-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .image-upload-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+    }
+    
+    .image-upload-btn:hover {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .action-buttons {
+        position: sticky;
+        bottom: 20px;
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        margin-top: 2rem;
+    }
+    
+    .hidden-file-input {
+        display: none;
+    }
+    
+    .placeholder-text {
+        color: #adb5bd;
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.announcements') }}">Announcements</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Announcement</li>
+                </ol>
+            </nav>
+            <h1 class="h2 mb-0">Edit Announcement</h1>
+            <p class="text-muted">Update announcement details</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a href="{{ url_for('admin.announcements') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Back to Announcements
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <form action="{{ url_for('admin.edit_announcement', announcement_id=announcement.id) }}" method="POST" enctype="multipart/form-data">
+                <!-- Announcement Content Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i> Announcement Details</h5>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="title" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="title" name="title" value="{{ announcement.title }}" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="content" class="form-label">Content</label>
+                                <textarea class="form-control" id="content" name="content" rows="5" required>{{ announcement.content }}</textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="display_order" class="form-label">Display Order</label>
+                                <input type="number" class="form-control" id="display_order" name="display_order" value="{{ announcement.display_order }}" min="1">
+                                <small class="text-muted">Lower numbers appear first</small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mt-4">
+                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if announcement.is_active %}checked{% endif %}>
+                                    <label class="form-check-label" for="is_active">Active</label>
+                                </div>
+                                <small class="text-muted">Inactive announcements won't be displayed on the home page.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0"><i class="fas fa-image me-2"></i> Announcement Image (Optional)</h5>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="image-preview-container">
+                                    {% if announcement.image_url %}
+                                    <img src="{{ url_for('static', filename=announcement.image_url) }}" class="image-preview" id="imagePreview" alt="Announcement Image">
+                                    <div class="placeholder-text" id="placeholderText" style="display: none;">
+                                        <i class="fas fa-image me-2"></i> No image selected
+                                    </div>
+                                    {% else %}
+                                    <img src="{{ url_for('static', filename='images/placeholder-image.png') }}" class="image-preview" id="imagePreview" alt="Announcement Image">
+                                    <div class="placeholder-text" id="placeholderText">
+                                        <i class="fas fa-image me-2"></i> No image selected
+                                    </div>
+                                    {% endif %}
+                                    <label for="image" class="image-upload-btn">
+                                        <i class="fas fa-camera"></i>
+                                    </label>
+                                </div>
+                                <input type="file" name="image" id="image" class="hidden-file-input" accept="image/png,image/jpeg,image/jpg">
+                                <p class="small text-muted text-center">Click on the camera icon to change the image. Recommended size: 1200x600px.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons text-center">
+                    <button type="button" class="btn btn-outline-secondary me-2" onclick="window.history.back();">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Image preview functionality
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('imagePreview');
+        const placeholderText = document.getElementById('placeholderText');
+        
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    placeholderText.style.display = 'none';
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    });
+</script>
+{% endblock %}

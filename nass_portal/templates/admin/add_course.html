@@ -1,0 +1,139 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Add New Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    .level-officers, .level-soldiers {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Add New Course</h1>
+        <a href="{{ url_for('admin.courses') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Courses
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Course Information</h6>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('admin.add_course') }}">
+                <div class="form-group">
+                    <label for="name">Course Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="duration">Duration</label>
+                    <input type="text" class="form-control" id="duration" name="duration" placeholder="e.g., 6 weeks, 3 months">
+                    <small class="form-text text-muted">Specify the duration of the course</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category <span class="text-danger">*</span></label>
+                    <select class="form-control" id="category" name="category" required onchange="updateLevelOptions()">
+                        <option value="">Select a category</option>
+                        <option value="Officers" {% if preset_category == 'Officers' %}selected{% endif %}>Officers Courses</option>
+                        <option value="Soldiers" {% if preset_category == 'Soldiers' %}selected{% endif %}>Soldiers Courses</option>
+                        <option value="General" {% if preset_category == 'General' %}selected{% endif %}>General Courses</option>
+                    </select>
+                    <small class="form-text text-muted">Select the category this course belongs to</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="level">Level <span class="text-danger">*</span></label>
+                    <select class="form-control" id="level" name="level" required>
+                        <option value="">Select a level</option>
+
+                        <!-- General levels -->
+                        <optgroup label="General Levels" class="level-general">
+                            <option value="General" class="level-general">General</option>
+                            <option value="Introductory" class="level-general">Introductory</option>
+                            <option value="Intermediate" class="level-general">Intermediate</option>
+                            <option value="Advanced" class="level-general">Advanced</option>
+                        </optgroup>
+
+                        <!-- Officers levels -->
+                        <optgroup label="Officers Levels" class="level-officers">
+                            <option value="Junior" class="level-officers">Junior Level (Lieutenant)</option>
+                            <option value="Mid" class="level-officers">Mid Level (Captain)</option>
+                            <option value="Senior" class="level-officers">Senior Level (Major+)</option>
+                            <option value="Command" class="level-officers">Command Level</option>
+                            <option value="Staff" class="level-officers">Staff Level</option>
+                        </optgroup>
+
+                        <!-- Soldiers levels -->
+                        <optgroup label="Soldiers Levels" class="level-soldiers">
+                            <option value="Basic" class="level-soldiers">Basic Level (Private-Corporal)</option>
+                            <option value="Medium" class="level-soldiers">Medium Level (Sergeant)</option>
+                            <option value="Advanced" class="level-soldiers">Advanced Level (Staff Sergeant+)</option>
+                            <option value="Technical" class="level-soldiers">Technical Level</option>
+                            <option value="Specialist" class="level-soldiers">Specialist Level</option>
+                        </optgroup>
+                    </select>
+                    <small class="form-text text-muted">Select the level of this course</small>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Course
+                    </button>
+                    <a href="{{ url_for('admin.courses') }}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateLevelOptions() {
+        const category = document.getElementById('category').value;
+        const levelSelect = document.getElementById('level');
+
+        // Hide all optgroups first
+        document.querySelectorAll('#level optgroup').forEach(group => {
+            group.style.display = 'none';
+        });
+
+        // Show only the relevant optgroup based on selected category
+        if (category === 'Officers') {
+            document.querySelector('#level optgroup.level-officers').style.display = 'block';
+        } else if (category === 'Soldiers') {
+            document.querySelector('#level optgroup.level-soldiers').style.display = 'block';
+        } else if (category === 'General') {
+            document.querySelector('#level optgroup.level-general').style.display = 'block';
+        }
+
+        // Reset the level selection
+        levelSelect.value = '';
+    }
+
+    // Initialize the level options when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        updateLevelOptions();
+
+        // If a category is preselected, trigger the change event to update level options
+        const category = document.getElementById('category').value;
+        if (category) {
+            // Trigger the change event to update level options
+            document.getElementById('category').dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+{% endblock %}

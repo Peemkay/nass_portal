@@ -129,7 +129,7 @@
                                                    placeholder="Enter phone number"
                                                    required>
                                             <!-- Hidden field for compatibility -->
-                                            <input type="hidden" name="nok_phone_1" id="nok_phone_1_hidden">
+                                            <input type="hidden" name="nok_phone_1" id="nok_phone_1" value="{{ session.get('nok_gsm_number_1', '') }}">
                                         </div>
                                         <div class="invalid-feedback">Phone number is required</div>
                                     </div>
@@ -301,6 +301,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             e.target.value = value;
         });
+    }
+
+    // Sync the phone number fields
+    const gsmField = document.getElementById('nok_gsm_number_1');
+    const phoneField = document.getElementById('nok_phone_1');
+
+    if (gsmField && phoneField) {
+        // Initial sync
+        phoneField.value = gsmField.value;
+
+        // Sync on change
+        gsmField.addEventListener('input', function() {
+            phoneField.value = gsmField.value;
+        });
+
+        // Ensure form submission includes both values
+        const form = gsmField.closest('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                phoneField.value = gsmField.value;
+            });
+        }
     }
 });
 </script>

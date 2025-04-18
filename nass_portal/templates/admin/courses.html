@@ -1,0 +1,164 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Courses Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Courses Management</h1>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="addCourseDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-plus"></i> Add New Course
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="addCourseDropdown">
+                <a class="dropdown-item" href="{{ url_for('admin.add_course') }}?category=Officers">
+                    <i class="fas fa-user-tie mr-2"></i> Add Officers Course
+                </a>
+                <a class="dropdown-item" href="{{ url_for('admin.add_course') }}?category=Soldiers">
+                    <i class="fas fa-user-shield mr-2"></i> Add Soldiers Course
+                </a>
+                <a class="dropdown-item" href="{{ url_for('admin.add_course') }}?category=General">
+                    <i class="fas fa-graduation-cap mr-2"></i> Add General Course
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{{ url_for('admin.add_course') }}">
+                    <i class="fas fa-plus mr-2"></i> Add Course (No Preset)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">All Courses</h6>
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-primary active" id="filter-all">All</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="filter-officers">Officers</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="filter-soldiers">Soldiers</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="filter-general">General</button>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if courses %}
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Duration</th>
+                            <th>Category</th>
+                            <th>Level</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in courses %}
+                        <tr>
+                            <td>{{ course.id }}</td>
+                            <td>{{ course.name }}</td>
+                            <td>{{ course.description }}</td>
+                            <td>{{ course.duration }}</td>
+                            <td>
+                                {% if course.category == 'Officers' %}
+                                <span class="badge badge-primary">Officers</span>
+                                {% elif course.category == 'Soldiers' %}
+                                <span class="badge badge-warning">Soldiers</span>
+                                {% else %}
+                                <span class="badge badge-secondary">{{ course.category }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if course.level == 'Junior' or course.level == 'Mid' or course.level == 'Senior' %}
+                                <span class="badge badge-info">{{ course.level }}</span>
+                                {% elif course.level == 'Basic' or course.level == 'Medium' or course.level == 'Advanced' %}
+                                <span class="badge badge-success">{{ course.level }}</span>
+                                {% else %}
+                                <span class="badge badge-secondary">{{ course.level }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ course.created_at }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_course', course_id=course.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ course.id }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteModal{{ course.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ course.id }}" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteModalLabel{{ course.id }}">Confirm Delete</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to delete the course "{{ course.name }}"?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <form action="{{ url_for('admin.delete_course', course_id=course.id) }}" method="post">
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <p class="lead text-muted">No courses found.</p>
+                <a href="{{ url_for('admin.add_course') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Course
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable with search functionality
+        var table = $('#dataTable').DataTable();
+
+        // Filter buttons functionality
+        $('#filter-all').click(function() {
+            table.search('').columns(4).search('').draw();
+            $('.btn-group .btn').removeClass('active');
+            $(this).addClass('active');
+        });
+
+        $('#filter-officers').click(function() {
+            table.search('').columns(4).search('Officers').draw();
+            $('.btn-group .btn').removeClass('active');
+            $(this).addClass('active');
+        });
+
+        $('#filter-soldiers').click(function() {
+            table.search('').columns(4).search('Soldiers').draw();
+            $('.btn-group .btn').removeClass('active');
+            $(this).addClass('active');
+        });
+
+        $('#filter-general').click(function() {
+            table.search('').columns(4).search('General').draw();
+            $('.btn-group .btn').removeClass('active');
+            $(this).addClass('active');
+        });
+    });
+</script>
+{% endblock %}

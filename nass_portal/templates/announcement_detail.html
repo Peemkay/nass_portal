@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ announcement.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .announcement-header {
+        background-color: var(--brand-blue);
+        color: white;
+        padding: 4rem 0;
+        position: relative;
+    }
+    
+    .announcement-header.with-image {
+        padding: 0;
+        height: 400px;
+        overflow: hidden;
+    }
+    
+    .announcement-header-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
+    
+    .announcement-header-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7));
+        z-index: 2;
+    }
+    
+    .announcement-header-content {
+        position: relative;
+        z-index: 3;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding-bottom: 2rem;
+    }
+    
+    .announcement-date {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-bottom: 0.5rem;
+    }
+    
+    .announcement-content {
+        padding: 3rem 0;
+        font-size: 1.1rem;
+        line-height: 1.8;
+    }
+    
+    .announcement-content p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .recent-announcements {
+        background-color: #f8f9fa;
+        padding: 3rem 0;
+    }
+    
+    .recent-announcement-card {
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .recent-announcement-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .recent-announcement-image {
+        height: 180px;
+        overflow: hidden;
+    }
+    
+    .recent-announcement-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .recent-announcement-card:hover .recent-announcement-image img {
+        transform: scale(1.1);
+    }
+    
+    .recent-announcement-content {
+        padding: 1.5rem;
+        background-color: white;
+    }
+    
+    .recent-announcement-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--brand-blue);
+    }
+    
+    .recent-announcement-date {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .back-to-home {
+        display: inline-flex;
+        align-items: center;
+        color: var(--brand-blue);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .back-to-home:hover {
+        color: #0056b3;
+        text-decoration: none;
+    }
+    
+    .back-to-home i {
+        margin-right: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .announcement-header {
+            padding: 3rem 0;
+        }
+        
+        .announcement-header.with-image {
+            height: 300px;
+        }
+        
+        .announcement-content {
+            padding: 2rem 0;
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Announcement Header -->
+    <header class="announcement-header {% if announcement.image_url %}with-image{% endif %}">
+        {% if announcement.image_url %}
+        <img src="{{ url_for('static', filename=announcement.image_url) }}" class="announcement-header-image" alt="{{ announcement.title }}">
+        <div class="announcement-header-overlay"></div>
+        {% endif %}
+        <div class="container">
+            <div class="announcement-header-content">
+                <a href="{{ url_for('main.index') }}" class="back-to-home">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+                <h1>{{ announcement.title }}</h1>
+                <p class="announcement-date">Posted: {{ announcement.created_at.strftime('%B %d, %Y') if announcement.created_at else 'Recently' }}</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Announcement Content -->
+    <section class="announcement-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="content-wrapper">
+                        {{ announcement.content | safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Announcements -->
+    {% if recent_announcements %}
+    <section class="recent-announcements">
+        <div class="container">
+            <h2 class="mb-4">More Announcements</h2>
+            <div class="row">
+                {% for recent in recent_announcements %}
+                <div class="col-md-4 mb-4">
+                    <a href="{{ url_for('main.view_announcement', announcement_id=recent.id) }}" class="text-decoration-none">
+                        <div class="recent-announcement-card">
+                            {% if recent.image_url %}
+                            <div class="recent-announcement-image">
+                                <img src="{{ url_for('static', filename=recent.image_url) }}" alt="{{ recent.title }}">
+                            </div>
+                            {% endif %}
+                            <div class="recent-announcement-content">
+                                <h3 class="recent-announcement-title">{{ recent.title }}</h3>
+                                <p class="recent-announcement-excerpt">
+                                    {{ recent.content[:100] }}{% if recent.content|length > 100 %}...{% endif %}
+                                </p>
+                                <p class="recent-announcement-date">
+                                    Posted: {{ recent.created_at.strftime('%B %d, %Y') if recent.created_at else 'Recently' }}
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+{% endblock %}

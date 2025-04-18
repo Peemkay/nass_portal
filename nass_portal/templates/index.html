@@ -1,262 +1,2006 @@
 {% extends 'base.html' %}
 {% block title %}Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero section styles */
+    .hero-section {
+        position: relative;
+        height: 80vh;
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("{{ url_for('static', filename='images/homepage-1-scaled.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        color: white;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-buttons .btn {
+        margin: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+    }
+
+    .hero-buttons .btn-primary {
+        background-color: var(--brand-blue);
+        border-color: var(--brand-blue);
+    }
+
+    .hero-buttons .btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Features section */
+    .features-section {
+        padding: 5rem 0;
+        background-color: #f8f9fa;
+    }
+
+    .feature-card {
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: white;
+        text-align: center;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        color: var(--brand-blue);
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    /* Announcement section */
+    .announcement-section {
+        padding: 3rem 0;
+        background-color: var(--brand-blue);
+        color: white;
+    }
+
+    .announcement-card {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 5px solid #ffc107;
+        height: 100%;
+    }
+
+    .announcement-date {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    /* Announcement Slider */
+    .announcement-slider {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .swiper-container {
+        width: 100%;
+        padding-bottom: 50px;
+        position: relative;
+    }
+
+    .swiper-slide {
+        width: 100%;
+        transition: opacity 0.5s ease;
+    }
+
+    .announcement-slide {
+        display: flex;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        height: 300px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .announcement-image {
+        flex: 0 0 50%;
+        max-width: 50%;
+        overflow: hidden;
+    }
+
+    .announcement-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .announcement-content {
+        flex: 0 0 50%;
+        max-width: 50%;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .announcement-content.no-image {
+        flex: 0 0 100%;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .announcement-content h4 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .announcement-link {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .announcement-link:hover {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .read-more {
+        display: inline-block;
+        margin-top: 1rem;
+        color: white;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        transition: background-color 0.3s ease;
+    }
+
+    .announcement-link:hover .read-more {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .read-more i {
+        margin-left: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .announcement-link:hover .read-more i {
+        transform: translateX(3px);
+    }
+
+    .swiper-pagination-bullet {
+        background: white;
+        opacity: 0.5;
+    }
+
+    .swiper-pagination-bullet-active {
+        opacity: 1;
+        background: white;
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .announcement-slide {
+            flex-direction: column;
+            height: auto;
+        }
+
+        .announcement-image,
+        .announcement-content {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        .announcement-image {
+            height: 200px;
+        }
+    }
+
+    /* Stats section */
+    .stats-section {
+        padding: 5rem 0;
+        background-color: #fff;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--brand-blue);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 1.2rem;
+        color: #6c757d;
+    }
+
+    /* Courses section styles */
+    .courses-section,
+    .dynamic-courses-section {
+        background-color: #fff;
+        padding: 5rem 0;
+    }
+
+    .level-section,
+    .category-section {
+        position: relative;
+        padding-bottom: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .level-section:not(:last-child):after,
+    .category-section:not(:last-child):after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 10%;
+        right: 10%;
+        height: 1px;
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .level-title,
+    .category-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #343a40;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--brand-blue);
+    }
+
+    .section-subtitle {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+
+    .course-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+    }
+
+    .course-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .course-list {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .course-list li {
+        margin-bottom: 0.75rem;
+        padding-left: 0;
+    }
+
+    .nav-pills .nav-link {
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        margin: 0 0.5rem;
+        font-weight: 600;
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: var(--brand-blue);
+        color: white;
+    }
+
+    .nav-pills .nav-link:hover:not(.active) {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* CTA section styles */
+    .cta-section {
+        background-color: #f8f9fa;
+    }
+
+    .cta-section h3 {
+        font-weight: 700;
+        color: #343a40;
+        margin-bottom: 0.5rem;
+    }
+
+    .cta-section p {
+        color: #6c757d;
+    }
+
+    /* Floating contact button */
+    .floating-contact {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background-color: var(--brand-blue);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        transition: all 0.3s ease;
+    }
+
+    .floating-contact:hover {
+        transform: scale(1.1);
+        background-color: #0056b3;
+        color: white;
+    }
+
+    /* Departments section styles */
+    .departments-section {
+        background-color: #f8f9fa;
+        padding: 5rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .departments-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('{{ url_for("static", filename="images/pattern-bg.png") }}');
+        opacity: 0.05;
+        pointer-events: none;
+    }
+
+    .department-card {
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        overflow: hidden;
+        border-radius: 15px;
+        position: relative;
+        background: white;
+        border: none;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .department-card:hover {
+        transform: translateY(-12px) scale(1.01);
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.15);
+        z-index: 5;
+    }
+
+    .department-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(to right, var(--brand-blue), var(--brand-blue-light));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .department-card:hover::after {
+        opacity: 1;
+    }
+
+    .department-image-container {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+
+    .department-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.7s ease, filter 0.5s ease;
+    }
+
+    .department-card:hover .department-image {
+        transform: scale(1.1);
+        filter: brightness(1.1) contrast(1.1);
+    }
+
+    .department-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7));
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 20px;
+        transition: background 0.3s ease;
+    }
+
+    .department-card:hover .department-overlay {
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.8));
+    }
+
+    .department-icon-wrapper {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .department-card:hover .department-icon-wrapper {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .department-icon {
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+    .department-icon-large {
+        font-size: 4rem;
+    }
+
+    .department-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .department-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: currentColor;
+        transition: width 0.3s ease;
+    }
+
+    .department-card:hover .department-title::after {
+        width: 80px;
+    }
+
+    .department-abbr {
+        font-size: 0.9rem;
+        font-weight: 600;
+        opacity: 0.8;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+    }
+
+    .department-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .department-description {
+        margin-bottom: 1.5rem;
+        color: #555;
+        line-height: 1.6;
+        flex-grow: 1;
+    }
+
+    .department-stats {
+        display: flex;
+        margin-bottom: 1.5rem;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        flex: 1;
+        text-align: center;
+        padding: 0.5rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .department-card:hover .stat-item {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #777;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .department-footer {
+        padding: 1rem 1.5rem 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .department-btn {
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .department-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.4s ease;
+        z-index: -1;
+    }
+
+    .department-btn:hover::before {
+        left: 0;
+    }
+
+    .department-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .department-btn:hover i {
+        transform: translateX(3px);
+    }
+
+    .department-social {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .social-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .social-icon:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .department-filter-buttons {
+        margin-bottom: 2rem;
+    }
+
+    .department-filter-buttons .btn {
+        border-radius: 50px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border-width: 2px;
+    }
+
+    .department-filter-buttons .btn.active {
+        background-color: var(--primary);
+        color: white;
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.2);
+    }
+
+    /* Department animations */
+    .department-item {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .department-item.animated {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* CSS Variables for colors */
+    :root {
+        --primary: #0d6efd;
+        --secondary: #6c757d;
+        --success: #198754;
+        --danger: #dc3545;
+        --warning: #ffc107;
+        --info: #0dcaf0;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --brand-blue: #0d6efd;
+        --brand-blue-light: #6ea8fe;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+
+        .hero-section {
+            height: 70vh;
+            min-height: 500px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .nav-pills .nav-link {
+            margin: 0 0.25rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .department-image-container {
+            height: 180px;
+        }
+
+        .department-stats {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-item {
+            padding: 0.3rem;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+        }
+
+        .department-title {
+            font-size: 1.2rem;
+        }
+
+        .department-content {
+            padding: 1rem;
+        }
+
+        .department-footer {
+            padding: 0.8rem 1rem 1rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .department-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .department-social {
+            justify-content: center;
+        }
+    }
+
+    @media (min-width: 769px) and (max-width: 991px) {
+        .department-stats {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <div class="jumbotron text-center bg-transparent py-5">
-        <h1 class="display-4 text-dark font-weight-bold">NIGERIAN ARMY SCHOOL OF SIGNALS</h1>
-        <p class="lead">Registration for Courses Portal</p>
-    </div>
-
-    <!-- Slideshow Section -->
-    <div id="slideshow" class="carousel slide mb-5" data-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="{{ url_for('static', filename='images/homepage-1-scaled.jpg') }}" class="d-block w-100" alt="Slide 1">
-            </div>
-            <div class="carousel-item">
-                <img src="{{ url_for('static', filename='images/homepage-3-scaled.jpg') }}" class="d-block w-100" alt="Slide 3">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">NIGERIAN ARMY SCHOOL OF SIGNALS</h1>
+            <p class="hero-subtitle">Excellence in Military Communications Training</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('main.registration') }}" class="btn btn-primary btn-lg">Register for Courses</a>
+                <a href="#courses" class="btn btn-outline-light btn-lg">Explore Courses</a>
             </div>
         </div>
-        <a class="carousel-control-prev" href="#slideshow" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#slideshow" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
-        </a>
-    </div>
+    </section>
 
-    <div class="container">
-        <!-- Officers Courses Section -->
-        <h2 class="text-center mb-5 course-section-title">OFFICERS COURSES</h2>
-        <div class="row">
-            <!-- Junior Level -->
-            <div class="col-md-4 mb-4">
-                <div class="course-card">
-                    <div class="course-card-inner">
-                        <div class="course-card-front">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-user-graduate mb-3 course-icon"></i>
-                                    <h5 class="card-title text-primary">Junior Level</h5>
-                                    <p class="card-text">Basic training for junior officers</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="course-card-back">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-2">Available Courses:</h6>
-                                    <ul class="course-list">
-                                        <li>Basic Computer Course (BCC)</li>
-                                        <li>Electronic Warfare Course</li>
-                                        <li>Young Officers Course</li>
-                                        <li>VSAT Installation Course</li>
-                                    </ul>
-                                    <a href="{{ url_for('main.registration') }}" class="btn btn-primary btn-sm mt-2">Register Now</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Why Choose NASS</h2>
+                    <p class="section-subtitle">The premier institution for military communications training in Nigeria</p>
                 </div>
             </div>
-
-            <!-- Mid Level -->
-            <div class="col-md-4 mb-4">
-                <div class="course-card">
-                    <div class="course-card-inner">
-                        <div class="course-card-front">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-chart-line mb-3 course-icon"></i>
-                                    <h5 class="card-title text-success">Mid Level</h5>
-                                    <p class="card-text">Advanced training for mid-level officers</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="course-card-back">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-2">Available Courses:</h6>
-                                    <ul class="course-list">
-                                        <li>Squadron Commanders' Course</li>
-                                        <li>Advanced Computer Course</li>
-                                        <li>Satellite Communication</li>
-                                        <li>Engineering Course (SOEC)</li>
-                                    </ul>
-                                    <a href="{{ url_for('main.registration') }}" class="btn btn-primary btn-sm mt-2">Register Now</a>
-                                </div>
-                            </div>
-                        </div>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <i class="fas fa-medal feature-icon"></i>
+                        <h3 class="feature-title">Excellence in Training</h3>
+                        <p>Our courses are designed to meet the highest standards of military communications training, ensuring that graduates are well-prepared for their roles.</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Senior Level -->
-            <div class="col-md-4 mb-4">
-                <div class="course-card">
-                    <div class="course-card-inner">
-                        <div class="course-card-front">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-star mb-3 course-icon"></i>
-                                    <h5 class="card-title text-danger">Senior Level</h5>
-                                    <p class="card-text">Strategic training for senior officers</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="course-card-back">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-2">Available Courses:</h6>
-                                    <ul class="course-list">
-                                        <li>Regiment Commanders' Course</li>
-                                        <li>Strategic Communications</li>
-                                        <li>Advanced Leadership</li>
-                                    </ul>
-                                    <a href="{{ url_for('main.registration') }}" class="btn btn-primary btn-sm mt-2">Register Now</a>
-                                </div>
-                            </div>
-                        </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <i class="fas fa-chalkboard-teacher feature-icon"></i>
+                        <h3 class="feature-title">Expert Instructors</h3>
+                        <p>Learn from experienced military professionals with extensive field experience and technical expertise in communications systems.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <i class="fas fa-satellite-dish feature-icon"></i>
+                        <h3 class="feature-title">Modern Facilities</h3>
+                        <p>Access state-of-the-art equipment and training facilities that simulate real-world military communications environments.</p>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Soldiers Courses Section -->
-        <h2 class="text-center mb-5 mt-5 course-section-title">SOLDIERS COURSES</h2>
-        <div class="row">
-            <!-- Basic Level -->
-            <div class="col-md-3 mb-4">
-                <div class="course-card">
-                    <div class="course-card-inner">
-                        <div class="course-card-front">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-layer-group mb-3 course-icon"></i>
-                                    <h5 class="card-title text-info">Basic Level</h5>
-                                    <p class="card-text">Foundation training for soldiers</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="course-card-back">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-2">Available Courses:</h6>
-                                    <ul class="course-list">
-                                        <li>Technical Course (TC) X III</li>
-                                        <li>Basic Computer Course</li>
-                                        <li>Hardware Course</li>
-                                        <li>Networking Course</li>
-                                    </ul>
-                                    <a href="{{ url_for('main.registration') }}" class="btn btn-primary btn-sm mt-2">Register Now</a>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Departments Section -->
+    <section class="departments-section py-5" id="departments">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Our Departments</h2>
+                    <p class="section-subtitle">Specialized units working together to deliver excellence in military communications</p>
+                </div>
+            </div>
+
+            <!-- Department Filter Buttons -->
+            <div class="row mb-5">
+                <div class="col-12 text-center">
+                    <div class="department-filter-buttons">
+                        <button class="btn btn-outline-primary active me-2 mb-2" data-filter="all">All Departments</button>
+                        <button class="btn btn-outline-primary me-2 mb-2" data-filter="combat">Combat</button>
+                        <button class="btn btn-outline-primary me-2 mb-2" data-filter="technical">Technical</button>
+                        <button class="btn btn-outline-primary me-2 mb-2" data-filter="support">Support</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Medium Level -->
-            <div class="col-md-3 mb-4">
-                <div class="course-card">
-                    <div class="course-card-inner">
-                        <div class="course-card-front">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-cogs mb-3 course-icon"></i>
-                                    <h5 class="card-title text-warning">Medium Level</h5>
-                                    <p class="card-text">Intermediate technical training</p>
+            <div class="row department-grid">
+                {% if departments %}
+                    {% for department in departments %}
+                        {% set dept_abbr = department.name.split(' - ')[0] if ' - ' in department.name else '' %}
+                        {% set dept_name = department.name.split(' - ')[1] if ' - ' in department.name else department.name %}
+                        {% set dept_type = 'combat' if 'Combat' in department.name else ('technical' if 'Technical' in department.name or 'Engineering' in department.name or 'ICT' in department.name else 'support') %}
+
+                        <div class="col-lg-4 col-md-6 mb-4 department-item" data-type="{{ dept_type }}">
+                            <div class="department-card">
+                                {% if department.image_url %}
+                                <div class="department-image-container">
+                                    <img src="{{ url_for('static', filename=department.image_url) }}" class="department-image" alt="{{ department.name }}">
+                                    <div class="department-overlay">
+                                        <h3 class="department-title text-white">{{ dept_name }}</h3>
+                                        <div class="department-abbr">{{ dept_abbr }}</div>
+                                    </div>
+                                    <div class="department-icon-wrapper" style="background-color: var(--{{ department.color }})">
+                                        <i class="fas {{ department.icon }} department-icon text-white"></i>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="department-image-container bg-{{ department.color }} d-flex align-items-center justify-content-center">
+                                    <i class="fas {{ department.icon }} department-icon-large text-white"></i>
+                                    <div class="department-overlay">
+                                        <h3 class="department-title text-white">{{ dept_name }}</h3>
+                                        <div class="department-abbr">{{ dept_abbr }}</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <div class="department-content">
+                                    <p class="department-description">{{ department.description }}</p>
+
+                                    <div class="department-stats">
+                                        <div class="stat-item">
+                                            <div class="stat-value text-{{ department.color }}">{{ range(5, 15)|random }}</div>
+                                            <div class="stat-label">Staff</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value text-{{ department.color }}">{{ range(2, 8)|random }}</div>
+                                            <div class="stat-label">Courses</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value text-{{ department.color }}">{{ range(1, 5)|random }}</div>
+                                            <div class="stat-label">Labs</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="department-footer">
+                                    <a href="#" class="department-btn btn-{{ department.color }}">
+                                        Explore <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                    <div class="department-social">
+                                        <a href="#" class="social-icon"><i class="fas fa-envelope text-{{ department.color }}"></i></a>
+                                        <a href="#" class="social-icon"><i class="fas fa-phone text-{{ department.color }}"></i></a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="course-card-back">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-2">Available Courses:</h6>
-                                    <ul class="course-list">
-                                        <li>Technical Course (TC) X2</li>
-                                        <li>Advanced Computer Course</li>
-                                        <li>VSAT Management</li>
-                                        <li>Database Management</li>
-                                    </ul>
-                                    <a href="{{ url_for('main.registration') }}" class="btn btn-primary btn-sm mt-2">Register Now</a>
+                    {% endfor %}
+                {% else %}
+                    <!-- Default departments if none in database -->
+                    <div class="col-lg-4 col-md-6 mb-4 department-item" data-type="combat">
+                        <div class="department-card">
+                            <div class="department-image-container">
+                                <img src="{{ url_for('static', filename='images/departments/communications.jpg') }}" class="department-image" alt="Combat Communication Department">
+                                <div class="department-overlay">
+                                    <h3 class="department-title text-white">Combat Communication Department</h3>
+                                    <div class="department-abbr">CCD</div>
+                                </div>
+                                <div class="department-icon-wrapper" style="background-color: var(--primary)">
+                                    <i class="fas fa-satellite-dish department-icon text-white"></i>
+                                </div>
+                            </div>
+
+                            <div class="department-content">
+                                <p class="department-description">Responsible for tactical and operational communication systems in combat environments.</p>
+
+                                <div class="department-stats">
+                                    <div class="stat-item">
+                                        <div class="stat-value text-primary">12</div>
+                                        <div class="stat-label">Staff</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value text-primary">5</div>
+                                        <div class="stat-label">Courses</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value text-primary">3</div>
+                                        <div class="stat-label">Labs</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="department-footer">
+                                <a href="#" class="department-btn btn-primary">
+                                    Explore <i class="fas fa-arrow-right"></i>
+                                </a>
+                                <div class="department-social">
+                                    <a href="#" class="social-icon"><i class="fas fa-envelope text-primary"></i></a>
+                                    <a href="#" class="social-icon"><i class="fas fa-phone text-primary"></i></a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Advanced Level -->
-            <div class="col-md-3 mb-4">
-                <div class="course-card">
-                    <div class="course-card-inner">
-                        <div class="course-card-front">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-rocket mb-3 course-icon"></i>
-                                    <h5 class="card-title text-success">Advanced Level</h5>
-                                    <p class="card-text">Advanced technical skills</p>
+                    <div class="col-lg-4 col-md-6 mb-4 department-item" data-type="technical">
+                        <div class="department-card">
+                            <div class="department-image-container">
+                                <img src="{{ url_for('static', filename='images/departments/signals-intelligence.jpg') }}" class="department-image" alt="Engineering Department">
+                                <div class="department-overlay">
+                                    <h3 class="department-title text-white">Engineering Department</h3>
+                                    <div class="department-abbr">ED</div>
+                                </div>
+                                <div class="department-icon-wrapper" style="background-color: var(--danger)">
+                                    <i class="fas fa-tools department-icon text-white"></i>
                                 </div>
                             </div>
-                        </div>
-                        <div class="course-card-back">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-2">Available Courses:</h6>
-                                    <ul class="course-list">
-                                        <li>Technical Course (TC) X 1</li>
-                                        <li>Programming Course</li>
-                                        <li>Network Security</li>
-                                        <li>Systems Administration</li>
-                                    </ul>
-                                    <a href="{{ url_for('main.registration') }}" class="btn btn-primary btn-sm mt-2">Register Now</a>
+
+                            <div class="department-content">
+                                <p class="department-description">Handles the engineering aspects of communication systems including design, installation, and maintenance.</p>
+
+                                <div class="department-stats">
+                                    <div class="stat-item">
+                                        <div class="stat-value text-danger">8</div>
+                                        <div class="stat-label">Staff</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value text-danger">4</div>
+                                        <div class="stat-label">Courses</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value text-danger">2</div>
+                                        <div class="stat-label">Labs</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="department-footer">
+                                <a href="#" class="department-btn btn-danger">
+                                    Explore <i class="fas fa-arrow-right"></i>
+                                </a>
+                                <div class="department-social">
+                                    <a href="#" class="social-icon"><i class="fas fa-envelope text-danger"></i></a>
+                                    <a href="#" class="social-icon"><i class="fas fa-phone text-danger"></i></a>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-lg-4 col-md-6 mb-4 department-item" data-type="support">
+                        <div class="department-card">
+                            <div class="department-image-container">
+                                <img src="{{ url_for('static', filename='images/departments/cyber-security.jpg') }}" class="department-image" alt="Army Training Support Centre">
+                                <div class="department-overlay">
+                                    <h3 class="department-title text-white">Army Training Support Centre</h3>
+                                    <div class="department-abbr">ATSA</div>
+                                </div>
+                                <div class="department-icon-wrapper" style="background-color: var(--success)">
+                                    <i class="fas fa-chalkboard-teacher department-icon text-white"></i>
+                                </div>
+                            </div>
+
+                            <div class="department-content">
+                                <p class="department-description">Provides training support and educational resources for signals personnel.</p>
+
+                                <div class="department-stats">
+                                    <div class="stat-item">
+                                        <div class="stat-value text-success">10</div>
+                                        <div class="stat-label">Staff</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value text-success">6</div>
+                                        <div class="stat-label">Courses</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value text-success">4</div>
+                                        <div class="stat-label">Labs</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="department-footer">
+                                <a href="#" class="department-btn btn-success">
+                                    Explore <i class="fas fa-arrow-right"></i>
+                                </a>
+                                <div class="department-social">
+                                    <a href="#" class="social-icon"><i class="fas fa-envelope text-success"></i></a>
+                                    <a href="#" class="social-icon"><i class="fas fa-phone text-success"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Announcements Section -->
+    <section class="announcement-section">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h2 class="text-center">Latest Announcements</h2>
                 </div>
             </div>
 
-            <!-- Specialist Level -->
-            <div class="col-md-3 mb-4">
-                <div class="course-card">
-                    <div class="course-card-inner">
-                        <div class="course-card-front">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-crown mb-3 course-icon"></i>
-                                    <h5 class="card-title text-purple">Specialist Level</h5>
-                                    <p class="card-text">Specialized management training</p>
+            {% if announcements %}
+            <div id="announcementCarousel" class="carousel slide">
+                <!-- Indicators -->
+                <ol class="carousel-indicators">
+                    {% for announcement in announcements %}
+                    <li data-target="#announcementCarousel" data-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %}></li>
+                    {% endfor %}
+                </ol>
+
+                <!-- Slides -->
+                <div class="carousel-inner">
+                    {% for announcement in announcements %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                        <a href="{{ url_for('main.view_announcement', announcement_id=announcement.id) }}" class="announcement-link">
+                            <div class="announcement-slide">
+                                {% if announcement.image_url %}
+                                <div class="announcement-image">
+                                    <img src="{{ url_for('static', filename=announcement.image_url) }}" alt="{{ announcement.title }}">
+                                </div>
+                                {% endif %}
+                                <div class="announcement-content{% if not announcement.image_url %} no-image{% endif %}">
+                                    <h4>{{ announcement.title }}</h4>
+                                    <p>{{ announcement.content | truncate(150) }}</p>
+                                    <p class="announcement-date">Posted: {{ announcement.created_at.strftime('%B %d, %Y') if announcement.created_at else 'Recently' }}</p>
+                                    <span class="read-more">Read More <i class="fas fa-arrow-right"></i></span>
                                 </div>
                             </div>
-                        </div>
-                        <div class="course-card-back">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-2">Available Courses:</h6>
-                                    <ul class="course-list">
-                                        <li>Yeoman of Signals</li>
-                                        <li>Advanced Management</li>
-                                        <li>Leadership Training</li>
-                                    </ul>
-                                    <a href="{{ url_for('main.registration') }}" class="btn btn-primary btn-sm mt-2">Register Now</a>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Controls -->
+                <a class="carousel-control-prev" href="#announcementCarousel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#announcementCarousel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+            {% else %}
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="announcement-card">
+                        <h4>Q2 Course Registration Open</h4>
+                        <p>Registration for the second quarter courses is now open. Apply before the deadline to secure your spot.</p>
+                        <p class="announcement-date">Posted: Recently</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="announcement-card">
+                        <h4>New Advanced Cybersecurity Course</h4>
+                        <p>We are introducing a new advanced cybersecurity course for officers starting next quarter.</p>
+                        <p class="announcement-date">Posted: Recently</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="announcement-card">
+                        <h4>Graduation Ceremony</h4>
+                        <p>The graduation ceremony for Q1 courses will be held on May 5th at the main parade ground.</p>
+                        <p class="announcement-date">Posted: Recently</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Dynamic Courses Section -->
+    {% if courses %}
+    <section class="dynamic-courses-section py-5" id="dynamic-courses">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Available Courses</h2>
+                    <p class="section-subtitle">Managed from the admin dashboard</p>
+                </div>
+            </div>
+
+            <!-- Course Categories Tabs -->
+            <ul class="nav nav-pills mb-4 justify-content-center" id="courseTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-tab" data-toggle="pill" data-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">
+                        <i class="fas fa-th-list me-2"></i>All Courses
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="officers-tab" data-toggle="pill" data-target="#officers" type="button" role="tab" aria-controls="officers" aria-selected="false">
+                        <i class="fas fa-user-tie me-2"></i>Officers Courses
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="soldiers-tab" href="#soldiers" data-toggle="pill" role="tab" aria-controls="soldiers" aria-selected="false">
+                        <i class="fas fa-user-shield me-2"></i>Soldiers Courses
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="courseTabsContent">
+                <!-- All Courses -->
+                <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+                    <!-- Officers Courses -->
+                    {% set officers_courses = courses|selectattr('category', 'equalto', 'Officers')|list %}
+                    {% if officers_courses %}
+                    <div class="category-section mb-5">
+                        <h3 class="category-title mb-4"><i class="fas fa-user-tie me-2 text-primary"></i>Officers Courses</h3>
+                        <div class="row">
+                            {% for course in officers_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-primary text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-primary"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <div class="mt-2">
+                                                <span class="badge badge-primary">{{ course.category }}</span>
+                                                {% if course.level %}
+                                                <span class="badge badge-info ml-2">{{ course.level }} Level</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-primary">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-primary">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                            {% endfor %}
                         </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Soldiers Courses -->
+                    {% set soldiers_courses = courses|selectattr('category', 'equalto', 'Soldiers')|list %}
+                    {% if soldiers_courses %}
+                    <div class="category-section mb-5">
+                        <h3 class="category-title mb-4"><i class="fas fa-user-shield me-2 text-warning"></i>Soldiers Courses</h3>
+                        <div class="row">
+                            {% for course in soldiers_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-warning text-dark text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-warning"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <div class="mt-2">
+                                                <span class="badge badge-warning">{{ course.category }}</span>
+                                                {% if course.level %}
+                                                <span class="badge badge-success ml-2">{{ course.level }} Level</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-warning text-dark">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-warning text-dark">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- General Courses -->
+                    {% set general_courses = courses|selectattr('category', 'equalto', 'General')|list %}
+                    {% if general_courses %}
+                    <div class="category-section mb-5">
+                        <h3 class="category-title mb-4"><i class="fas fa-graduation-cap me-2 text-secondary"></i>General Courses</h3>
+                        <div class="row">
+                            {% for course in general_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-secondary text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-secondary"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <div class="mt-2">
+                                                <span class="badge badge-secondary">{{ course.category }}</span>
+                                                {% if course.level and course.level != 'General' %}
+                                                <span class="badge badge-light ml-2">{{ course.level }} Level</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-secondary">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-secondary">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if not officers_courses and not soldiers_courses and not general_courses %}
+                    <div class="col-12 text-center py-5">
+                        <p class="lead text-muted">No courses available at the moment.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Officers Courses -->
+                <div class="tab-pane fade" id="officers" role="tabpanel" aria-labelledby="officers-tab">
+                    <!-- Junior Level -->
+                    {% set junior_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Junior')|list %}
+                    {% if junior_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-user-graduate me-2 text-primary"></i>Junior Level</h3>
+                        <div class="row">
+                            {% for course in junior_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-primary text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-primary"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-info">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-primary">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-primary">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Mid Level -->
+                    {% set mid_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Mid')|list %}
+                    {% if mid_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-chart-line me-2 text-success"></i>Mid Level</h3>
+                        <div class="row">
+                            {% for course in mid_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-success text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-success"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-info">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-success">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-success">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Senior Level -->
+                    {% set senior_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Senior')|list %}
+                    {% if senior_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-star me-2 text-danger"></i>Senior Level</h3>
+                        <div class="row">
+                            {% for course in senior_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-danger text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-danger"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-info">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-danger">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-danger">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if not junior_courses and not mid_courses and not senior_courses %}
+                    <div class="col-12 text-center py-5">
+                        <p class="lead text-muted">No officers courses available at the moment.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Soldiers Courses -->
+                <div class="tab-pane fade" id="soldiers" role="tabpanel" aria-labelledby="soldiers-tab">
+                    <!-- Basic Level -->
+                    {% set basic_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Basic')|list %}
+                    {% if basic_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-layer-group me-2 text-info"></i>Basic Level</h3>
+                        <div class="row">
+                            {% for course in basic_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-info text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-info"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-success">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-info">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-info text-white">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Medium Level -->
+                    {% set medium_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Medium')|list %}
+                    {% if medium_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-cogs me-2 text-warning"></i>Medium Level</h3>
+                        <div class="row">
+                            {% for course in medium_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-warning text-dark text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-warning"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-success">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-warning text-dark">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-warning text-dark">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Advanced Level -->
+                    {% set advanced_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Advanced')|list %}
+                    {% if advanced_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-rocket me-2 text-success"></i>Advanced Level</h3>
+                        <div class="row">
+                            {% for course in advanced_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-success text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-success"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-success">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-success">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-success">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if not basic_courses and not medium_courses and not advanced_courses %}
+                    <div class="col-12 text-center py-5">
+                        <p class="lead text-muted">No soldiers courses available at the moment.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Our Impact</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-number">50+</div>
+                        <div class="stat-label">Courses Offered</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-number">5,000+</div>
+                        <div class="stat-label">Graduates</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-number">30+</div>
+                        <div class="stat-label">Years of Excellence</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Job Placement</div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
+    <!-- Courses Section -->
+    <section class="courses-section py-5" id="courses">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Our Training Programs</h2>
+                    <p class="section-subtitle">Comprehensive courses designed for military excellence</p>
+                </div>
+            </div>
+
+            <!-- Course Categories Tabs -->
+            <ul class="nav nav-pills mb-4 justify-content-center" id="courseTabs2" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="officers-tab2" data-toggle="pill" data-target="#officers2" type="button" role="tab" aria-controls="officers2" aria-selected="true">
+                        <i class="fas fa-user-tie me-2"></i>Officers Courses
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="soldiers-tab2" href="#soldiers2" data-toggle="pill" role="tab" aria-controls="soldiers2" aria-selected="false">
+                        <i class="fas fa-user-shield me-2"></i>Soldiers Courses
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="courseTabsContent2">
+                <!-- Officers Courses -->
+                <div class="tab-pane fade show active" id="officers2" role="tabpanel" aria-labelledby="officers-tab2">
+                    <!-- Junior Level -->
+                    {% set junior_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Junior')|list %}
+                    {% if junior_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-user-graduate me-2 text-primary"></i>Junior Level</h3>
+                        <div class="row">
+                            {% for course in junior_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-primary text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-primary"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-info">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-primary">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-primary">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Mid Level -->
+                    {% set mid_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Mid')|list %}
+                    {% if mid_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-chart-line me-2 text-success"></i>Mid Level</h3>
+                        <div class="row">
+                            {% for course in mid_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-success text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-success"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-info">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-success">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-success">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Senior Level -->
+                    {% set senior_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Senior')|list %}
+                    {% if senior_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-star me-2 text-danger"></i>Senior Level</h3>
+                        <div class="row">
+                            {% for course in senior_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-danger text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-danger"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-info">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-danger">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-danger">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if not junior_courses and not mid_courses and not senior_courses %}
+                    <div class="col-12 text-center py-5">
+                        <p class="lead text-muted">No officers courses available at the moment.</p>
+                        <a href="{{ url_for('admin.add_course') }}" class="btn btn-primary mt-3">
+                            <i class="fas fa-plus me-2"></i>Add Officers Course
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Soldiers Courses -->
+                <div class="tab-pane fade" id="soldiers2" role="tabpanel" aria-labelledby="soldiers-tab2">
+                    <!-- Basic Level -->
+                    {% set basic_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Basic')|list %}
+                    {% if basic_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-layer-group me-2 text-info"></i>Basic Level</h3>
+                        <div class="row">
+                            {% for course in basic_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-info text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-info"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-success">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-info">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-info text-white">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Medium Level -->
+                    {% set medium_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Medium')|list %}
+                    {% if medium_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-cogs me-2 text-warning"></i>Medium Level</h3>
+                        <div class="row">
+                            {% for course in medium_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-warning text-dark text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-warning"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-success">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-warning text-dark">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-warning text-dark">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Advanced Level -->
+                    {% set advanced_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Advanced')|list %}
+                    {% if advanced_courses %}
+                    <div class="level-section mb-5">
+                        <h3 class="level-title mb-4"><i class="fas fa-rocket me-2 text-success"></i>Advanced Level</h3>
+                        <div class="row">
+                            {% for course in advanced_courses %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card course-card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-success text-white text-center py-3">
+                                        <h5 class="mb-0">{{ course.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <i class="fas fa-book course-icon text-success"></i>
+                                            {% if course.duration %}
+                                            <p class="mt-3">Duration: {{ course.duration }}</p>
+                                            {% endif %}
+                                            <span class="badge badge-success">{{ course.level }} Level</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
+                                        <p>{{ course.description|truncate(100) }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-success">
+                                                <i class="fas fa-info-circle me-2"></i>View Details
+                                            </a>
+                                            <a href="{{ url_for('main.registration') }}" class="btn btn-success">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Register
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if not basic_courses and not medium_courses and not advanced_courses %}
+                    <div class="col-12 text-center py-5">
+                        <p class="lead text-muted">No soldiers courses available at the moment.</p>
+                        {% if session.get('admin_logged_in') %}
+                        <a href="{{ url_for('admin.add_course') }}" class="btn btn-warning mt-3">
+                            <i class="fas fa-plus me-2"></i>Add Soldiers Course
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section py-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3>Ready to advance your military career?</h3>
+                    <p class="mb-md-0">Join the Nigerian Army School of Signals and become a communications expert.</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="{{ url_for('main.registration') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Register Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Contact Button -->
     <a href="{{ url_for('main.contact') }}" class="floating-contact" title="Contact Customer Care">
         <i class="fas fa-headset"></i>
     </a>
 {% endblock %}
 
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/carousel-init.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap-carousel.js') }}"></script>
+<script>
+    // Direct inline JavaScript for tab functionality
+    $(document).ready(function() {
+        console.log('Inline tab handlers loaded');
 
+        // Handle soldiers tab click
+        $('#soldiers-tab').on('click', function(e) {
+            e.preventDefault();
+            console.log('Soldiers tab clicked');
 
+            // Deactivate all tabs and content
+            $('#courseTabs .nav-link').removeClass('active');
+            $('#courseTabsContent .tab-pane').removeClass('show active');
 
+            // Activate soldiers tab and content
+            $(this).addClass('active');
+            $('#soldiers').addClass('show active');
+        });
+
+        // Handle soldiers tab click in second tab group
+        $('#soldiers-tab2').on('click', function(e) {
+            e.preventDefault();
+            console.log('Soldiers tab 2 clicked');
+
+            // Deactivate all tabs and content
+            $('#courseTabs2 .nav-link').removeClass('active');
+            $('#courseTabsContent2 .tab-pane').removeClass('show active');
+
+            // Activate soldiers tab and content
+            $(this).addClass('active');
+            $('#soldiers2').addClass('show active');
+        });
+
+        // Department filtering functionality
+        $('.department-filter-buttons .btn').on('click', function() {
+            const filter = $(this).data('filter');
+
+            // Update active button
+            $('.department-filter-buttons .btn').removeClass('active');
+            $(this).addClass('active');
+
+            // Filter departments
+            if (filter === 'all') {
+                $('.department-item').fadeIn(300);
+            } else {
+                $('.department-item').hide();
+                $('.department-item[data-type="' + filter + '"]').fadeIn(300);
+            }
+
+            // Add animation to visible cards
+            $('.department-item:visible').each(function(i) {
+                const card = $(this);
+                setTimeout(function() {
+                    card.addClass('animated');
+                }, i * 100);
+            });
+        });
+
+        // Department card hover effects
+        $('.department-card').hover(
+            function() {
+                $(this).find('.department-title').css('transform', 'translateY(-5px)');
+            },
+            function() {
+                $(this).find('.department-title').css('transform', 'translateY(0)');
+            }
+        );
+
+        // Initialize department cards with staggered animation
+        $('.department-item').each(function(i) {
+            const card = $(this);
+            setTimeout(function() {
+                card.addClass('animated');
+            }, i * 100);
+        });
+    });
+</script>
+{% endblock %}
 
