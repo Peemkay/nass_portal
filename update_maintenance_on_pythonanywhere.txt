@@ -1,0 +1,27 @@
+# PythonAnywhere Update Script for Maintenance Mode
+# Copy and paste these commands into your PythonAnywhere bash console
+
+# Navigate to your project directory
+cd ~/nass_portal
+
+# Enable maintenance mode before updating (optional)
+# This will prevent users from accessing the site during the update
+python -c "from nass_portal.settings_utils import update_setting; update_setting('maintenance_mode', 'true'); print('Maintenance mode enabled')"
+
+# Pull the latest changes from GitHub
+git pull
+
+# Apply the maintenance schema if it hasn't been applied yet
+python apply_maintenance_schema.py
+
+# Restart the web application
+touch /var/www/yourusername_pythonanywhere_com_wsgi.py
+
+# Wait a moment for the application to restart
+sleep 5
+
+# Disable maintenance mode (optional)
+# Only do this if you enabled it above and want to disable it now
+# python -c "from nass_portal.settings_utils import update_setting; update_setting('maintenance_mode', 'false'); print('Maintenance mode disabled')"
+
+echo "Maintenance mode functionality has been updated successfully!"

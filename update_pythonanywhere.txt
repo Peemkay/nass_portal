@@ -1,0 +1,16 @@
+# PythonAnywhere Update Script
+# Copy and paste these commands into your PythonAnywhere bash console
+
+# Navigate to your project directory
+cd ~/nass_portal
+
+# Pull the latest changes from GitHub
+git pull
+
+# Restart the web application
+touch /var/www/yourusername_pythonanywhere_com_wsgi.py
+
+# Optional: Check the error log
+# cat /var/log/yourusername.pythonanywhere.com.error.log
+
+echo "Deployment updated successfully!"

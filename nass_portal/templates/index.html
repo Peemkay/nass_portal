@@ -903,10 +903,6 @@
                                     <a href="#" class="department-btn btn-{{ department.color }}">
                                         Explore <i class="fas fa-arrow-right"></i>
                                     </a>
-                                    <div class="department-social">
-                                        <a href="#" class="social-icon"><i class="fas fa-envelope text-{{ department.color }}"></i></a>
-                                        <a href="#" class="social-icon"><i class="fas fa-phone text-{{ department.color }}"></i></a>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -949,10 +945,6 @@
                                 <a href="#" class="department-btn btn-primary">
                                     Explore <i class="fas fa-arrow-right"></i>
                                 </a>
-                                <div class="department-social">
-                                    <a href="#" class="social-icon"><i class="fas fa-envelope text-primary"></i></a>
-                                    <a href="#" class="social-icon"><i class="fas fa-phone text-primary"></i></a>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -993,10 +985,6 @@
                                 <a href="#" class="department-btn btn-danger">
                                     Explore <i class="fas fa-arrow-right"></i>
                                 </a>
-                                <div class="department-social">
-                                    <a href="#" class="social-icon"><i class="fas fa-envelope text-danger"></i></a>
-                                    <a href="#" class="social-icon"><i class="fas fa-phone text-danger"></i></a>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -1037,10 +1025,6 @@
                                 <a href="#" class="department-btn btn-success">
                                     Explore <i class="fas fa-arrow-right"></i>
                                 </a>
-                                <div class="department-social">
-                                    <a href="#" class="social-icon"><i class="fas fa-envelope text-success"></i></a>
-                                    <a href="#" class="social-icon"><i class="fas fa-phone text-success"></i></a>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -1754,9 +1738,11 @@
                     {% if not junior_courses and not mid_courses and not senior_courses %}
                     <div class="col-12 text-center py-5">
                         <p class="lead text-muted">No officers courses available at the moment.</p>
+                        {% if session.get('admin_logged_in') %}
                         <a href="{{ url_for('admin.add_course') }}" class="btn btn-primary mt-3">
                             <i class="fas fa-plus me-2"></i>Add Officers Course
                         </a>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
