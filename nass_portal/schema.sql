@@ -64,12 +64,7 @@ CREATE TABLE IF NOT EXISTS registration_periods (
     updated_at TIMESTAMP
 );
 
--- Insert default registration periods
-INSERT INTO registration_periods (quarter, year, start_date, end_date, is_active, description)
-VALUES
-('first', 2025, '2025-01-01', '2025-04-30', 1, 'First Quarter Registration Period'),
-('second', 2025, '2025-05-01', '2025-08-31', 0, 'Second Quarter Registration Period'),
-('third', 2025, '2025-09-01', '2025-12-31', 0, 'Third Quarter Registration Period');
+-- Registration periods should be added through the admin interface
 
 -- Create announcements table for managing homepage announcements
 CREATE TABLE IF NOT EXISTS announcements (
@@ -83,12 +78,7 @@ CREATE TABLE IF NOT EXISTS announcements (
     updated_at TIMESTAMP
 );
 
--- Insert default announcements
-INSERT INTO announcements (title, content, is_active, display_order)
-VALUES
-('Q2 Course Registration Open', 'Registration for the second quarter courses is now open. Apply before the deadline to secure your spot.', 1, 1),
-('New Advanced Cybersecurity Course', 'We are introducing a new advanced cybersecurity course for officers starting next quarter.', 1, 2),
-('Graduation Ceremony', 'The graduation ceremony for Q1 courses will be held on May 5th, 2025 at the main parade ground.', 1, 3);
+-- Announcements should be added through the admin interface
 
 -- Create settings table for system-wide configuration
 CREATE TABLE IF NOT EXISTS settings (
@@ -109,21 +99,21 @@ VALUES
 -- General Settings
 ('site_title', 'Nigerian Army School of Signals Portal', 'text', 'general', 'The title of the website', 1),
 ('site_description', 'Official portal for the Nigerian Army School of Signals', 'text', 'general', 'Meta description for the website', 1),
-('contact_email', 'contact@nassportal.mil.ng', 'text', 'general', 'Primary contact email address', 1),
-('contact_phone', '+234 123 456 7890', 'text', 'general', 'Primary contact phone number', 1),
+('contact_email', 'contact@example.com', 'text', 'general', 'Primary contact email address', 1),
+('contact_phone', '+234 000 000 0000', 'text', 'general', 'Primary contact phone number', 1),
 ('footer_text', '© Nigerian Army School of Signals. All rights reserved.', 'text', 'general', 'Text displayed in the footer', 1),
 
 -- Mail Settings
-('mail_server', 'smtp.gmail.com', 'text', 'mail', 'SMTP server address', 0),
+('mail_server', 'smtp.example.com', 'text', 'mail', 'SMTP server address', 0),
 ('mail_port', '587', 'number', 'mail', 'SMTP server port', 0),
 ('mail_use_tls', 'true', 'boolean', 'mail', 'Use TLS encryption', 0),
 ('mail_use_ssl', 'false', 'boolean', 'mail', 'Use SSL encryption', 0),
-('mail_username', '', 'text', 'mail', 'SMTP username/email', 0),
-('mail_password', '', 'text', 'mail', 'SMTP password or app password', 0),
-('mail_default_sender', 'noreply@nassportal.mil.ng', 'text', 'mail', 'Default sender email address', 0),
+('mail_username', 'email@example.com', 'text', 'mail', 'SMTP username/email', 0),
+('mail_password', 'your-password', 'text', 'mail', 'SMTP password or app password', 0),
+('mail_default_sender', 'noreply@example.com', 'text', 'mail', 'Default sender email address', 0),
 ('mail_sender_name', 'NASS Portal', 'text', 'mail', 'Sender name for outgoing emails', 0),
 ('mail_contact_form_enabled', 'true', 'boolean', 'mail', 'Enable email notifications for contact form submissions', 0),
-('mail_contact_form_recipients', '', 'text', 'mail', 'Comma-separated list of email addresses to receive contact form submissions', 0),
+('mail_contact_form_recipients', 'contact@example.com', 'text', 'mail', 'Comma-separated list of email addresses to receive contact form submissions', 0),
 ('mail_contact_form_subject_prefix', '[NASS Portal Contact]', 'text', 'mail', 'Subject prefix for contact form emails', 0),
 
 -- Registration Settings
@@ -240,6 +230,5 @@ CREATE TABLE IF NOT EXISTS contact_messages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert default admin user with hashed password (password: admin123)
-INSERT INTO admins (username, password)
-VALUES ('admin', 'pbkdf2:sha256:150000$LnrTXNNj$d119fae74dc2817dd7c3c5bd9a27ebf2c1a7a5b237b0ecdd2c2a1e906c4c7f4f');
+-- Admin users should be created through the initialize_app.py script
+-- or directly through the database with a securely hashed password

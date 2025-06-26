@@ -336,12 +336,40 @@
 
                     <!-- Navigation Buttons -->
                     <div class="form-navigation d-flex justify-content-between align-items-center">
-                        <a href="{{ url_for('main.registration') }}" class="btn btn-outline-military">
-                            <i class="fas fa-arrow-left me-2"></i> Back to Registration
-                        </a>
+                        <div>
+                            <a href="{{ url_for('main.registration') }}" class="btn btn-outline-military">
+                                <i class="fas fa-arrow-left me-2"></i> Back to Registration
+                            </a>
+                            <button type="button" class="btn btn-outline-success" id="saveProgressBtn">
+                                <i class="fas fa-save me-2"></i> Save Progress
+                            </button>
+                        </div>
                         <button type="submit" class="btn btn-military btn-lg">
                             Next Step <i class="fas fa-arrow-right ms-2"></i>
                         </button>
+                    </div>
+
+                    <!-- Save Progress Modal -->
+                    <div class="modal fade" id="saveProgressModal" tabindex="-1" aria-labelledby="saveProgressModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="saveProgressModalLabel">Save Your Progress</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>You can continue your registration later using your service number and date of birth.</p>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i> Make sure your service number and date of birth are filled in correctly before saving.
+                                    </div>
+                                    <div id="saveProgressResult"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-success" id="confirmSaveProgress">Save Progress</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Progress Indicator -->
@@ -429,6 +457,92 @@ window.addEventListener('DOMContentLoaded', function() {
         card.style.animationDelay = `${index * 0.1}s`;
         card.classList.add('fade-in');
     });
+});
+</script>
+
+<script>
+// Save Progress Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const saveProgressBtn = document.getElementById('saveProgressBtn');
+    const confirmSaveProgress = document.getElementById('confirmSaveProgress');
+    const saveProgressModal = new bootstrap.Modal(document.getElementById('saveProgressModal'));
+    const saveProgressResult = document.getElementById('saveProgressResult');
+
+    // Show the save progress modal
+    if (saveProgressBtn) {
+        saveProgressBtn.addEventListener('click', function() {
+            // Validate service number and date of birth are filled
+            const serviceNumber = document.getElementById('service_number').value;
+            const dateOfBirth = document.getElementById('date_of_birth').value;
+
+            if (!serviceNumber || !dateOfBirth) {
+                saveProgressResult.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Service Number and Date of Birth are required to save your progress.
+                    </div>
+                `;
+            } else {
+                saveProgressResult.innerHTML = '';
+            }
+
+            saveProgressModal.show();
+        });
+    }
+
+    // Handle save progress confirmation
+    if (confirmSaveProgress) {
+        confirmSaveProgress.addEventListener('click', function() {
+            // Get form data
+            const form = document.querySelector('form');
+            const formData = new FormData(form);
+
+            // Add current page number
+            formData.append('current_page', 1);
+
+            // Send AJAX request to save progress
+            fetch('{{ url_for("main.save_registration_progress") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    saveProgressResult.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            ${data.message}
+                        </div>
+                    `;
+
+                    // Disable the confirm button
+                    confirmSaveProgress.disabled = true;
+
+                    // Close the modal after a delay
+                    setTimeout(() => {
+                        saveProgressModal.hide();
+                        confirmSaveProgress.disabled = false;
+                    }, 2000);
+                } else {
+                    saveProgressResult.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ${data.message}
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error saving progress:', error);
+                saveProgressResult.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        An error occurred while saving your progress. Please try again.
+                    </div>
+                `;
+            });
+        });
+    }
 });
 </script>
 {% endblock %}

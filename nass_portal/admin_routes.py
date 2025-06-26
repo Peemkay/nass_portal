@@ -13,6 +13,7 @@ from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from .db import get_db
 from .registration_utils import get_all_registration_periods, update_registration_period, add_registration_period, delete_registration_period
+from .apply_impact_stats_schema import apply_impact_stats_schema
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -139,10 +140,34 @@ def add_course():
         else:
             db = get_db()
             try:
-                db.execute(
-                    'INSERT INTO courses (name, description, duration, category, level) VALUES (?, ?, ?, ?, ?)',
-                    (name, description, duration, category, level)
-                )
+                # Check if the courses table has the required columns
+                columns = [column[1] for column in db.execute('PRAGMA table_info(courses)').fetchall()]
+
+                # Build the query dynamically based on available columns
+                insert_columns = ['name', 'description']
+                insert_values = [name, description]
+
+                if 'duration' in columns and duration:
+                    insert_columns.append('duration')
+                    insert_values.append(duration)
+
+                if 'category' in columns and category:
+                    insert_columns.append('category')
+                    insert_values.append(category)
+
+                if 'level' in columns and level:
+                    insert_columns.append('level')
+                    insert_values.append(level)
+
+                # Build the query
+                query = f'''
+                    INSERT INTO courses (
+                        {', '.join(insert_columns)}
+                    ) VALUES ({', '.join(['?'] * len(insert_values))})
+                '''
+
+                # Execute the query
+                db.execute(query, insert_values)
                 db.commit()
                 flash('Course added successfully!', 'success')
                 return redirect(url_for('admin.courses'))
@@ -187,10 +212,37 @@ def edit_course(course_id):
             flash(error, 'error')
         else:
             try:
-                db.execute(
-                    'UPDATE courses SET name = ?, description = ?, duration = ?, category = ?, level = ? WHERE id = ?',
-                    (name, description, duration, category, level, course_id)
-                )
+                # Check if the courses table has the required columns
+                columns = [column[1] for column in db.execute('PRAGMA table_info(courses)').fetchall()]
+
+                # Build the query dynamically based on available columns
+                update_columns = ['name = ?', 'description = ?']
+                update_values = [name, description]
+
+                if 'duration' in columns and duration:
+                    update_columns.append('duration = ?')
+                    update_values.append(duration)
+
+                if 'category' in columns and category:
+                    update_columns.append('category = ?')
+                    update_values.append(category)
+
+                if 'level' in columns and level:
+                    update_columns.append('level = ?')
+                    update_values.append(level)
+
+                # Add course_id to values
+                update_values.append(course_id)
+
+                # Build the query
+                query = f'''
+                    UPDATE courses SET
+                        {', '.join(update_columns)}
+                    WHERE id = ?
+                '''
+
+                # Execute the query
+                db.execute(query, update_values)
                 db.commit()
                 flash('Course updated successfully!', 'success')
                 return redirect(url_for('admin.courses'))
@@ -390,7 +442,136 @@ def student_detail(student_id):
         flash('Student not found', 'error')
         return redirect(url_for('admin.students'))
 
-    return render_template('admin/student_detail.html', student=student)
+    # Get student documents
+    try:
+        student_documents = db.execute(
+            'SELECT sd.*, dr.name as requirement_name FROM student_documents sd '
+            'JOIN document_requirements dr ON sd.requirement_id = dr.id '
+            'WHERE sd.student_id = ? ORDER BY dr.display_order',
+            (student_id,)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching student documents: {str(e)}")
+        student_documents = []
+
+    # Get military courses
+    try:
+        military_courses = db.execute(
+            'SELECT * FROM military_courses WHERE student_id = ? ORDER BY end_date DESC',
+            (student_id,)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching military courses: {str(e)}")
+        military_courses = []
+
+    # Get NASS courses (student_courses)
+    try:
+        student_courses = db.execute(
+            'SELECT sc.*, c.name, c.description, c.department, c.quarter, c.year, '
+            '(SELECT COUNT(*) FROM certificates WHERE student_id = ? AND course_id = c.id) as has_certificate '
+            'FROM student_courses sc '
+            'JOIN courses c ON sc.course_id = c.id '
+            'WHERE sc.student_id = ? '
+            'ORDER BY sc.registration_date DESC',
+            (student_id, student_id)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching student courses: {str(e)}")
+        student_courses = []
+
+    # Get certificates
+    try:
+        certificates = db.execute(
+            'SELECT cert.*, c.name as course_name '
+            'FROM certificates cert '
+            'JOIN courses c ON cert.course_id = c.id '
+            'WHERE cert.student_id = ? '
+            'ORDER BY cert.issue_date DESC',
+            (student_id,)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching certificates: {str(e)}")
+        certificates = []
+
+    # Get login history
+    try:
+        login_history = db.execute(
+            'SELECT * FROM student_login_history '
+            'WHERE student_id = ? '
+            'ORDER BY login_time DESC LIMIT 10',
+            (student_id,)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching login history: {str(e)}")
+        login_history = []
+
+    # Get available courses for assignment
+    try:
+        available_courses = db.execute(
+            'SELECT c.* FROM courses c '
+            'WHERE c.is_active = 1 AND c.id NOT IN '
+            '(SELECT course_id FROM student_courses WHERE student_id = ?) '
+            'ORDER BY c.year DESC, c.quarter DESC, c.name',
+            (student_id,)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching available courses: {str(e)}")
+        available_courses = []
+
+    # Get completed courses for certificate upload
+    try:
+        completed_courses = db.execute(
+            'SELECT c.id, c.name, c.quarter, c.year FROM student_courses sc '
+            'JOIN courses c ON sc.course_id = c.id '
+            'WHERE sc.student_id = ? AND sc.status = "completed" '
+            'AND c.id NOT IN (SELECT course_id FROM certificates WHERE student_id = ?) '
+            'ORDER BY c.year DESC, c.quarter DESC, c.name',
+            (student_id, student_id)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching completed courses: {str(e)}")
+        completed_courses = []
+
+    # Get document requirements
+    try:
+        document_requirements = db.execute(
+            'SELECT * FROM document_requirements '
+            'WHERE is_active = 1 '
+            'ORDER BY display_order'
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching document requirements: {str(e)}")
+        document_requirements = []
+
+    # Check if tables exist, if not, set empty lists
+    if not student_documents and not military_courses:
+        try:
+            # Check if student_documents table exists
+            cursor = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='student_documents'")
+            if not cursor.fetchone():
+                student_documents = []
+
+            # Check if military_courses table exists
+            cursor = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='military_courses'")
+            if not cursor.fetchone():
+                military_courses = []
+        except Exception as e:
+            current_app.logger.error(f"Error checking tables: {str(e)}")
+
+    # Current date for forms
+    now = datetime.now()
+
+    return render_template('admin/student_detail.html',
+                           student=student,
+                           student_documents=student_documents,
+                           military_courses=military_courses,
+                           student_courses=student_courses,
+                           certificates=certificates,
+                           login_history=login_history,
+                           available_courses=available_courses,
+                           completed_courses=completed_courses,
+                           document_requirements=document_requirements,
+                           now=now)
 
 
 @admin_bp.route('/students/<int:student_id>/edit', methods=['GET', 'POST'])
@@ -490,6 +671,928 @@ def edit_student(student_id):
             flash(f'Error updating student: {str(e)}', 'error')
 
     return render_template('admin/edit_student.html', student=student)
+
+
+@admin_bp.route('/students/<int:student_id>/print')
+def print_student(student_id):
+    """Print student profile"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    # Get student documents
+    try:
+        student_documents = db.execute(
+            'SELECT sd.*, dr.name as requirement_name FROM student_documents sd '
+            'JOIN document_requirements dr ON sd.requirement_id = dr.id '
+            'WHERE sd.student_id = ? ORDER BY dr.display_order',
+            (student_id,)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching student documents: {str(e)}")
+        student_documents = []
+
+    # Get military courses
+    try:
+        military_courses = db.execute(
+            'SELECT * FROM military_courses WHERE student_id = ? ORDER BY year DESC',
+            (student_id,)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching military courses: {str(e)}")
+        military_courses = []
+
+    # Get educational background
+    try:
+        student_education = db.execute(
+            'SELECT * FROM student_education WHERE student_id = ? ORDER BY year DESC',
+            (student_id,)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching student education: {str(e)}")
+        student_education = []
+
+    # Current date for the printout
+    now = datetime.now()
+
+    return render_template('admin/student_print.html',
+                           student=student,
+                           student_documents=student_documents,
+                           military_courses=military_courses,
+                           student_education=student_education,
+                           now=now)
+
+
+@admin_bp.route('/students/<int:student_id>/assign-course', methods=['POST'])
+def assign_course(student_id):
+    """Assign a course to a student"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'POST':
+        course_id = request.form.get('course_id')
+        status = request.form.get('status')
+        registration_date = request.form.get('registration_date')
+        remarks = request.form.get('remarks')
+
+        # Validate input
+        if not course_id:
+            flash('Course is required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        if not status:
+            status = 'registered'
+
+        if not registration_date:
+            registration_date = datetime.now().strftime('%Y-%m-%d')
+
+        try:
+            # Check if student is already registered for this course
+            existing = db.execute(
+                'SELECT * FROM student_courses WHERE student_id = ? AND course_id = ?',
+                (student_id, course_id)
+            ).fetchone()
+
+            if existing:
+                flash('Student is already registered for this course', 'error')
+                return redirect(url_for('admin.student_detail', student_id=student_id))
+
+            # Insert new course registration
+            db.execute(
+                'INSERT INTO student_courses (student_id, course_id, status, registration_date, remarks) '
+                'VALUES (?, ?, ?, ?, ?)',
+                (student_id, course_id, status, registration_date, remarks)
+            )
+            db.commit()
+            flash('Course assigned successfully', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error assigning course: {str(e)}")
+            flash(f'Error assigning course: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/update-course-status', methods=['POST'])
+def update_course_status(student_id):
+    """Update a student's course status"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'POST':
+        course_id = request.form.get('course_id')
+        status = request.form.get('status')
+        completion_date = request.form.get('completion_date')
+        grade = request.form.get('grade')
+        remarks = request.form.get('remarks')
+
+        # Validate input
+        if not course_id or not status:
+            flash('Course ID and status are required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Update course status
+            if status == 'completed' and completion_date:
+                db.execute(
+                    'UPDATE student_courses SET status = ?, completion_date = ?, grade = ?, remarks = ? '
+                    'WHERE student_id = ? AND course_id = ?',
+                    (status, completion_date, grade, remarks, student_id, course_id)
+                )
+            else:
+                db.execute(
+                    'UPDATE student_courses SET status = ?, grade = ?, remarks = ? '
+                    'WHERE student_id = ? AND course_id = ?',
+                    (status, grade, remarks, student_id, course_id)
+                )
+            db.commit()
+            flash('Course status updated successfully', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error updating course status: {str(e)}")
+            flash(f'Error updating course status: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/remove-course', methods=['POST'])
+def remove_course(student_id):
+    """Remove a course from a student's record"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'POST':
+        course_id = request.form.get('course_id')
+
+        if not course_id:
+            flash('Course ID is required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Delete course registration
+            db.execute(
+                'DELETE FROM student_courses WHERE student_id = ? AND course_id = ?',
+                (student_id, course_id)
+            )
+            db.commit()
+            flash('Course removed successfully', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error removing course: {str(e)}")
+            flash(f'Error removing course: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/add-military-course', methods=['POST'])
+def add_military_course(student_id):
+    """Add a military course to a student's record"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'POST':
+        serial_number = request.form.get('serial_number')
+        institution_name = request.form.get('institution_name')
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+        certificate = request.form.get('certificate')
+        grade = request.form.get('grade')
+        remarks = request.form.get('remarks')
+
+        # Validate input
+        if not institution_name or not start_date or not end_date or not certificate:
+            flash('Institution name, start date, end date, and certificate are required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Extract year from end date
+            year = end_date.split('-')[0] if '-' in end_date else end_date
+
+            # Insert new military course
+            db.execute(
+                'INSERT INTO military_courses (student_id, serial_number, institution_name, start_date, end_date, year, certificate, grade, remarks) '
+                'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                (student_id, serial_number, institution_name, start_date, end_date, year, certificate, grade, remarks)
+            )
+            db.commit()
+            flash('Military course added successfully', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error adding military course: {str(e)}")
+            flash(f'Error adding military course: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/update-military-course', methods=['POST'])
+def update_military_course(student_id):
+    """Update a military course in a student's record"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'POST':
+        course_id = request.form.get('course_id')
+        serial_number = request.form.get('serial_number')
+        institution_name = request.form.get('institution_name')
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+        certificate = request.form.get('certificate')
+        grade = request.form.get('grade')
+        remarks = request.form.get('remarks')
+
+        # Validate input
+        if not course_id or not institution_name or not start_date or not end_date or not certificate:
+            flash('Course ID, institution name, start date, end date, and certificate are required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Extract year from end date
+            year = end_date.split('-')[0] if '-' in end_date else end_date
+
+            # Update military course
+            db.execute(
+                'UPDATE military_courses SET serial_number = ?, institution_name = ?, start_date = ?, end_date = ?, '
+                'year = ?, certificate = ?, grade = ?, remarks = ? WHERE id = ? AND student_id = ?',
+                (serial_number, institution_name, start_date, end_date, year, certificate, grade, remarks, course_id, student_id)
+            )
+            db.commit()
+            flash('Military course updated successfully', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error updating military course: {str(e)}")
+            flash(f'Error updating military course: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/remove-military-course', methods=['POST'])
+def remove_military_course(student_id):
+    """Remove a military course from a student's record"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'POST':
+        course_id = request.form.get('course_id')
+
+        if not course_id:
+            flash('Course ID is required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Delete military course
+            db.execute(
+                'DELETE FROM military_courses WHERE id = ? AND student_id = ?',
+                (course_id, student_id)
+            )
+            db.commit()
+            flash('Military course removed successfully', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error removing military course: {str(e)}")
+            flash(f'Error removing military course: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/upload-certificate-manual', methods=['POST'])
+def upload_certificate_manual(student_id):
+    """Upload a certificate for a student"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'POST':
+        course_id = request.form.get('course_id')
+        issue_date = request.form.get('issue_date')
+        certificate_number = request.form.get('certificate_number')
+        certificate_file = request.files.get('certificate_file')
+
+        # Validate input
+        if not course_id or not issue_date or not certificate_file:
+            flash('Course, issue date, and certificate file are required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Check if certificate already exists
+            existing = db.execute(
+                'SELECT * FROM certificates WHERE student_id = ? AND course_id = ?',
+                (student_id, course_id)
+            ).fetchone()
+
+            if existing:
+                flash('Certificate already exists for this course', 'error')
+                return redirect(url_for('admin.student_detail', student_id=student_id))
+
+            # Save certificate file
+            if certificate_file and certificate_file.filename:
+                # Create certificates directory if it doesn't exist
+                certificates_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'certificates')
+                if not os.path.exists(certificates_dir):
+                    os.makedirs(certificates_dir)
+
+                # Generate unique filename
+                filename = secure_filename(certificate_file.filename)
+                file_ext = os.path.splitext(filename)[1]
+                unique_filename = f"{student['service_number']}_{course_id}_{int(time.time())}{file_ext}"
+                file_path = os.path.join('certificates', unique_filename)
+                full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_path)
+
+                # Save file
+                certificate_file.save(full_path)
+
+                # Insert certificate record
+                db.execute(
+                    'INSERT INTO certificates (student_id, course_id, file_path, issue_date, certificate_number) '
+                    'VALUES (?, ?, ?, ?, ?)',
+                    (student_id, course_id, file_path, issue_date, certificate_number)
+                )
+                db.commit()
+                flash('Certificate uploaded successfully', 'success')
+            else:
+                flash('Certificate file is required', 'error')
+        except Exception as e:
+            current_app.logger.error(f"Error uploading certificate: {str(e)}")
+            flash(f'Error uploading certificate: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/remove-certificate', methods=['POST'])
+def remove_certificate(student_id):
+    """Remove a certificate from a student's record"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'POST':
+        certificate_id = request.form.get('certificate_id')
+
+        if not certificate_id:
+            flash('Certificate ID is required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Get certificate details
+            certificate = db.execute(
+                'SELECT * FROM certificates WHERE id = ? AND student_id = ?',
+                (certificate_id, student_id)
+            ).fetchone()
+
+            if not certificate:
+                flash('Certificate not found', 'error')
+                return redirect(url_for('admin.student_detail', student_id=student_id))
+
+            # Delete certificate file
+            if certificate['file_path']:
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], certificate['file_path'])
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+            # Delete certificate record
+            db.execute(
+                'DELETE FROM certificates WHERE id = ? AND student_id = ?',
+                (certificate_id, student_id)
+            )
+            db.commit()
+            flash('Certificate removed successfully', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error removing certificate: {str(e)}")
+            flash(f'Error removing certificate: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/upload-document', methods=['POST'])
+def upload_document(student_id):
+    """Upload a document for a student"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'POST':
+        requirement_id = request.form.get('requirement_id')
+        document_file = request.files.get('document_file')
+
+        # Validate input
+        if not requirement_id or not document_file:
+            flash('Document type and file are required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Check if document already exists for this requirement
+            existing = db.execute(
+                'SELECT * FROM student_documents WHERE student_id = ? AND requirement_id = ?',
+                (student_id, requirement_id)
+            ).fetchone()
+
+            if existing:
+                # Delete existing document file
+                if existing['file_path']:
+                    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], existing['file_path'])
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+
+                # Delete existing document record
+                db.execute(
+                    'DELETE FROM student_documents WHERE id = ?',
+                    (existing['id'],)
+                )
+                db.commit()
+
+            # Save document file
+            if document_file and document_file.filename:
+                # Create documents directory if it doesn't exist
+                documents_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'documents')
+                if not os.path.exists(documents_dir):
+                    os.makedirs(documents_dir)
+
+                # Generate unique filename
+                filename = secure_filename(document_file.filename)
+                file_ext = os.path.splitext(filename)[1]
+                unique_filename = f"{student['service_number']}_{requirement_id}_{int(time.time())}{file_ext}"
+                file_path = os.path.join('documents', unique_filename)
+                full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_path)
+
+                # Save file
+                document_file.save(full_path)
+
+                # Get file size
+                file_size = os.path.getsize(full_path)
+
+                # Insert document record
+                db.execute(
+                    'INSERT INTO student_documents (student_id, requirement_id, file_path, original_filename, file_size) '
+                    'VALUES (?, ?, ?, ?, ?)',
+                    (student_id, requirement_id, file_path, filename, file_size)
+                )
+                db.commit()
+                flash('Document uploaded successfully', 'success')
+            else:
+                flash('Document file is required', 'error')
+        except Exception as e:
+            current_app.logger.error(f"Error uploading document: {str(e)}")
+            flash(f'Error uploading document: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/remove-document', methods=['POST'])
+def remove_document(student_id):
+    """Remove a document from a student's record"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'POST':
+        document_id = request.form.get('document_id')
+
+        if not document_id:
+            flash('Document ID is required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Get document details
+            document = db.execute(
+                'SELECT * FROM student_documents WHERE id = ? AND student_id = ?',
+                (document_id, student_id)
+            ).fetchone()
+
+            if not document:
+                flash('Document not found', 'error')
+                return redirect(url_for('admin.student_detail', student_id=student_id))
+
+            # Delete document file
+            if document['file_path']:
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], document['file_path'])
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+            # Delete document record
+            db.execute(
+                'DELETE FROM student_documents WHERE id = ? AND student_id = ?',
+                (document_id, student_id)
+            )
+            db.commit()
+            flash('Document removed successfully', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error removing document: {str(e)}")
+            flash(f'Error removing document: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/create-portal-account', methods=['GET', 'POST'])
+def create_student_portal(student_id):
+    """Create a portal account for a student"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'GET':
+        # Check if student already has a portal account
+        portal_user = db.execute(
+            'SELECT * FROM student_portal_users WHERE student_id = ?',
+            (student_id,)
+        ).fetchone()
+
+        if portal_user:
+            flash('Student already has a portal account', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        # Generate a random password
+        import string
+        import random
+        password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+
+        return render_template('admin/create_student_portal.html', student=student, password=password)
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        password = request.form.get('password')
+
+        # Validate input
+        if not password:
+            flash('Password is required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Check if student already has a portal account
+            portal_user = db.execute(
+                'SELECT * FROM student_portal_users WHERE student_id = ?',
+                (student_id,)
+            ).fetchone()
+
+            if portal_user:
+                flash('Student already has a portal account', 'error')
+                return redirect(url_for('admin.student_detail', student_id=student_id))
+
+            # Create portal account
+            from werkzeug.security import generate_password_hash
+
+            db.execute(
+                'INSERT INTO student_portal_users (student_id, email, phone, password, is_active, created_at) '
+                'VALUES (?, ?, ?, ?, 1, CURRENT_TIMESTAMP)',
+                (student_id, email, phone, generate_password_hash(password))
+            )
+
+            # Update student record to mark as portal registered
+            db.execute(
+                'UPDATE students SET is_portal_registered = 1, email = ?, phone = ? WHERE id = ?',
+                (email, phone, student_id)
+            )
+
+            db.commit()
+            flash('Portal account created successfully', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error creating portal account: {str(e)}")
+            flash(f'Error creating portal account: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/reset-password', methods=['GET', 'POST'])
+def reset_student_password(student_id):
+    """Reset a student's portal password"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    if request.method == 'GET':
+        # Generate a random password
+        import string
+        import random
+        password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        return render_template('admin/reset_password.html', student=student, password=password)
+
+    if request.method == 'POST':
+        password = request.form.get('password')
+
+        # Validate input
+        if not password:
+            flash('Password is required', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        try:
+            # Check if student has a portal account
+            portal_user = db.execute(
+                'SELECT * FROM student_portal_users WHERE student_id = ?',
+                (student_id,)
+            ).fetchone()
+
+            if not portal_user:
+                flash('Student does not have a portal account', 'error')
+                return redirect(url_for('admin.student_detail', student_id=student_id))
+
+            # Update password
+            from werkzeug.security import generate_password_hash
+
+            db.execute(
+                'UPDATE student_portal_users SET password = ? WHERE student_id = ?',
+                (generate_password_hash(password), student_id)
+            )
+
+            db.commit()
+            flash('Password reset successfully', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error resetting password: {str(e)}")
+            flash(f'Error resetting password: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/toggle-account', methods=['GET'])
+def toggle_student_account(student_id):
+    """Toggle a student's portal account status"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    try:
+        # Check if student has a portal account
+        portal_user = db.execute(
+            'SELECT * FROM student_portal_users WHERE student_id = ?',
+            (student_id,)
+        ).fetchone()
+
+        if not portal_user:
+            flash('Student does not have a portal account', 'error')
+            return redirect(url_for('admin.student_detail', student_id=student_id))
+
+        # Toggle account status
+        new_status = 0 if portal_user['is_active'] else 1
+
+        db.execute(
+            'UPDATE student_portal_users SET is_active = ? WHERE student_id = ?',
+            (new_status, student_id)
+        )
+
+        db.commit()
+
+        status_text = 'activated' if new_status else 'deactivated'
+        flash(f'Student portal account {status_text} successfully', 'success')
+    except Exception as e:
+        current_app.logger.error(f"Error toggling account status: {str(e)}")
+        flash(f'Error toggling account status: {str(e)}', 'error')
+
+    return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/students/<int:student_id>/documents/download')
+def download_student_documents(student_id):
+    """Download all documents for a student as a zip file"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get student details
+    student = db.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+
+    if not student:
+        flash('Student not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    # Get student documents
+    try:
+        student_documents = db.execute(
+            'SELECT sd.*, dr.name as requirement_name FROM student_documents sd '
+            'JOIN document_requirements dr ON sd.requirement_id = dr.id '
+            'WHERE sd.student_id = ?',
+            (student_id,)
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching student documents: {str(e)}")
+        flash('Error fetching student documents', 'error')
+        return redirect(url_for('admin.student_detail', student_id=student_id))
+
+    if not student_documents:
+        flash('No documents found for this student', 'warning')
+        return redirect(url_for('admin.student_detail', student_id=student_id))
+
+    try:
+        import io
+        import zipfile
+        from flask import send_file
+
+        # Create a zip file in memory
+        memory_file = io.BytesIO()
+        with zipfile.ZipFile(memory_file, 'w') as zf:
+            for doc in student_documents:
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], doc['file_path'])
+                if os.path.exists(file_path):
+                    # Add file to zip with a descriptive name
+                    zf.write(file_path, f"{doc['requirement_name']}_{doc['original_filename']}")
+
+        # Seek to the beginning of the stream
+        memory_file.seek(0)
+
+        # Send the zip file
+        return send_file(
+            memory_file,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=f"documents_{student['service_number']}.zip"
+        )
+    except Exception as e:
+        current_app.logger.error(f"Error creating zip file: {str(e)}")
+        flash('Error creating zip file', 'error')
+        return redirect(url_for('admin.student_detail', student_id=student_id))
+
+
+@admin_bp.route('/documents/<int:document_id>/view')
+def view_document(document_id):
+    """View a document"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get document details
+    document = db.execute('SELECT * FROM student_documents WHERE id = ?', (document_id,)).fetchone()
+
+    if not document:
+        flash('Document not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    # Get the file path
+    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], document['file_path'])
+
+    if not os.path.exists(file_path):
+        flash('Document file not found', 'error')
+        return redirect(url_for('admin.student_detail', student_id=document['student_id']))
+
+    try:
+        from flask import send_file
+        return send_file(file_path)
+    except Exception as e:
+        current_app.logger.error(f"Error viewing document: {str(e)}")
+        flash('Error viewing document', 'error')
+        return redirect(url_for('admin.student_detail', student_id=document['student_id']))
+
+
+@admin_bp.route('/documents/<int:document_id>/download')
+def download_document(document_id):
+    """Download a document"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get document details
+    document = db.execute('SELECT * FROM student_documents WHERE id = ?', (document_id,)).fetchone()
+
+    if not document:
+        flash('Document not found', 'error')
+        return redirect(url_for('admin.students'))
+
+    # Get the file path
+    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], document['file_path'])
+
+    if not os.path.exists(file_path):
+        flash('Document file not found', 'error')
+        return redirect(url_for('admin.student_detail', student_id=document['student_id']))
+
+    try:
+        from flask import send_file
+        return send_file(
+            file_path,
+            as_attachment=True,
+            download_name=document['original_filename']
+        )
+    except Exception as e:
+        current_app.logger.error(f"Error downloading document: {str(e)}")
+        flash('Error downloading document', 'error')
+        return redirect(url_for('admin.student_detail', student_id=document['student_id']))
 
 
 @admin_bp.route('/document-requirements')
@@ -665,6 +1768,12 @@ def settings():
 
     # Import settings utilities
     from .settings_utils import get_all_settings, update_settings, get_setting
+
+    # Apply impact stats schema if needed
+    try:
+        apply_impact_stats_schema()
+    except Exception as e:
+        current_app.logger.error(f"Error applying impact stats schema: {str(e)}")
 
     # Get current date for the system information section
     now = datetime.now()
@@ -1733,3 +2842,163 @@ def reorder_announcements():
     except Exception as e:
         db.rollback()
         return jsonify({'success': False, 'message': f'Error reordering announcements: {str(e)}'}), 500
+
+
+# Impact Statistics Management Routes
+@admin_bp.route('/impact-stats')
+def impact_stats():
+    """Manage impact statistics"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Get database connection
+    db = get_db()
+
+    # Get all impact stats
+    try:
+        # Apply the schema first to ensure the table exists
+        apply_impact_stats_schema()
+
+        stats = db.execute('SELECT * FROM impact_stats ORDER BY display_order').fetchall()
+
+        # Get active stats for preview
+        active_stats = db.execute('SELECT * FROM impact_stats WHERE active = 1 ORDER BY display_order').fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching impact stats: {str(e)}")
+        stats = []
+        active_stats = []
+        flash(f'Error loading impact statistics: {str(e)}. The table may not exist yet.', 'warning')
+
+    return render_template('admin/impact_stats.html', stats=stats, active_stats=active_stats)
+
+
+@admin_bp.route('/impact-stats/add', methods=['POST'])
+def add_impact_stat():
+    """Add a new impact statistic"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        value = request.form.get('value')
+        icon = request.form.get('icon')
+        color = request.form.get('color')
+        display_order = request.form.get('display_order', 0)
+        active = 1 if request.form.get('active') else 0
+
+        # Validate input
+        error = None
+        if not title:
+            error = 'Title is required.'
+        elif not value:
+            error = 'Value is required.'
+
+        if error is not None:
+            flash(error, 'error')
+        else:
+            db = get_db()
+            try:
+                db.execute(
+                    'INSERT INTO impact_stats (title, value, icon, color, display_order, active) VALUES (?, ?, ?, ?, ?, ?)',
+                    (title, value, icon, color, display_order, active)
+                )
+                db.commit()
+                flash('Impact statistic added successfully!', 'success')
+            except Exception as e:
+                db.rollback()
+                flash(f'Error adding impact statistic: {str(e)}', 'error')
+
+    return redirect(url_for('admin.impact_stats'))
+
+
+@admin_bp.route('/impact-stats/edit', methods=['POST'])
+def edit_impact_stat():
+    """Edit an impact statistic"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    if request.method == 'POST':
+        stat_id = request.form.get('id')
+        title = request.form.get('title')
+        value = request.form.get('value')
+        icon = request.form.get('icon')
+        color = request.form.get('color')
+        display_order = request.form.get('display_order', 0)
+        active = 1 if request.form.get('active') else 0
+
+        # Validate input
+        error = None
+        if not stat_id:
+            error = 'Statistic ID is required.'
+        elif not title:
+            error = 'Title is required.'
+        elif not value:
+            error = 'Value is required.'
+
+        if error is not None:
+            flash(error, 'error')
+        else:
+            db = get_db()
+            try:
+                db.execute(
+                    'UPDATE impact_stats SET title = ?, value = ?, icon = ?, color = ?, display_order = ?, active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+                    (title, value, icon, color, display_order, active, stat_id)
+                )
+                db.commit()
+                flash('Impact statistic updated successfully!', 'success')
+            except Exception as e:
+                db.rollback()
+                flash(f'Error updating impact statistic: {str(e)}', 'error')
+
+    return redirect(url_for('admin.impact_stats'))
+
+
+@admin_bp.route('/impact-stats/delete', methods=['POST'])
+def delete_impact_stat():
+    """Delete an impact statistic"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    if request.method == 'POST':
+        stat_id = request.form.get('id')
+
+        if not stat_id:
+            flash('Statistic ID is required.', 'error')
+        else:
+            db = get_db()
+            try:
+                db.execute('DELETE FROM impact_stats WHERE id = ?', (stat_id,))
+                db.commit()
+                flash('Impact statistic deleted successfully!', 'success')
+            except Exception as e:
+                db.rollback()
+                flash(f'Error deleting impact statistic: {str(e)}', 'error')
+
+    return redirect(url_for('admin.impact_stats'))
+
+
+@admin_bp.route('/impact-stats/<int:stat_id>/toggle', methods=['GET'])
+def toggle_impact_stat(stat_id):
+    """Toggle the active status of an impact statistic"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    db = get_db()
+
+    # Get the current status
+    stat = db.execute('SELECT active FROM impact_stats WHERE id = ?', (stat_id,)).fetchone()
+
+    if not stat:
+        flash('Statistic not found', 'error')
+    else:
+        try:
+            # Toggle the status
+            new_status = 0 if stat['active'] else 1
+            db.execute('UPDATE impact_stats SET active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', (new_status, stat_id))
+            db.commit()
+            flash('Impact statistic status updated successfully!', 'success')
+        except Exception as e:
+            db.rollback()
+            flash(f'Error updating impact statistic status: {str(e)}', 'error')
+
+    return redirect(url_for('admin.impact_stats'))

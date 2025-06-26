@@ -1,0 +1,286 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Manage Impact Statistics{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Manage Impact Statistics</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Impact Statistics</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Impact Statistics
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addStatModal">
+                    <i class="fas fa-plus me-1"></i> Add New Statistic
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            {% include 'admin/includes/flash_messages.html' %}
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="impactStatsTable">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Title</th>
+                            <th>Value</th>
+                            <th>Icon</th>
+                            <th>Color</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in stats %}
+                        <tr>
+                            <td>{{ stat.display_order }}</td>
+                            <td>{{ stat.title }}</td>
+                            <td>{{ stat.value }}</td>
+                            <td><i class="{{ stat.icon }}"></i> {{ stat.icon }}</td>
+                            <td><span class="badge bg-{{ stat.color }}">{{ stat.color }}</span></td>
+                            <td>
+                                {% if stat.active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-primary btn-sm edit-stat"
+                                            data-id="{{ stat.id }}"
+                                            data-title="{{ stat.title }}"
+                                            data-value="{{ stat.value }}"
+                                            data-icon="{{ stat.icon }}"
+                                            data-color="{{ stat.color }}"
+                                            data-order="{{ stat.display_order }}"
+                                            data-active="{{ stat.active }}"
+                                            data-bs-toggle="modal" data-bs-target="#editStatModal">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <a href="{{ url_for('admin.toggle_impact_stat', stat_id=stat.id) }}" class="btn btn-warning btn-sm">
+                                        {% if stat.active %}
+                                        <i class="fas fa-eye-slash"></i>
+                                        {% else %}
+                                        <i class="fas fa-eye"></i>
+                                        {% endif %}
+                                    </a>
+                                    <button type="button" class="btn btn-danger btn-sm delete-stat"
+                                            data-id="{{ stat.id }}"
+                                            data-title="{{ stat.title }}"
+                                            data-bs-toggle="modal" data-bs-target="#deleteStatModal">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle me-1"></i>
+            Preview
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for stat in active_stats %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 border-{{ stat.color }}">
+                        <div class="card-body text-center">
+                            <i class="{{ stat.icon }} fa-3x text-{{ stat.color }} mb-3"></i>
+                            <h2 class="stat-number">{{ stat.value }}</h2>
+                            <div class="stat-label">{{ stat.title }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Stat Modal -->
+<div class="modal fade" id="addStatModal" tabindex="-1" aria-labelledby="addStatModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('admin.add_impact_stat') }}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addStatModalLabel">Add New Impact Statistic</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="value" class="form-label">Value</label>
+                        <input type="text" class="form-control" id="value" name="value" required>
+                        <small class="form-text text-muted">Example: "50+", "5,000+", etc.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="icon" class="form-label">Icon</label>
+                        <input type="text" class="form-control" id="icon" name="icon" value="fas fa-chart-bar">
+                        <small class="form-text text-muted">FontAwesome icon class (e.g., "fas fa-book")</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="color" class="form-label">Color</label>
+                        <select class="form-select" id="color" name="color">
+                            <option value="primary">Primary (Blue)</option>
+                            <option value="secondary">Secondary (Gray)</option>
+                            <option value="success">Success (Green)</option>
+                            <option value="danger">Danger (Red)</option>
+                            <option value="warning">Warning (Yellow)</option>
+                            <option value="info">Info (Light Blue)</option>
+                            <option value="dark">Dark (Black)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="display_order" class="form-label">Display Order</label>
+                        <input type="number" class="form-control" id="display_order" name="display_order" value="0" min="0">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="active" name="active" value="1" checked>
+                        <label class="form-check-label" for="active">Active</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Statistic</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Stat Modal -->
+<div class="modal fade" id="editStatModal" tabindex="-1" aria-labelledby="editStatModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('admin.edit_impact_stat') }}" method="post">
+                <input type="hidden" id="edit_id" name="id">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editStatModalLabel">Edit Impact Statistic</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="edit_title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_value" class="form-label">Value</label>
+                        <input type="text" class="form-control" id="edit_value" name="value" required>
+                        <small class="form-text text-muted">Example: "50+", "5,000+", etc.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_icon" class="form-label">Icon</label>
+                        <input type="text" class="form-control" id="edit_icon" name="icon">
+                        <small class="form-text text-muted">FontAwesome icon class (e.g., "fas fa-book")</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_color" class="form-label">Color</label>
+                        <select class="form-select" id="edit_color" name="color">
+                            <option value="primary">Primary (Blue)</option>
+                            <option value="secondary">Secondary (Gray)</option>
+                            <option value="success">Success (Green)</option>
+                            <option value="danger">Danger (Red)</option>
+                            <option value="warning">Warning (Yellow)</option>
+                            <option value="info">Info (Light Blue)</option>
+                            <option value="dark">Dark (Black)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_display_order" class="form-label">Display Order</label>
+                        <input type="number" class="form-control" id="edit_display_order" name="display_order" min="0">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_active" name="active" value="1">
+                        <label class="form-check-label" for="edit_active">Active</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Stat Modal -->
+<div class="modal fade" id="deleteStatModal" tabindex="-1" aria-labelledby="deleteStatModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('admin.delete_impact_stat') }}" method="post">
+                <input type="hidden" id="delete_id" name="id">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteStatModalLabel">Delete Impact Statistic</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the statistic "<span id="delete_title"></span>"?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable
+        $('#impactStatsTable').DataTable({
+            order: [[0, 'asc']]
+        });
+
+        // Edit Stat Modal
+        $('.edit-stat').click(function() {
+            const id = $(this).data('id');
+            const title = $(this).data('title');
+            const value = $(this).data('value');
+            const icon = $(this).data('icon');
+            const color = $(this).data('color');
+            const order = $(this).data('order');
+            const active = $(this).data('active');
+
+            $('#edit_id').val(id);
+            $('#edit_title').val(title);
+            $('#edit_value').val(value);
+            $('#edit_icon').val(icon);
+            $('#edit_color').val(color);
+            $('#edit_display_order').val(order);
+            $('#edit_active').prop('checked', active == 1);
+        });
+
+        // Delete Stat Modal
+        $('.delete-stat').click(function() {
+            const id = $(this).data('id');
+            const title = $(this).data('title');
+
+            $('#delete_id').val(id);
+            $('#delete_title').text(title);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,292 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Student Profile - {{ student.surname }}, {{ student.other_names }}{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printable-content, #printable-content * {
+            visibility: visible;
+        }
+        #printable-content {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+    }
+    
+    .print-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .print-header img {
+        max-width: 100px;
+        margin-bottom: 10px;
+    }
+    
+    .print-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .print-subtitle {
+        font-size: 18px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+    
+    .student-photo-print {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border: 1px solid #ddd;
+    }
+    
+    .section-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .info-row {
+        margin-bottom: 8px;
+    }
+    
+    .info-label {
+        font-weight: bold;
+        color: #555;
+    }
+    
+    .document-item {
+        margin-bottom: 10px;
+    }
+    
+    .document-name {
+        font-weight: bold;
+    }
+    
+    .document-info {
+        color: #666;
+        font-size: 0.9em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4 no-print">
+        <div class="col-md-6">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.students') }}">Students</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.student_detail', student_id=student.id) }}">Student Details</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Print Profile</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-6 text-md-end no-print">
+            <button type="button" class="btn btn-primary" onclick="window.print()">
+                <i class="fas fa-print me-2"></i> Print Now
+            </button>
+            <a href="{{ url_for('admin.student_detail', student_id=student.id) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Back to Details
+            </a>
+        </div>
+    </div>
+    
+    <div id="printable-content">
+        <!-- Print Header -->
+        <div class="print-header">
+            <img src="{{ url_for('static', filename='images/na_logo.png') }}" alt="Nigerian Army Logo">
+            <div class="print-title">NIGERIAN ARMY SCHOOL OF SIGNALS</div>
+            <div class="print-subtitle">STUDENT PROFILE RECORD</div>
+        </div>
+        
+        <!-- Student Basic Information -->
+        <div class="row mb-4">
+            <div class="col-md-3 text-center">
+                {% if student.passport_photo %}
+                <img src="{{ url_for('static', filename='uploads/passport_photos/' + student.passport_photo) }}" class="student-photo-print" alt="Student Photo">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/placeholder-user.png') }}" class="student-photo-print" alt="Student Photo">
+                {% endif %}
+            </div>
+            <div class="col-md-9">
+                <h2>{{ student.rank }} {{ student.surname }}, {{ student.other_names }}</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">Service Number:</span> {{ student.service_number }}
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Gender:</span> {{ student.gender }}
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Date of Birth:</span> {{ student.date_of_birth }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">Corps:</span> {{ student.corps or 'Not Assigned' }}
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Current Unit:</span> {{ student.current_unit }}
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Years in Service:</span> {{ student.years_in_service }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Military Information -->
+        <div class="section-title">Military Information</div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-row">
+                    <span class="info-label">Date of Commission/Enlistment:</span> {{ student.date_of_commission }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Rank:</span> {{ student.rank }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-row">
+                    <span class="info-label">Corps:</span> {{ student.corps or 'Not Assigned' }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Current Unit:</span> {{ student.current_unit }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Information -->
+        <div class="section-title">Contact Information</div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-row">
+                    <span class="info-label">Phone Number:</span> {{ student.phone_number or 'Not provided' }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span> {{ student.email or 'Not provided' }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-row">
+                    <span class="info-label">Address:</span> {{ student.address or 'Not provided' }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Educational Background -->
+        <div class="section-title">Educational Background</div>
+        {% if student_education %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Institution</th>
+                        <th>Qualification</th>
+                        <th>Course</th>
+                        <th>Year</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for edu in student_education %}
+                    <tr>
+                        <td>{{ edu.institution }}</td>
+                        <td>{{ edu.qualification }}</td>
+                        <td>{{ edu.course }}</td>
+                        <td>{{ edu.year }}</td>
+                        <td>{{ edu.grade }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No educational records available.</p>
+        {% endif %}
+        
+        <!-- Military Courses -->
+        <div class="section-title">Military Courses</div>
+        {% if military_courses %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Course Name</th>
+                        <th>Institution</th>
+                        <th>Year</th>
+                        <th>Certificate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in military_courses %}
+                    <tr>
+                        <td>{{ course.name }}</td>
+                        <td>{{ course.institution }}</td>
+                        <td>{{ course.year }}</td>
+                        <td>{{ course.certificate }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No military course records available.</p>
+        {% endif %}
+        
+        <!-- Documents -->
+        <div class="section-title">Uploaded Documents</div>
+        {% if student_documents %}
+            <div class="row">
+                {% for doc in student_documents %}
+                <div class="col-md-6">
+                    <div class="document-item">
+                        <div class="document-name">{{ doc.requirement_name }}</div>
+                        <div class="document-info">
+                            <i class="fas fa-file"></i> {{ doc.original_filename }}
+                            <span class="text-muted">({{ (doc.file_size / 1024)|round(1) }} KB)</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No documents uploaded.</p>
+        {% endif %}
+        
+        <!-- Footer -->
+        <div class="mt-5 text-center">
+            <p>Printed on: {{ now.strftime('%d %B, %Y') }}</p>
+            <p>This document is an official record of the Nigerian Army School of Signals.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-print when the page loads (optional)
+        // window.print();
+    });
+</script>
+{% endblock %}

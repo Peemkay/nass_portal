@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Portal Registration{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css', v='1.1') }}">
+<style>
+    .registration-card {
+        max-width: 800px;
+        margin: 0 auto;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .registration-header {
+        background-color: #3c78c3;
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .registration-body {
+        padding: 30px;
+    }
+
+    .registration-footer {
+        background-color: #f8f9fa;
+        padding: 15px;
+        text-align: center;
+        border-top: 1px solid #eee;
+    }
+
+    .registration-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .form-section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #3c78c3;
+    }
+
+    .password-requirements {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+        margin-top: 10px;
+    }
+
+    .password-requirements ul {
+        margin-bottom: 0;
+        padding-left: 20px;
+    }
+
+    .password-requirements li {
+        margin-bottom: 5px;
+    }
+
+    .password-requirements li:last-child {
+        margin-bottom: 0;
+    }
+
+    .password-strength {
+        height: 5px;
+        border-radius: 5px;
+        margin-top: 10px;
+        transition: all 0.3s;
+    }
+
+    .password-strength.weak {
+        background-color: #dc3545;
+        width: 25%;
+    }
+
+    .password-strength.medium {
+        background-color: #ffc107;
+        width: 50%;
+    }
+
+    .password-strength.strong {
+        background-color: #28a745;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="registration-card">
+                <div class="registration-header">
+                    <div class="registration-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h2>Student Portal Registration</h2>
+                    <p class="mb-0">Create your account to access your course history and certificates</p>
+                </div>
+
+                <div class="registration-body">
+                    <form method="post" action="{{ url_for('student.register_portal') }}" id="registrationForm">
+                        <div class="form-section">
+                            <h3 class="form-section-title">
+                                <i class="fas fa-id-card me-2"></i> Verification Information
+                            </h3>
+                            <p class="text-muted mb-4">Please enter your service number and date of birth to verify your identity.</p>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="service_number" class="form-label">Service Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                        <input type="text" class="form-control" id="service_number" name="service_number" value="{{ session.get('registration_form_data', {}).get('service_number', request.form.get('service_number', '')) }}" required>
+                                    </div>
+                                    <div class="form-text">Enter your military service number (any format accepted)</div>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="date_of_birth" class="form-label">Date of Birth</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ session.get('registration_form_data', {}).get('date_of_birth', request.form.get('date_of_birth', '')) }}" required>
+                                    </div>
+                                    <div class="form-text">Enter your date of birth as shown in your records</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="form-section-title">
+                                <i class="fas fa-envelope me-2"></i> Contact Information
+                            </h3>
+                            <p class="text-muted mb-4">Please provide your contact information for account recovery and notifications.</p>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                        <input type="email" class="form-control" id="email" name="email" value="{{ session.get('registration_form_data', {}).get('email', request.form.get('email', '')) }}" required>
+                                    </div>
+                                    <div class="form-text">We'll send important notifications to this email</div>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ session.get('registration_form_data', {}).get('phone', request.form.get('phone', '')) }}" required>
+                                    </div>
+                                    <div class="form-text">Enter your active phone number</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="form-section-title">
+                                <i class="fas fa-lock me-2"></i> Account Security
+                            </h3>
+                            <p class="text-muted mb-4">Create a secure password for your account.</p>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="password" class="form-label">Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input type="password" class="form-control" id="password" name="password" required>
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="password-strength" id="passwordStrength"></div>
+                                    <div class="password-requirements mt-2">
+                                        <p class="mb-2"><strong>Password Requirements:</strong></p>
+                                        <ul>
+                                            <li>At least 8 characters long</li>
+                                            <li>Include at least one uppercase letter</li>
+                                            <li>Include at least one number</li>
+                                            <li>Include at least one special character</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="confirm_password" class="form-label">Confirm Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Re-enter your password to confirm</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-user-plus me-2"></i> Create Account
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-grid">
+                                    <a href="{{ url_for('student.clear_form') }}" class="btn btn-outline-secondary btn-lg" id="clearFormBtn">
+                                        <i class="fas fa-eraser me-2"></i> Clear Form
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="registration-footer">
+                    <p class="mb-0">Already have an account? <a href="{{ url_for('student.login') }}">Login here</a></p>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('main.registration') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Back to Registration Options
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4>Nigerian Army School of Signals - Student Portal Terms of Use</h4>
+                <p>By accessing and using the Nigerian Army School of Signals Student Portal, you agree to comply with these Terms and Conditions.</p>
+
+                <h5>1. Account Security</h5>
+                <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must immediately notify the administration of any unauthorized use of your account.</p>
+
+                <h5>2. Acceptable Use</h5>
+                <p>The Student Portal is provided for educational and administrative purposes only. You agree not to use the portal for any unlawful or prohibited activities.</p>
+
+                <h5>3. Privacy</h5>
+                <p>Your use of the Student Portal is subject to our Privacy Policy, which governs how we collect, use, and disclose your personal information.</p>
+
+                <h5>4. Modifications</h5>
+                <p>The Nigerian Army School of Signals reserves the right to modify these Terms and Conditions at any time. Continued use of the portal after such modifications constitutes your acceptance of the revised terms.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Privacy Policy Modal -->
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="privacyModalLabel">Privacy Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4>Nigerian Army School of Signals - Student Portal Privacy Policy</h4>
+                <p>This Privacy Policy explains how we collect, use, and protect your personal information when you use the Nigerian Army School of Signals Student Portal.</p>
+
+                <h5>1. Information Collection</h5>
+                <p>We collect personal information such as your name, service number, contact details, and academic records to provide you with access to the Student Portal and its services.</p>
+
+                <h5>2. Information Use</h5>
+                <p>We use your personal information to manage your student account, provide access to courses and educational resources, communicate important information, and improve our services.</p>
+
+                <h5>3. Information Security</h5>
+                <p>We implement appropriate security measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction.</p>
+
+                <h5>4. Information Sharing</h5>
+                <p>We do not share your personal information with third parties except as required by law or with your consent.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                const icon = this.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        // Password strength meter
+        const passwordInput = document.getElementById('password');
+        const passwordStrength = document.getElementById('passwordStrength');
+
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+
+            if (password.length >= 8) strength += 1;
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+
+            passwordStrength.className = 'password-strength';
+
+            if (strength === 0) {
+                passwordStrength.style.width = '0';
+            } else if (strength <= 2) {
+                passwordStrength.classList.add('weak');
+            } else if (strength === 3) {
+                passwordStrength.classList.add('medium');
+            } else {
+                passwordStrength.classList.add('strong');
+            }
+        });
+
+        // Form validation
+        const form = document.getElementById('registrationForm');
+        const confirmPassword = document.getElementById('confirm_password');
+
+        // Load saved form data from localStorage if available
+        try {
+            const savedData = localStorage.getItem('registrationFormData');
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+
+                // Fill in form fields except passwords
+                if (formData.service_number) document.getElementById('service_number').value = formData.service_number;
+                if (formData.date_of_birth) document.getElementById('date_of_birth').value = formData.date_of_birth;
+                if (formData.email) document.getElementById('email').value = formData.email;
+                if (formData.phone) document.getElementById('phone').value = formData.phone;
+            }
+        } catch (e) {
+            console.error('Error loading saved form data:', e);
+        }
+
+        // Save form data to localStorage on input change
+        const saveFormData = function() {
+            try {
+                const formData = {
+                    service_number: document.getElementById('service_number').value,
+                    date_of_birth: document.getElementById('date_of_birth').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value
+                };
+
+                localStorage.setItem('registrationFormData', JSON.stringify(formData));
+            } catch (e) {
+                console.error('Error saving form data:', e);
+            }
+        };
+
+        // Add input event listeners to save form data
+        document.getElementById('service_number').addEventListener('input', saveFormData);
+        document.getElementById('date_of_birth').addEventListener('change', saveFormData);
+        document.getElementById('email').addEventListener('input', saveFormData);
+        document.getElementById('phone').addEventListener('input', saveFormData);
+
+        // Clear localStorage when clear form button is clicked
+        document.getElementById('clearFormBtn').addEventListener('click', function() {
+            localStorage.removeItem('registrationFormData');
+        });
+
+        form.addEventListener('submit', function(event) {
+            if (passwordInput.value !== confirmPassword.value) {
+                event.preventDefault();
+                alert('Passwords do not match. Please try again.');
+                confirmPassword.focus();
+            } else {
+                // Clear localStorage data on successful submission
+                localStorage.removeItem('registrationFormData');
+            }
+        });
+    });
+</script>
+{% endblock %}

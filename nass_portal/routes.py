@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, jsonify
 import os
 import time
+import json
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from .db import get_db
@@ -46,7 +47,16 @@ def index():
         'SELECT * FROM departments WHERE is_active = 1 ORDER BY display_order'
     ).fetchall()
 
-    return render_template('index.html', now=now, announcements=announcements, courses=courses, departments=departments)
+    # Get impact statistics
+    try:
+        impact_stats = db.execute(
+            'SELECT * FROM impact_stats WHERE active = 1 ORDER BY display_order'
+        ).fetchall()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching impact stats: {str(e)}")
+        impact_stats = []
+
+    return render_template('index.html', now=now, announcements=announcements, courses=courses, departments=departments, impact_stats=impact_stats)
 
 
 @bp.route('/clear-session', methods=['GET', 'POST'])
@@ -102,16 +112,156 @@ def view_announcement(announcement_id):
 
 @bp.route('/registration')
 def registration():
-    # Clear any existing session data
-    session.clear()
+    """Registration landing page"""
+    # Get database connection
+    db = get_db()
 
-    # Get registration status
-    reg_status = get_registration_status()
+    # Get current active quarter for registration deadline
+    try:
+        quarter = db.execute('SELECT * FROM registration_quarters WHERE is_active = 1 LIMIT 1').fetchone()
+        registration_deadline = quarter['registration_deadline'] if quarter else None
+    except Exception as e:
+        current_app.logger.error(f"Error fetching registration quarter: {str(e)}")
+        registration_deadline = None
 
-    return render_template('registration.html', reg_status=reg_status)
+    return render_template('registration_landing.html', registration_deadline=registration_deadline)
+
+@bp.route('/continue-registration', methods=['POST'])
+def continue_registration():
+    """Continue an existing registration"""
+    service_number = request.form.get('service_number')
+    date_of_birth = request.form.get('date_of_birth')
+
+    if not service_number or not date_of_birth:
+        flash('Service number and date of birth are required.', 'error')
+        return redirect(url_for('main.registration'))
+
+    # Get database connection
+    db = get_db()
+
+    # Check if there's a saved registration
+    saved_registration = db.execute(
+        'SELECT * FROM registration_progress WHERE service_number = ? AND date_of_birth = ?',
+        (service_number, date_of_birth)
+    ).fetchone()
+
+    if not saved_registration:
+        flash('No saved registration found with these credentials.', 'error')
+        return redirect(url_for('main.registration'))
+
+    # Load the saved session data
+    try:
+        session_data = json.loads(saved_registration['session_data'])
+
+        # Update the current session with saved data
+        for key, value in session_data.items():
+            session[key] = value
+
+        # Redirect to the appropriate page
+        current_page = saved_registration['current_page']
+        if current_page == 1:
+            return redirect(url_for('main.registration_page_1'))
+        elif current_page == 2:
+            return redirect(url_for('main.registration_page_2'))
+        elif current_page == 3:
+            return redirect(url_for('main.registration_page_3'))
+        elif current_page == 4:
+            return redirect(url_for('main.registration_page_4'))
+        elif current_page == 5:
+            return redirect(url_for('main.registration_page_5'))
+        elif current_page == 6:
+            return redirect(url_for('main.registration_page_6'))
+        else:
+            return redirect(url_for('main.registration_page_1'))
+
+    except Exception as e:
+        current_app.logger.error(f"Error loading saved registration: {str(e)}")
+        flash('Error loading saved registration. Please start a new registration.', 'error')
+        return redirect(url_for('main.registration'))
+
+@bp.route('/student-login', methods=['GET', 'POST'])
+def student_login():
+    """Student login page"""
+    return redirect(url_for('student.login'))
+
+@bp.route('/student-portal-register', methods=['GET', 'POST'])
+def student_portal_register():
+    """Student portal registration page"""
+    return redirect(url_for('student.register_portal'))
+
+@bp.route('/save-registration-progress', methods=['POST'])
+def save_registration_progress():
+    """Save registration progress"""
+    try:
+        # Get required fields
+        service_number = request.form.get('service_number')
+        date_of_birth = request.form.get('date_of_birth')
+        current_page = request.form.get('current_page', 1)
+
+        if not service_number or not date_of_birth:
+            return jsonify({
+                'success': False,
+                'message': 'Service number and date of birth are required.'
+            })
+
+        # Create a copy of the session data
+        session_data = {}
+        for key, value in session.items():
+            # Skip Flask session metadata
+            if not key.startswith('_'):
+                session_data[key] = value
+
+        # Convert session data to JSON
+        session_json = json.dumps(session_data)
+
+        # Get database connection
+        db = get_db()
+
+        # Check if a record already exists for this service number and DOB
+        existing = db.execute(
+            'SELECT id FROM registration_progress WHERE service_number = ? AND date_of_birth = ?',
+            (service_number, date_of_birth)
+        ).fetchone()
+
+        if existing:
+            # Update existing record
+            db.execute(
+                'UPDATE registration_progress SET current_page = ?, session_data = ?, updated_at = CURRENT_TIMESTAMP '
+                'WHERE service_number = ? AND date_of_birth = ?',
+                (current_page, session_json, service_number, date_of_birth)
+            )
+        else:
+            # Insert new record
+            db.execute(
+                'INSERT INTO registration_progress (service_number, date_of_birth, current_page, session_data) '
+                'VALUES (?, ?, ?, ?)',
+                (service_number, date_of_birth, current_page, session_json)
+            )
+
+        db.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Your progress has been saved. You can continue later using your service number and date of birth.'
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Error saving registration progress: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while saving your progress. Please try again.'
+        })
 
 @bp.route('/registration_page_1', methods=['GET', 'POST'])
 def registration_page_1():
+    # Check if student is logged in to the portal
+    is_logged_in = session.get('student_logged_in', False)
+
+    # If not logged in, redirect to student portal registration
+    if not is_logged_in:
+        flash('You must register and log in to the student portal before you can register for a course.', 'warning')
+        return redirect(url_for('student.register_portal'))
+
     # Check if registration is open
     if not is_registration_open():
         flash('Registration is currently closed.', 'error')
@@ -344,6 +494,14 @@ def registration_page_1():
 
 @bp.route('/registration_page_2', methods=['GET', 'POST'])
 def registration_page_2():
+    # Check if student is logged in to the portal
+    is_logged_in = session.get('student_logged_in', False)
+
+    # If not logged in, redirect to student portal registration
+    if not is_logged_in:
+        flash('You must register and log in to the student portal before you can register for a course.', 'warning')
+        return redirect(url_for('student.register_portal'))
+
     # Check if registration is open
     if not is_registration_open():
         flash('Registration is currently closed.', 'error')
@@ -388,6 +546,14 @@ def registration_page_2():
 
 @bp.route('/registration_page_3', methods=['GET', 'POST'])
 def registration_page_3():
+    # Check if student is logged in to the portal
+    is_logged_in = session.get('student_logged_in', False)
+
+    # If not logged in, redirect to student portal registration
+    if not is_logged_in:
+        flash('You must register and log in to the student portal before you can register for a course.', 'warning')
+        return redirect(url_for('student.register_portal'))
+
     # Check if registration is open
     if not is_registration_open():
         flash('Registration is currently closed.', 'error')
@@ -424,6 +590,14 @@ def registration_page_3():
 
 @bp.route('/registration_page_4', methods=['GET', 'POST'])
 def registration_page_4():
+    # Check if student is logged in to the portal
+    is_logged_in = session.get('student_logged_in', False)
+
+    # If not logged in, redirect to student portal registration
+    if not is_logged_in:
+        flash('You must register and log in to the student portal before you can register for a course.', 'warning')
+        return redirect(url_for('student.register_portal'))
+
     # Check if registration is open
     if not is_registration_open():
         flash('Registration is currently closed.', 'error')
@@ -482,6 +656,14 @@ def registration_page_4():
 
 @bp.route('/registration_page_5', methods=['GET', 'POST'])
 def registration_page_5():
+    # Check if student is logged in to the portal
+    is_logged_in = session.get('student_logged_in', False)
+
+    # If not logged in, redirect to student portal registration
+    if not is_logged_in:
+        flash('You must register and log in to the student portal before you can register for a course.', 'warning')
+        return redirect(url_for('student.register_portal'))
+
     # Check if registration is open
     if not is_registration_open():
         flash('Registration is currently closed.', 'error')
@@ -509,6 +691,11 @@ def registration_page_5():
             for field in education_fields:
                 session[field] = request.form.getlist(f'{field}[]')
                 current_app.logger.debug(f"Saved {field}: {session[field]}")
+
+            # Save military information
+            session['corps'] = request.form.get('corps')
+            session['date_of_commission'] = request.form.get('date_of_commission')
+            session['years_in_service'] = request.form.get('years_in_service')
 
             # Save NASS specific information
             session['nass_course'] = request.form.get('nass_course')
@@ -566,6 +753,14 @@ def registration_page_5():
 
 @bp.route('/registration_page_6', methods=['GET', 'POST'])
 def registration_page_6():
+    # Check if student is logged in to the portal
+    is_logged_in = session.get('student_logged_in', False)
+
+    # If not logged in, redirect to student portal registration
+    if not is_logged_in:
+        flash('You must register and log in to the student portal before you can register for a course.', 'warning')
+        return redirect(url_for('student.register_portal'))
+
     # Check if registration is open
     if not is_registration_open():
         flash('Registration is currently closed.', 'error')
@@ -613,7 +808,9 @@ def registration_page_6():
                     # Generate unique filename
                     filename = secure_filename(document_file.filename)
                     file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
-                    unique_filename = f"{session.get('service_number')}_{req['id']}_{int(time.time())}.{file_ext}"
+                    # Sanitize service number to avoid path issues
+                    service_number = str(session.get('service_number', '')).replace('/', '_').replace('\\', '_')
+                    unique_filename = f"{service_number}_{req['id']}_{int(time.time())}.{file_ext}"
 
                     # Save file
                     upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'documents')
@@ -706,9 +903,10 @@ def registration_page_7():
                 'nok_address_1': session.get('nok_address_1'),
 
                 # Military Information (Page 5)
-                'military_courses': session.get('military_courses'),
+                'corps': session.get('corps'),
                 'current_unit': session.get('current_unit'),
-                'date_of_enlistment': session.get('date_of_enlistment'),
+                'date_of_commission': session.get('date_of_commission'),
+                'years_in_service': session.get('years_in_service'),
 
                 # Medical Information (Page 6)
                 'blood_group': session.get('blood_group'),
@@ -744,9 +942,15 @@ def registration_page_7():
                     flash('A student with this service number already exists.', 'error')
                     return render_template('registration_page_7.html', data=registration_data)
 
-                # Calculate years in service
-                enlistment_date = datetime.strptime(registration_data['date_of_enlistment'], '%Y-%m-%d')
-                years_in_service = datetime.now().year - enlistment_date.year
+                # Use the years_in_service from the form or calculate it
+                years_in_service = registration_data.get('years_in_service')
+                if not years_in_service and registration_data.get('date_of_commission'):
+                    try:
+                        commission_date = datetime.strptime(registration_data['date_of_commission'], '%Y-%m-%d')
+                        years_in_service = datetime.now().year - commission_date.year
+                    except Exception as e:
+                        current_app.logger.error(f"Error calculating years in service: {str(e)}")
+                        years_in_service = 0
 
                 # Insert into students table
                 db.execute(
@@ -756,8 +960,8 @@ def registration_page_7():
                     (registration_data['service_number'], registration_data['rank'],
                      registration_data['surname'], registration_data['other_names'],
                      registration_data['date_of_birth'], registration_data['gender'],
-                     registration_data.get('corps', ''), registration_data['current_unit'],
-                     registration_data['date_of_enlistment'],
+                     registration_data.get('corps', ''), registration_data.get('current_unit', ''),
+                     registration_data.get('date_of_commission', ''),
                      years_in_service, session.get('passport_photo', ''))
                 )
 

@@ -4,16 +4,20 @@ from dotenv import load_dotenv
 import logging
 import sys
 import os
-from nass_portal.config import Config  # Update this import
+from nass_portal.config import config  # Updated import to use config dictionary
 
 # Load environment variables
 load_dotenv()
 
 mail = Mail()
 
-def create_app(config_class=Config):
+def create_app(config_name=None):
+    # Determine which configuration to use
+    if config_name is None:
+        config_name = os.environ.get('FLASK_ENV', 'default')
+
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    app.config.from_object(config[config_name])
 
     # Configure logging
     try:
@@ -40,6 +44,16 @@ def create_app(config_class=Config):
     from . import db
     db.init_app(app)
 
+    # Apply schema updates
+    with app.app_context():
+        # Apply student portal schema
+        try:
+            from .schema.student_portal_schema import apply_student_portal_schema
+            apply_student_portal_schema()
+            app.logger.info('Student portal schema applied')
+        except Exception as e:
+            app.logger.error(f'Error applying student portal schema: {e}')
+
     # Register commands
     from . import commands
     commands.init_app(app)
@@ -51,6 +65,26 @@ def create_app(config_class=Config):
     # Register admin blueprint
     from .admin_routes import admin_bp
     app.register_blueprint(admin_bp)
+
+    # Register admin course management blueprint
+    from .admin_routes_courses import admin_courses_bp
+    app.register_blueprint(admin_courses_bp)
+
+    # Register admin quarters management blueprint
+    from .admin_routes_quarters import admin_quarters_bp
+    app.register_blueprint(admin_quarters_bp)
+
+    # Register admin certificates management blueprint
+    from .admin_routes_certificates import admin_certificates_bp
+    app.register_blueprint(admin_certificates_bp)
+
+    # Register admin reports blueprint
+    from .admin_routes_reports import admin_reports_bp
+    app.register_blueprint(admin_reports_bp)
+
+    # Register student blueprint
+    from .student_routes import student_bp
+    app.register_blueprint(student_bp)
 
     # Register middleware for maintenance mode
     from .middleware import check_maintenance_mode

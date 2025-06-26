@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}Registration - Military Training{% endblock %}
+{% block title %}Registration - Documents & Medical Information{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/styles.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/registration/document-upload.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/progress-bar.css', v='1.1') }}">
 {% endblock %}
 
 {% block content %}
@@ -13,8 +14,11 @@
         <div class="col-md-10">
             <div class="registration-card">
                 <!-- Header -->
-                <div class="card-header bg-military text-white">
-                    <h2 class="text-center mb-0">Military Training & Medical Information</h2>
+                <div class="card-header bg-military text-white py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h4 class="mb-0">Documents & Medical Information</h4>
+                        <span class="badge bg-warning">Step 6 of 7</span>
+                    </div>
                 </div>
 
                 <!-- Progress Steps -->
@@ -38,11 +42,11 @@
                         </div>
                         <div class="progress-step completed">
                             <div class="step-number">5</div>
-                            <div class="step-label">Education</div>
+                            <div class="step-label">Academic & Military</div>
                         </div>
                         <div class="progress-step active">
                             <div class="step-number">6</div>
-                            <div class="step-label">Military Training</div>
+                            <div class="step-label">Documents & Medical</div>
                         </div>
                         <div class="progress-step">
                             <div class="step-number">7</div>
@@ -114,6 +118,8 @@
                                 </div>
                             </div>
                         </div>
+
+
 
                         <!-- Medical Information Section -->
                         <div class="card mb-4">
@@ -225,6 +231,8 @@
 {% block scripts %}
 <!-- Include the modern registration JavaScript -->
 <script src="{{ url_for('static', filename='js/registration/modern.js') }}"></script>
+<!-- Include the progress bar JavaScript -->
+<script src="{{ url_for('static', filename='js/registration/progress-bar.js', v='1.1') }}"></script>
 
 <script>
 // Add animation classes to cards
@@ -234,6 +242,8 @@ document.addEventListener('DOMContentLoaded', function() {
         card.style.animationDelay = `${index * 0.1}s`;
         card.classList.add('fade-in');
     });
+
+
 })
 
 // Document upload and preview

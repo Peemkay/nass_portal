@@ -1,0 +1,490 @@
+{% extends 'base.html' %}
+
+{% block title %}Register for Course - Student Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css', v='1.1') }}">
+<style>
+    :root {
+        --primary-color: #3c78c3;
+        --secondary-color: #2c5aa0;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --info-color: #17a2b8;
+        --danger-color: #dc3545;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background-color: #f5f7fa;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .registration-container {
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    .registration-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .registration-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+        position: relative;
+    }
+
+    .registration-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(50%, -50%);
+    }
+
+    .registration-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .registration-body {
+        padding: 40px;
+    }
+
+    .course-info {
+        background: var(--light-color);
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .course-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 15px;
+    }
+
+    .course-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .meta-item i {
+        color: var(--primary-color);
+        width: 20px;
+        text-align: center;
+    }
+
+    .registration-info {
+        background: rgba(23, 162, 184, 0.1);
+        border: 1px solid rgba(23, 162, 184, 0.2);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .registration-info h5 {
+        color: var(--info-color);
+        font-weight: 600;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .student-info {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .student-info h5 {
+        color: var(--dark-color);
+        font-weight: 600;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .info-value {
+        color: #6c757d;
+    }
+
+    .confirmation-section {
+        background: rgba(40, 167, 69, 0.1);
+        border: 1px solid rgba(40, 167, 69, 0.2);
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .confirmation-section h5 {
+        color: var(--success-color);
+        font-weight: 600;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-check {
+        margin-bottom: 20px;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .form-check-label {
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-register {
+        background: var(--success-color);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: var(--transition);
+        min-width: 150px;
+    }
+
+    .btn-register:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-register:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-back {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: var(--transition);
+        text-decoration: none;
+        min-width: 150px;
+        text-align: center;
+    }
+
+    .btn-back:hover {
+        background: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+    }
+
+    .alert-warning {
+        background: rgba(255, 193, 7, 0.1);
+        color: #856404;
+        border-left: 4px solid var(--warning-color);
+    }
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        color: #721c24;
+        border-left: 4px solid var(--danger-color);
+    }
+
+    @media (max-width: 768px) {
+        .registration-container {
+            padding: 20px 0;
+        }
+
+        .registration-body {
+            padding: 20px;
+        }
+
+        .registration-header {
+            padding: 20px;
+        }
+
+        .registration-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .course-meta {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-register,
+        .btn-back {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <div class="container">
+        <div class="registration-card">
+            <div class="registration-header">
+                <h2><i class="fas fa-graduation-cap me-2"></i> Course Registration</h2>
+                <p class="mb-0">Complete your registration for the selected course</p>
+            </div>
+
+            <div class="registration-body">
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Course Information -->
+                <div class="course-info">
+                    <h3 class="course-title">{{ course.name }}</h3>
+                    <p class="course-description">{{ course.description }}</p>
+                    
+                    <div class="course-meta">
+                        {% if course.start_date and course.end_date %}
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span><strong>Duration:</strong> {{ course.start_date }} - {{ course.end_date }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if course.duration %}
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span><strong>Course Length:</strong> {{ course.duration }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if course.level %}
+                        <div class="meta-item">
+                            <i class="fas fa-layer-group"></i>
+                            <span><strong>Level:</strong> {{ course.level }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if course.department %}
+                        <div class="meta-item">
+                            <i class="fas fa-building"></i>
+                            <span><strong>Department:</strong> {{ course.department }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if course.max_students %}
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <span><strong>Max Students:</strong> {{ course.max_students }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Registration Period Information -->
+                {% if quarter %}
+                <div class="registration-info">
+                    <h5><i class="fas fa-info-circle"></i> Registration Information</h5>
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <span class="info-label">Quarter:</span>
+                            <span class="info-value">{{ quarter.name|title }} {{ quarter.year }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Registration Deadline:</span>
+                            <span class="info-value">{{ quarter.registration_deadline }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Student Information -->
+                <div class="student-info">
+                    <h5><i class="fas fa-user"></i> Student Information</h5>
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <span class="info-label">Name:</span>
+                            <span class="info-value">{{ student.rank }} {{ student.surname }}, {{ student.other_names }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Service Number:</span>
+                            <span class="info-value">{{ student.service_number }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Current Unit:</span>
+                            <span class="info-value">{{ student.current_unit or 'Not Assigned' }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Email:</span>
+                            <span class="info-value">{{ student.email }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registration Form -->
+                <form method="POST" id="registrationForm">
+                    <div class="confirmation-section">
+                        <h5><i class="fas fa-check-circle"></i> Confirmation</h5>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmInfo" name="confirm_info" required>
+                            <label class="form-check-label" for="confirmInfo">
+                                I confirm that all the information provided above is correct and accurate.
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmCommitment" name="confirm_commitment" required>
+                            <label class="form-check-label" for="confirmCommitment">
+                                I understand the course requirements and commit to attending all sessions and completing all assignments.
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmTerms" name="confirm_terms" required>
+                            <label class="form-check-label" for="confirmTerms">
+                                I agree to abide by the Nigerian Army School of Signals rules and regulations during the course.
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <a href="{{ url_for('student.dashboard') }}" class="btn-back">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn-register" id="submitBtn">
+                            <i class="fas fa-check me-2"></i> Confirm Registration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('registrationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+
+        // Check if all checkboxes are checked
+        function updateSubmitButton() {
+            const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+            submitBtn.disabled = !allChecked;
+        }
+
+        // Add event listeners to checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateSubmitButton);
+        });
+
+        // Initial check
+        updateSubmitButton();
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+            
+            if (!allChecked) {
+                e.preventDefault();
+                alert('Please confirm all requirements before submitting.');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Processing...';
+            submitBtn.disabled = true;
+        });
+    });
+</script>
+{% endblock %}

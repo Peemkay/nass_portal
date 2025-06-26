@@ -241,9 +241,27 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'admin.courses' or request.endpoint == 'admin.add_course' or request.endpoint == 'admin.edit_course' %}active{% endif %}" href="{{ url_for('admin.courses') }}">
+                    <a class="nav-link {% if request.endpoint == 'admin.courses' or request.endpoint == 'admin.add_course' or request.endpoint == 'admin.edit_course' or request.endpoint == 'admin_courses.index' %}active{% endif %}" href="{{ url_for('admin_courses.index') }}">
                         <i class="fas fa-book"></i>
                         Courses
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'admin_quarters.index' %}active{% endif %}" href="{{ url_for('admin_quarters.index') }}">
+                        <i class="fas fa-calendar-alt"></i>
+                        Quarters
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'admin_certificates.index' %}active{% endif %}" href="{{ url_for('admin_certificates.index') }}">
+                        <i class="fas fa-certificate"></i>
+                        Certificates
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'admin_reports.index' %}active{% endif %}" href="{{ url_for('admin_reports.index') }}">
+                        <i class="fas fa-chart-line"></i>
+                        Reports
                     </a>
                 </li>
                 <li class="nav-item">
@@ -256,6 +274,12 @@
                     <a class="nav-link {% if request.endpoint == 'admin.departments' or request.endpoint == 'admin.add_department' or request.endpoint == 'admin.edit_department' %}active{% endif %}" href="{{ url_for('admin.departments') }}">
                         <i class="fas fa-building"></i>
                         Departments
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'admin.impact_stats' %}active{% endif %}" href="{{ url_for('admin.impact_stats') }}">
+                        <i class="fas fa-chart-bar"></i>
+                        Impact Statistics
                     </a>
                 </li>
                 <li class="nav-item">
@@ -334,9 +358,33 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#">
+                    <a class="nav-link text-white {% if request.endpoint == 'admin_courses.index' %}active{% endif %}" href="{{ url_for('admin_courses.index') }}">
                         <i class="fas fa-book"></i>
                         Courses
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {% if request.endpoint == 'admin_quarters.index' %}active{% endif %}" href="{{ url_for('admin_quarters.index') }}">
+                        <i class="fas fa-calendar-alt"></i>
+                        Quarters
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {% if request.endpoint == 'admin_certificates.index' %}active{% endif %}" href="{{ url_for('admin_certificates.index') }}">
+                        <i class="fas fa-certificate"></i>
+                        Certificates
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {% if request.endpoint == 'admin_reports.index' %}active{% endif %}" href="{{ url_for('admin_reports.index') }}">
+                        <i class="fas fa-chart-line"></i>
+                        Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {% if request.endpoint == 'admin.impact_stats' %}active{% endif %}" href="{{ url_for('admin.impact_stats') }}">
+                        <i class="fas fa-chart-bar"></i>
+                        Impact Statistics
                     </a>
                 </li>
                 <li class="nav-item">

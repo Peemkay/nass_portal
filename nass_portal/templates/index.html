@@ -705,6 +705,41 @@
         --brand-blue-light: #6ea8fe;
     }
 
+    /* Old Style Courses Section */
+    .courses-section h3 {
+        color: var(--brand-blue);
+        font-weight: 600;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+        margin-top: 30px;
+    }
+
+    .courses-section .card {
+        transition: all 0.3s ease;
+        border: 1px solid #eee;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    .courses-section .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+
+    .courses-section .card-title {
+        color: var(--brand-blue);
+        font-weight: 600;
+    }
+
+    .courses-section .card-body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .courses-section .btn {
+        margin-top: auto;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .hero-title {
@@ -827,6 +862,176 @@
             </div>
         </div>
     </section>
+
+    <!-- Old Style Courses Section -->
+    <section class="courses-section py-5" id="courses">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Our Training Programs</h2>
+                    <p class="section-subtitle">Comprehensive courses designed for military excellence</p>
+                </div>
+            </div>
+
+            <h3 class="mb-4">OFFICERS COURSES</h3>
+            <div class="row mb-5">
+                {% set officers_courses = courses|selectattr('category', 'equalto', 'Officers')|list %}
+                {% if officers_courses %}
+                    {% for course in officers_courses %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ course.name }}</h5>
+                                <p class="card-text">{{ course.description|truncate(100) }}</p>
+                                {% if course.duration %}
+                                <p class="card-text"><small class="text-muted">Duration: {{ course.duration }}</small></p>
+                                {% endif %}
+                                {% if course.level %}
+                                <p class="card-text"><small class="text-muted">Level: {{ course.level }}</small></p>
+                                {% endif %}
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Junior Level Course</h5>
+                                <p class="card-text">An introductory course designed for beginners.</p>
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Basic Computer Course (BCC)</h5>
+                                <p class="card-text">Learn the fundamentals of computer usage.</p>
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Electronic Warfare Course Officers</h5>
+                                <p class="card-text">Advanced training for electronic warfare operations.</p>
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <h3 class="mb-4">SOLDIERS COURSES</h3>
+            <div class="row mb-5">
+                {% set soldiers_courses = courses|selectattr('category', 'equalto', 'Soldiers')|list %}
+                {% if soldiers_courses %}
+                    {% for course in soldiers_courses %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ course.name }}</h5>
+                                <p class="card-text">{{ course.description|truncate(100) }}</p>
+                                {% if course.duration %}
+                                <p class="card-text"><small class="text-muted">Duration: {{ course.duration }}</small></p>
+                                {% endif %}
+                                {% if course.level %}
+                                <p class="card-text"><small class="text-muted">Level: {{ course.level }}</small></p>
+                                {% endif %}
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Basic Courses</h5>
+                                <p class="card-text">Fundamental courses for soldiers.</p>
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Technical Course (TC) X III</h5>
+                                <p class="card-text">Technical training for soldiers.</p>
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Computer Hardware Course</h5>
+                                <p class="card-text">Learn computer hardware maintenance and repair.</p>
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <h3 class="mb-4">ADVANCED LEVEL (UPGRADING) COURSES</h3>
+            <div class="row">
+                {% set advanced_courses = courses|selectattr('level', 'equalto', 'Advanced')|list %}
+                {% if advanced_courses %}
+                    {% for course in advanced_courses %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ course.name }}</h5>
+                                <p class="card-text">{{ course.description|truncate(100) }}</p>
+                                {% if course.duration %}
+                                <p class="card-text"><small class="text-muted">Duration: {{ course.duration }}</small></p>
+                                {% endif %}
+                                {% if course.category %}
+                                <p class="card-text"><small class="text-muted">Category: {{ course.category }}</small></p>
+                                {% endif %}
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Technical Course (TC) X 1</h5>
+                                <p class="card-text">Advanced training for technical skills.</p>
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Programming Course</h5>
+                                <p class="card-text">Advanced programming and software development.</p>
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Network Security</h5>
+                                <p class="card-text">Advanced network security and protection techniques.</p>
+                                <a href="{{ url_for('main.registration') }}" class="btn btn-primary">Register</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- We've replaced the dynamic courses section with the old style courses section above -->
 
     <!-- Departments Section -->
     <section class="departments-section py-5" id="departments">
@@ -1112,444 +1317,6 @@
         </div>
     </section>
 
-    <!-- Dynamic Courses Section -->
-    {% if courses %}
-    <section class="dynamic-courses-section py-5" id="dynamic-courses">
-        <div class="container">
-            <div class="row text-center mb-5">
-                <div class="col-md-12">
-                    <h2 class="section-title">Available Courses</h2>
-                    <p class="section-subtitle">Managed from the admin dashboard</p>
-                </div>
-            </div>
-
-            <!-- Course Categories Tabs -->
-            <ul class="nav nav-pills mb-4 justify-content-center" id="courseTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="all-tab" data-toggle="pill" data-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">
-                        <i class="fas fa-th-list me-2"></i>All Courses
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="officers-tab" data-toggle="pill" data-target="#officers" type="button" role="tab" aria-controls="officers" aria-selected="false">
-                        <i class="fas fa-user-tie me-2"></i>Officers Courses
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a class="nav-link" id="soldiers-tab" href="#soldiers" data-toggle="pill" role="tab" aria-controls="soldiers" aria-selected="false">
-                        <i class="fas fa-user-shield me-2"></i>Soldiers Courses
-                    </a>
-                </li>
-            </ul>
-
-            <!-- Tab Content -->
-            <div class="tab-content" id="courseTabsContent">
-                <!-- All Courses -->
-                <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
-                    <!-- Officers Courses -->
-                    {% set officers_courses = courses|selectattr('category', 'equalto', 'Officers')|list %}
-                    {% if officers_courses %}
-                    <div class="category-section mb-5">
-                        <h3 class="category-title mb-4"><i class="fas fa-user-tie me-2 text-primary"></i>Officers Courses</h3>
-                        <div class="row">
-                            {% for course in officers_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-primary text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-primary"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <div class="mt-2">
-                                                <span class="badge badge-primary">{{ course.category }}</span>
-                                                {% if course.level %}
-                                                <span class="badge badge-info ml-2">{{ course.level }} Level</span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-primary">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-primary">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Soldiers Courses -->
-                    {% set soldiers_courses = courses|selectattr('category', 'equalto', 'Soldiers')|list %}
-                    {% if soldiers_courses %}
-                    <div class="category-section mb-5">
-                        <h3 class="category-title mb-4"><i class="fas fa-user-shield me-2 text-warning"></i>Soldiers Courses</h3>
-                        <div class="row">
-                            {% for course in soldiers_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-warning text-dark text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-warning"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <div class="mt-2">
-                                                <span class="badge badge-warning">{{ course.category }}</span>
-                                                {% if course.level %}
-                                                <span class="badge badge-success ml-2">{{ course.level }} Level</span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-warning text-dark">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-warning text-dark">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- General Courses -->
-                    {% set general_courses = courses|selectattr('category', 'equalto', 'General')|list %}
-                    {% if general_courses %}
-                    <div class="category-section mb-5">
-                        <h3 class="category-title mb-4"><i class="fas fa-graduation-cap me-2 text-secondary"></i>General Courses</h3>
-                        <div class="row">
-                            {% for course in general_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-secondary text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-secondary"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <div class="mt-2">
-                                                <span class="badge badge-secondary">{{ course.category }}</span>
-                                                {% if course.level and course.level != 'General' %}
-                                                <span class="badge badge-light ml-2">{{ course.level }} Level</span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-secondary">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-secondary">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    {% if not officers_courses and not soldiers_courses and not general_courses %}
-                    <div class="col-12 text-center py-5">
-                        <p class="lead text-muted">No courses available at the moment.</p>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- Officers Courses -->
-                <div class="tab-pane fade" id="officers" role="tabpanel" aria-labelledby="officers-tab">
-                    <!-- Junior Level -->
-                    {% set junior_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Junior')|list %}
-                    {% if junior_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-user-graduate me-2 text-primary"></i>Junior Level</h3>
-                        <div class="row">
-                            {% for course in junior_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-primary text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-primary"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-info">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-primary">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-primary">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Mid Level -->
-                    {% set mid_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Mid')|list %}
-                    {% if mid_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-chart-line me-2 text-success"></i>Mid Level</h3>
-                        <div class="row">
-                            {% for course in mid_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-success text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-success"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-info">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-success">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-success">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Senior Level -->
-                    {% set senior_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Senior')|list %}
-                    {% if senior_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-star me-2 text-danger"></i>Senior Level</h3>
-                        <div class="row">
-                            {% for course in senior_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-danger text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-danger"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-info">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-danger">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-danger">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    {% if not junior_courses and not mid_courses and not senior_courses %}
-                    <div class="col-12 text-center py-5">
-                        <p class="lead text-muted">No officers courses available at the moment.</p>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- Soldiers Courses -->
-                <div class="tab-pane fade" id="soldiers" role="tabpanel" aria-labelledby="soldiers-tab">
-                    <!-- Basic Level -->
-                    {% set basic_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Basic')|list %}
-                    {% if basic_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-layer-group me-2 text-info"></i>Basic Level</h3>
-                        <div class="row">
-                            {% for course in basic_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-info text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-info"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-success">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-info">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-info text-white">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Medium Level -->
-                    {% set medium_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Medium')|list %}
-                    {% if medium_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-cogs me-2 text-warning"></i>Medium Level</h3>
-                        <div class="row">
-                            {% for course in medium_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-warning text-dark text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-warning"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-success">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-warning text-dark">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-warning text-dark">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Advanced Level -->
-                    {% set advanced_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Advanced')|list %}
-                    {% if advanced_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-rocket me-2 text-success"></i>Advanced Level</h3>
-                        <div class="row">
-                            {% for course in advanced_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-success text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-success"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-success">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-success">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-success">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    {% if not basic_courses and not medium_courses and not advanced_courses %}
-                    <div class="col-12 text-center py-5">
-                        <p class="lead text-muted">No soldiers courses available at the moment.</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </section>
-    {% endif %}
-
     <!-- Stats Section -->
     <section class="stats-section">
         <div class="container">
@@ -1559,330 +1326,42 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-3 mb-4">
+                {% if impact_stats %}
+                    {% for stat in impact_stats %}
+                    <div class="col-md-{{ 12 // impact_stats|length }} mb-4">
+                        <div class="stat-card">
+                            {% if stat.icon %}<i class="{{ stat.icon }} text-{{ stat.color }} mb-3"></i>{% endif %}
+                            <div class="stat-number">{{ stat.value }}</div>
+                            <div class="stat-label">{{ stat.title }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <!-- Default stats if no database entries -->
+                <div class="col-md-4 mb-4">
                     <div class="stat-card">
                         <div class="stat-number">50+</div>
                         <div class="stat-label">Courses Offered</div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-4">
+                <div class="col-md-4 mb-4">
                     <div class="stat-card">
                         <div class="stat-number">5,000+</div>
                         <div class="stat-label">Graduates</div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-4">
+                <div class="col-md-4 mb-4">
                     <div class="stat-card">
                         <div class="stat-number">30+</div>
                         <div class="stat-label">Years of Excellence</div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-4">
-                    <div class="stat-card">
-                        <div class="stat-number">100%</div>
-                        <div class="stat-label">Job Placement</div>
-                    </div>
-                </div>
+                {% endif %}
             </div>
         </div>
     </section>
 
-    <!-- Courses Section -->
-    <section class="courses-section py-5" id="courses">
-        <div class="container">
-            <div class="row text-center mb-5">
-                <div class="col-md-12">
-                    <h2 class="section-title">Our Training Programs</h2>
-                    <p class="section-subtitle">Comprehensive courses designed for military excellence</p>
-                </div>
-            </div>
-
-            <!-- Course Categories Tabs -->
-            <ul class="nav nav-pills mb-4 justify-content-center" id="courseTabs2" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="officers-tab2" data-toggle="pill" data-target="#officers2" type="button" role="tab" aria-controls="officers2" aria-selected="true">
-                        <i class="fas fa-user-tie me-2"></i>Officers Courses
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a class="nav-link" id="soldiers-tab2" href="#soldiers2" data-toggle="pill" role="tab" aria-controls="soldiers2" aria-selected="false">
-                        <i class="fas fa-user-shield me-2"></i>Soldiers Courses
-                    </a>
-                </li>
-            </ul>
-
-            <!-- Tab Content -->
-            <div class="tab-content" id="courseTabsContent2">
-                <!-- Officers Courses -->
-                <div class="tab-pane fade show active" id="officers2" role="tabpanel" aria-labelledby="officers-tab2">
-                    <!-- Junior Level -->
-                    {% set junior_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Junior')|list %}
-                    {% if junior_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-user-graduate me-2 text-primary"></i>Junior Level</h3>
-                        <div class="row">
-                            {% for course in junior_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-primary text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-primary"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-info">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-primary">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-primary">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Mid Level -->
-                    {% set mid_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Mid')|list %}
-                    {% if mid_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-chart-line me-2 text-success"></i>Mid Level</h3>
-                        <div class="row">
-                            {% for course in mid_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-success text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-success"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-info">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-success">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-success">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Senior Level -->
-                    {% set senior_courses = courses|selectattr('category', 'equalto', 'Officers')|selectattr('level', 'equalto', 'Senior')|list %}
-                    {% if senior_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-star me-2 text-danger"></i>Senior Level</h3>
-                        <div class="row">
-                            {% for course in senior_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-danger text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-danger"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-info">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-danger">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-danger">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    {% if not junior_courses and not mid_courses and not senior_courses %}
-                    <div class="col-12 text-center py-5">
-                        <p class="lead text-muted">No officers courses available at the moment.</p>
-                        {% if session.get('admin_logged_in') %}
-                        <a href="{{ url_for('admin.add_course') }}" class="btn btn-primary mt-3">
-                            <i class="fas fa-plus me-2"></i>Add Officers Course
-                        </a>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- Soldiers Courses -->
-                <div class="tab-pane fade" id="soldiers2" role="tabpanel" aria-labelledby="soldiers-tab2">
-                    <!-- Basic Level -->
-                    {% set basic_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Basic')|list %}
-                    {% if basic_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-layer-group me-2 text-info"></i>Basic Level</h3>
-                        <div class="row">
-                            {% for course in basic_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-info text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-info"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-success">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-info">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-info text-white">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Medium Level -->
-                    {% set medium_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Medium')|list %}
-                    {% if medium_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-cogs me-2 text-warning"></i>Medium Level</h3>
-                        <div class="row">
-                            {% for course in medium_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-warning text-dark text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-warning"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-success">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-warning text-dark">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-warning text-dark">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Advanced Level -->
-                    {% set advanced_courses = courses|selectattr('category', 'equalto', 'Soldiers')|selectattr('level', 'equalto', 'Advanced')|list %}
-                    {% if advanced_courses %}
-                    <div class="level-section mb-5">
-                        <h3 class="level-title mb-4"><i class="fas fa-rocket me-2 text-success"></i>Advanced Level</h3>
-                        <div class="row">
-                            {% for course in advanced_courses %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card course-card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-success text-white text-center py-3">
-                                        <h5 class="mb-0">{{ course.name }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-4">
-                                            <i class="fas fa-book course-icon text-success"></i>
-                                            {% if course.duration %}
-                                            <p class="mt-3">Duration: {{ course.duration }}</p>
-                                            {% endif %}
-                                            <span class="badge badge-success">{{ course.level }} Level</span>
-                                        </div>
-                                        <h6 class="card-subtitle mb-3 fw-bold">Course Description:</h6>
-                                        <p>{{ course.description|truncate(100) }}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent text-center border-0 pb-4">
-                                        <div class="d-flex justify-content-between">
-                                            <a href="{{ url_for('main.view_course', course_id=course.id) }}" class="btn btn-outline-success">
-                                                <i class="fas fa-info-circle me-2"></i>View Details
-                                            </a>
-                                            <a href="{{ url_for('main.registration') }}" class="btn btn-success">
-                                                <i class="fas fa-sign-in-alt me-2"></i>Register
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    {% if not basic_courses and not medium_courses and not advanced_courses %}
-                    <div class="col-12 text-center py-5">
-                        <p class="lead text-muted">No soldiers courses available at the moment.</p>
-                        {% if session.get('admin_logged_in') %}
-                        <a href="{{ url_for('admin.add_course') }}" class="btn btn-warning mt-3">
-                            <i class="fas fa-plus me-2"></i>Add Soldiers Course
-                        </a>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- No duplicate courses section here -->
 
     <!-- Call to Action Section -->
     <section class="cta-section py-5 bg-light">
@@ -1930,19 +1409,7 @@
             $('#soldiers').addClass('show active');
         });
 
-        // Handle soldiers tab click in second tab group
-        $('#soldiers-tab2').on('click', function(e) {
-            e.preventDefault();
-            console.log('Soldiers tab 2 clicked');
-
-            // Deactivate all tabs and content
-            $('#courseTabs2 .nav-link').removeClass('active');
-            $('#courseTabsContent2 .tab-pane').removeClass('show active');
-
-            // Activate soldiers tab and content
-            $(this).addClass('active');
-            $('#soldiers2').addClass('show active');
-        });
+        // Removed duplicate tab handler for soldiers-tab2
 
         // Department filtering functionality
         $('.department-filter-buttons .btn').on('click', function() {

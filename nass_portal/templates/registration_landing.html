@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Registration Options{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css', v='1.1') }}">
+<style>
+    .registration-option {
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+
+    .registration-option:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .option-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #3c78c3;
+    }
+
+    .option-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .option-description {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+
+    .continue-form {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-10 text-center">
+            <h1 class="display-4 mb-3">Nigerian Army School of Signals</h1>
+            <h2 class="h3 text-muted mb-4">Course Registration Portal</h2>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-5 mb-4">
+            <div class="card registration-option">
+                <div class="card-body text-center p-5">
+                    <div class="option-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3 class="option-title">New Registration</h3>
+                    <p class="option-description">First time registering for a course at Nigerian Army School of Signals? Start a new registration here.</p>
+                    {% if session.get('student_logged_in') %}
+                        <a href="{{ url_for('main.registration_page_1') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-arrow-right me-2"></i> Start New Registration
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('student.register_portal') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i> Register Portal First
+                        </a>
+                        <p class="mt-2 text-muted small">You must register and log in to the student portal before starting a new course registration.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5 mb-4">
+            <div class="card registration-option">
+                <div class="card-body text-center p-5">
+                    <div class="option-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3 class="option-title">Continue Registration</h3>
+                    <p class="option-description">Already started a registration but didn't complete it? Continue from where you left off.</p>
+                    {% if session.get('student_logged_in') %}
+                        <button type="button" class="btn btn-success btn-lg" data-bs-toggle="collapse" data-bs-target="#continueForm">
+                            <i class="fas fa-sign-in-alt me-2"></i> Continue Registration
+                        </button>
+
+                        <div class="collapse mt-4" id="continueForm">
+                            <div class="continue-form">
+                                <form method="post" action="{{ url_for('main.continue_registration') }}">
+                                    <div class="mb-3">
+                                        <label for="service_number" class="form-label">Service Number</label>
+                                        <input type="text" class="form-control" id="service_number" name="service_number" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="date_of_birth" class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Continue</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('student.register_portal') }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-user-plus me-2"></i> Register Portal First
+                        </a>
+                        <p class="mt-2 text-muted small">You must register and log in to the student portal before continuing a course registration.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title"><i class="fas fa-info-circle me-2"></i> Important Information</h4>
+                    <ul class="mb-0">
+                        <li>Registration is open for the current quarter until <strong>{{ registration_deadline or 'the deadline' }}</strong>.</li>
+                        <li>You can save your progress at any time and continue later.</li>
+                        <li>Make sure to have your documents ready for upload (passport photograph, certificates, etc.).</li>
+                        <li>For any assistance, please contact the administration office.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-4 mb-4">
+            <div class="card registration-option">
+                <div class="card-body text-center p-4">
+                    <div class="option-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3 class="option-title">Student Portal Login</h3>
+                    <p class="option-description">Access your course history, certificates, and personal information.</p>
+                    <a href="{{ url_for('student.login') }}" class="btn btn-info btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i> Student Login
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card registration-option">
+                <div class="card-body text-center p-4">
+                    <div class="option-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3 class="option-title">Create Portal Account</h3>
+                    <p class="option-description">Register for the student portal to manage your courses and certificates.</p>
+                    <a href="{{ url_for('student.register_portal') }}" class="btn btn-success btn-lg">
+                        <i class="fas fa-user-plus me-2"></i> Register Portal
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card registration-option">
+                <div class="card-body text-center p-4">
+                    <div class="option-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3 class="option-title">Course Information</h3>
+                    <p class="option-description">View available courses, schedules, and requirements.</p>
+                    <a href="{{ url_for('main.courses') }}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-list me-2"></i> View Courses
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to cards
+        document.querySelectorAll('.registration-option').forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('fade-in');
+        });
+    });
+</script>
+{% endblock %}

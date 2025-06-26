@@ -1,0 +1,487 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Certificate Management{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .certificate-card {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .certificate-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .student-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .student-photo {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 15px;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .student-name {
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+    
+    .student-number {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .certificate-info {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+    
+    .certificate-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+    
+    .certificate-value {
+        font-weight: 600;
+    }
+    
+    .filter-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .certificate-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .certificate-preview {
+        width: 100%;
+        height: 150px;
+        object-fit: contain;
+        margin-top: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    .bulk-upload-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .upload-area {
+        border: 2px dashed #ddd;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+        background-color: #fff;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-area:hover {
+        border-color: #6c757d;
+    }
+    
+    .upload-icon {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Certificate Management</h1>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadCertificateModal">
+            <i class="fas fa-upload me-2"></i> Upload Certificate
+        </button>
+    </div>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Bulk Upload Section -->
+    <div class="bulk-upload-section mb-4">
+        <h4 class="mb-3">Bulk Certificate Upload</h4>
+        <p class="text-muted mb-4">Upload multiple certificates for a course at once. Select a course and upload a ZIP file containing certificates named with student service numbers.</p>
+        
+        <form method="post" action="{{ url_for('admin.bulk_upload_certificates') }}" enctype="multipart/form-data">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="course_id" class="form-label">Course</label>
+                    <select class="form-select" id="course_id" name="course_id" required>
+                        <option value="">Select Course</option>
+                        {% for course in completed_courses %}
+                            <option value="{{ course.id }}">{{ course.name }} ({{ course.quarter }} {{ course.year }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="issue_date" class="form-label">Issue Date</label>
+                    <input type="date" class="form-control" id="issue_date" name="issue_date" required>
+                </div>
+                <div class="col-md-12">
+                    <div class="upload-area">
+                        <div class="upload-icon">
+                            <i class="fas fa-file-archive"></i>
+                        </div>
+                        <h5>Drag & Drop ZIP File Here</h5>
+                        <p class="text-muted">or</p>
+                        <input type="file" class="form-control" id="certificate_zip" name="certificate_zip" accept=".zip" required>
+                        <small class="form-text text-muted mt-2">
+                            ZIP file should contain PDF certificates named with student service numbers (e.g., NA12345.pdf).
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-12 text-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload me-2"></i> Upload Certificates
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="filter-section mb-4">
+        <form method="get" action="{{ url_for('admin.certificates') }}" class="row g-3">
+            <div class="col-md-4">
+                <label for="course_filter" class="form-label">Course</label>
+                <select class="form-select" id="course_filter" name="course_id">
+                    <option value="">All Courses</option>
+                    {% for course in all_courses %}
+                        <option value="{{ course.id }}" {% if request.args.get('course_id') == course.id|string %}selected{% endif %}>{{ course.name }} ({{ course.quarter }} {{ course.year }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="student_filter" class="form-label">Student</label>
+                <input type="text" class="form-control" id="student_filter" name="student_search" placeholder="Name or Service Number" value="{{ request.args.get('student_search', '') }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-filter me-2"></i> Filter
+                </button>
+                <a href="{{ url_for('admin.certificates') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-redo me-2"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Certificates Grid -->
+    <div class="row">
+        {% if certificates %}
+            {% for cert in certificates %}
+                <div class="col-md-4 mb-4">
+                    <div class="card certificate-card">
+                        <div class="card-body position-relative">
+                            <span class="certificate-badge">
+                                {{ cert.issue_date }}
+                            </span>
+                            
+                            <div class="student-info">
+                                {% if cert.student_photo %}
+                                    <img src="{{ url_for('static', filename='uploads/passport_photos/' + cert.student_photo) }}" class="student-photo" alt="Student Photo">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='images/placeholder-user.png') }}" class="student-photo" alt="Student Photo">
+                                {% endif %}
+                                <div>
+                                    <h6 class="student-name">{{ cert.student_name }}</h6>
+                                    <div class="student-number">{{ cert.service_number }}</div>
+                                </div>
+                            </div>
+                            
+                            <h5 class="card-title">{{ cert.course_name }}</h5>
+                            
+                            <div class="certificate-info">
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <div class="certificate-label">Certificate Number</div>
+                                        <div class="certificate-value">{{ cert.certificate_number }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="certificate-label">Quarter</div>
+                                        <div class="certificate-value">{{ cert.quarter }} {{ cert.year }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if cert.certificate_file.lower().endswith('.pdf') %}
+                                <div class="text-center mt-3">
+                                    <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                    <p class="mt-2 mb-0">PDF Certificate</p>
+                                </div>
+                            {% else %}
+                                <img src="{{ url_for('static', filename='uploads/' + cert.certificate_file) }}" class="certificate-preview" alt="Certificate Preview">
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ url_for('admin.view_certificate', certificate_id=cert.id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                    <i class="fas fa-eye me-1"></i> View
+                                </a>
+                                <a href="{{ url_for('admin.download_certificate', certificate_id=cert.id) }}" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-download me-1"></i> Download
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteCertificateModal" data-certificate-id="{{ cert.id }}" data-student-name="{{ cert.student_name }}">
+                                    <i class="fas fa-trash me-1"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No certificates found. Use the button above to upload certificates.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if pagination and pagination.pages > 1 %}
+        <div class="d-flex justify-content-center mt-4">
+            <nav aria-label="Certificate pagination">
+                <ul class="pagination">
+                    <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin.certificates', page=pagination.page-1, **request.args) }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    
+                    {% for p in range(1, pagination.pages + 1) %}
+                        <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.certificates', page=p, **request.args) }}">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+                    
+                    <li class="page-item {% if pagination.page == pagination.pages %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin.certificates', page=pagination.page+1, **request.args) }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Upload Certificate Modal -->
+<div class="modal fade" id="uploadCertificateModal" tabindex="-1" aria-labelledby="uploadCertificateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadCertificateModalLabel">Upload Certificate</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('admin.upload_certificate') }}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label for="student_id" class="form-label">Student</label>
+                            <select class="form-select" id="student_id" name="student_id" required>
+                                <option value="">Select Student</option>
+                                {% for student in students %}
+                                    <option value="{{ student.id }}">{{ student.rank }} {{ student.surname }}, {{ student.other_names }} ({{ student.service_number }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="course_id_single" class="form-label">Course</label>
+                            <select class="form-select" id="course_id_single" name="course_id" required>
+                                <option value="">Select Course</option>
+                                {% for course in completed_courses %}
+                                    <option value="{{ course.id }}">{{ course.name }} ({{ course.quarter }} {{ course.year }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="certificate_file" class="form-label">Certificate File</label>
+                            <input type="file" class="form-control" id="certificate_file" name="certificate_file" accept=".pdf,.jpg,.jpeg,.png" required>
+                            <small class="form-text text-muted">
+                                Accepted formats: PDF, JPG, JPEG, PNG
+                            </small>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="certificate_number" class="form-label">Certificate Number</label>
+                            <input type="text" class="form-control" id="certificate_number" name="certificate_number" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="issue_date_single" class="form-label">Issue Date</label>
+                            <input type="date" class="form-control" id="issue_date_single" name="issue_date" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload Certificate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Certificate Modal -->
+<div class="modal fade" id="deleteCertificateModal" tabindex="-1" aria-labelledby="deleteCertificateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCertificateModalLabel">Delete Certificate</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the certificate for <strong id="delete_student_name"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{{ url_for('admin.delete_certificate') }}" id="deleteCertificateForm">
+                    <input type="hidden" name="certificate_id" id="delete_certificate_id">
+                    <button type="submit" class="btn btn-danger">Delete Certificate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle delete certificate modal
+        const deleteCertificateModal = document.getElementById('deleteCertificateModal');
+        if (deleteCertificateModal) {
+            deleteCertificateModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const certificateId = button.getAttribute('data-certificate-id');
+                const studentName = button.getAttribute('data-student-name');
+                
+                document.getElementById('delete_certificate_id').value = certificateId;
+                document.getElementById('delete_student_name').textContent = studentName;
+            });
+        }
+        
+        // Auto-populate today's date for issue date
+        const issueDateInput = document.getElementById('issue_date');
+        const issueDateSingleInput = document.getElementById('issue_date_single');
+        
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+        
+        if (issueDateInput) {
+            issueDateInput.value = formattedDate;
+        }
+        
+        if (issueDateSingleInput) {
+            issueDateSingleInput.value = formattedDate;
+        }
+        
+        // Drag and drop functionality for bulk upload
+        const uploadArea = document.querySelector('.upload-area');
+        const certificateZipInput = document.getElementById('certificate_zip');
+        
+        if (uploadArea && certificateZipInput) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                uploadArea.classList.add('bg-light');
+                uploadArea.style.borderColor = '#6c757d';
+            }
+            
+            function unhighlight() {
+                uploadArea.classList.remove('bg-light');
+                uploadArea.style.borderColor = '#ddd';
+            }
+            
+            uploadArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    certificateZipInput.files = files;
+                    
+                    // Show file name
+                    const fileName = files[0].name;
+                    const fileSize = (files[0].size / 1024 / 1024).toFixed(2); // Convert to MB
+                    
+                    uploadArea.querySelector('h5').textContent = fileName;
+                    uploadArea.querySelector('p').textContent = `${fileSize} MB`;
+                }
+            }
+            
+            // Also handle file input change
+            certificateZipInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    const fileName = this.files[0].name;
+                    const fileSize = (this.files[0].size / 1024 / 1024).toFixed(2); // Convert to MB
+                    
+                    uploadArea.querySelector('h5').textContent = fileName;
+                    uploadArea.querySelector('p').textContent = `${fileSize} MB`;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

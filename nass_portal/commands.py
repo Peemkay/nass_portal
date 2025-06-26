@@ -50,9 +50,45 @@ def init_maintenance_command():
     except Exception as e:
         click.echo(f'Error initializing maintenance schema: {e}')
 
+@click.command('apply-schema-updates')
+@with_appcontext
+def apply_schema_updates_command():
+    """Apply schema updates from schema_updates.sql."""
+    db = get_db()
+
+    # Get the schema updates file path
+    schema_updates_path = os.path.join(os.path.dirname(__file__), 'schema_updates.sql')
+
+    # Check if the file exists
+    if not os.path.exists(schema_updates_path):
+        click.echo('Schema updates file not found.')
+        return
+
+    # Read the schema updates file
+    with open(schema_updates_path, 'r') as f:
+        schema_updates = f.read()
+
+    # Split the schema updates into individual statements
+    statements = schema_updates.split(';')
+
+    # Execute each statement
+    for statement in statements:
+        statement = statement.strip()
+        if statement:
+            try:
+                db.execute(statement)
+                db.commit()
+            except Exception as e:
+                db.rollback()
+                click.echo(f'Error executing statement: {e}')
+                click.echo(f'Statement: {statement}')
+
+    click.echo('Schema updates applied successfully.')
+
 def init_app(app):
     """Register commands."""
     app.cli.add_command(init_db_command)
     app.cli.add_command(init_admin_command)
     app.cli.add_command(init_maintenance_command)
+    app.cli.add_command(apply_schema_updates_command)
 

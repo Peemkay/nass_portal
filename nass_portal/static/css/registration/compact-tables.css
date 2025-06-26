@@ -1,11 +1,11 @@
 /* Compact Tables Styling for Registration Page 5 */
 
 /* Main container styling */
-.education-container {
+.education-section {
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    margin-bottom: 1.5rem;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
     overflow: hidden;
 }
 
@@ -13,7 +13,7 @@
 .section-header {
     background-color: var(--military-dark-blue);
     color: white;
-    padding: 10px 15px;
+    padding: 6px 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -22,20 +22,20 @@
 
 .section-header h5 {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 .section-description {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #6c757d;
-    margin: 8px 15px;
+    margin: 5px 10px 3px;
 }
 
 /* Table container */
 .table-container {
-    padding: 10px 15px;
+    padding: 6px 10px;
 }
 
 /* Table styling */
@@ -253,7 +253,7 @@
     .table-responsive {
         overflow-x: auto;
     }
-    
+
     .compact-table {
         min-width: 800px;
     }
@@ -264,17 +264,17 @@
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .section-header .btn-add-row {
         margin-top: 8px;
         align-self: flex-end;
     }
-    
+
     .form-navigation {
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .btn-nav {
         width: 100%;
     }

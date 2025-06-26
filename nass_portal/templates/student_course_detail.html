@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+
+{% block title %}Course Details - Student Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/registration/modern.css', v='1.1') }}">
+<style>
+    .course-card {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .course-header {
+        background-color: #3c78c3;
+        color: white;
+        padding: 20px;
+        position: relative;
+    }
+    
+    .course-body {
+        padding: 30px;
+    }
+    
+    .sidebar-nav {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+    }
+    
+    .sidebar-nav .nav-link {
+        color: #495057;
+        padding: 10px 15px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-nav .nav-link:hover {
+        background-color: #e9ecef;
+        color: #3c78c3;
+    }
+    
+    .sidebar-nav .nav-link.active {
+        background-color: #3c78c3;
+        color: white;
+    }
+    
+    .status-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+    
+    .status-completed {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .status-in-progress {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .status-registered {
+        background-color: #17a2b8;
+        color: white;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .info-value {
+        color: #6c757d;
+    }
+    
+    .certificate-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .certificate-icon {
+        font-size: 3rem;
+        color: #28a745;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3 mb-4">
+            <div class="sidebar-nav">
+                <h5 class="mb-3">Student Portal</h5>
+                <div class="nav flex-column">
+                    <a href="{{ url_for('student.dashboard') }}" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('student.profile') }}" class="nav-link">
+                        <i class="fas fa-user"></i> My Profile
+                    </a>
+                    <a href="{{ url_for('student.documents') }}" class="nav-link">
+                        <i class="fas fa-file-alt"></i> My Documents
+                    </a>
+                    <a href="{{ url_for('student.dashboard') }}#courses" class="nav-link active">
+                        <i class="fas fa-graduation-cap"></i> My Courses
+                    </a>
+                    <a href="{{ url_for('student.dashboard') }}#certificates" class="nav-link">
+                        <i class="fas fa-certificate"></i> My Certificates
+                    </a>
+                    <a href="{{ url_for('student.logout') }}" class="nav-link text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Course Details Card -->
+            <div class="course-card">
+                <div class="course-header">
+                    <span class="status-badge status-{{ course.status }}">{{ course.status|capitalize }}</span>
+                    <h2><i class="fas fa-graduation-cap me-2"></i> {{ course.name }}</h2>
+                    <p class="mb-0">Course Registration Details</p>
+                </div>
+                
+                <div class="course-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="mb-3">Course Information</h5>
+                            
+                            <div class="info-row">
+                                <span class="info-label">Course Name:</span>
+                                <span class="info-value">{{ course.name }}</span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="info-label">Description:</span>
+                                <span class="info-value">{{ course.description }}</span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="info-label">Duration:</span>
+                                <span class="info-value">{{ course.duration }}</span>
+                            </div>
+                            
+                            {% if course.start_date %}
+                            <div class="info-row">
+                                <span class="info-label">Start Date:</span>
+                                <span class="info-value">{{ course.start_date }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if course.end_date %}
+                            <div class="info-row">
+                                <span class="info-label">End Date:</span>
+                                <span class="info-value">{{ course.end_date }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if course.level %}
+                            <div class="info-row">
+                                <span class="info-label">Level:</span>
+                                <span class="info-value">{{ course.level }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if course.department %}
+                            <div class="info-row">
+                                <span class="info-label">Department:</span>
+                                <span class="info-value">{{ course.department }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="info-row">
+                                <span class="info-label">Registration Date:</span>
+                                <span class="info-value">{{ course.registration_date }}</span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="info-label">Status:</span>
+                                <span class="info-value">
+                                    <span class="badge bg-{{ 'success' if course.status == 'completed' else 'warning' if course.status == 'in_progress' else 'info' }}">
+                                        {{ course.status|capitalize }}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            {% if course.status == 'completed' and certificate %}
+                                <div class="certificate-section">
+                                    <div class="certificate-icon">
+                                        <i class="fas fa-award"></i>
+                                    </div>
+                                    <h5>Certificate Available</h5>
+                                    <p class="text-muted">You have successfully completed this course.</p>
+                                    <a href="{{ url_for('student.certificate', certificate_id=certificate.id) }}" class="btn btn-success">
+                                        <i class="fas fa-download me-2"></i> Download Certificate
+                                    </a>
+                                    <a href="{{ url_for('student.certificate_view', certificate_id=certificate.id) }}" class="btn btn-outline-secondary mt-2" target="_blank">
+                                        <i class="fas fa-eye me-2"></i> View Certificate
+                                    </a>
+                                </div>
+                            {% elif course.status == 'in_progress' %}
+                                <div class="certificate-section">
+                                    <div class="certificate-icon">
+                                        <i class="fas fa-clock text-warning"></i>
+                                    </div>
+                                    <h5>Course in Progress</h5>
+                                    <p class="text-muted">You are currently enrolled in this course. Certificate will be available upon completion.</p>
+                                </div>
+                            {% else %}
+                                <div class="certificate-section">
+                                    <div class="certificate-icon">
+                                        <i class="fas fa-check-circle text-info"></i>
+                                    </div>
+                                    <h5>Registration Confirmed</h5>
+                                    <p class="text-muted">You are registered for this course. Course will begin on the scheduled start date.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary">
+                                    <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+                                </a>
+                                {% if course.status == 'completed' and certificate %}
+                                <a href="{{ url_for('student.certificate', certificate_id=certificate.id) }}" class="btn btn-success">
+                                    <i class="fas fa-download me-2"></i> Download Certificate
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% endblock %}

@@ -1,0 +1,475 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Registration Quarters Management{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .quarter-card {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .quarter-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .quarter-status {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .quarter-year {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        background-color: #e2e3e5;
+        color: #383d41;
+    }
+
+    .date-info {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+
+    .date-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+
+    .date-value {
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Registration Quarters Management</h1>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQuarterModal">
+            <i class="fas fa-plus me-2"></i> Add New Quarter
+        </button>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{{ url_for('admin_quarters.index') }}" class="row g-3">
+                <div class="col-md-4">
+                    <label for="year" class="form-label">Year</label>
+                    <select class="form-select" id="year" name="year">
+                        <option value="">All Years</option>
+                        {% for y in years %}
+                            <option value="{{ y }}" {% if request.args.get('year') == y|string %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All Status</option>
+                        <option value="1" {% if request.args.get('status') == '1' %}selected{% endif %}>Active</option>
+                        <option value="0" {% if request.args.get('status') == '0' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-filter me-2"></i> Filter
+                    </button>
+                    <a href="{{ url_for('admin_quarters.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo me-2"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quarters Grid -->
+    <div class="row">
+        {% if quarters %}
+            {% for quarter in quarters %}
+                <div class="col-md-4 mb-4">
+                    <div class="card quarter-card">
+                        <div class="card-body position-relative">
+                            <span class="quarter-status {% if quarter.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                {{ 'Active' if quarter.is_active else 'Inactive' }}
+                            </span>
+                            <span class="quarter-year">{{ quarter.year }}</span>
+
+                            <h5 class="card-title mt-4">{{ quarter.name }}</h5>
+
+                            <div class="date-info">
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <div class="date-label">Start Date</div>
+                                        <div class="date-value">{{ quarter.start_date }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="date-label">End Date</div>
+                                        <div class="date-value">{{ quarter.end_date }}</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="date-label">Registration Deadline</div>
+                                        <div class="date-value">{{ quarter.registration_deadline }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                {% if quarter.is_active %}
+                                    <span class="badge bg-success">Registration Open</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Registration Closed</span>
+                                {% endif %}
+
+                                {% if now > quarter.registration_deadline %}
+                                    <span class="badge bg-danger">Deadline Passed</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editQuarterModal" data-quarter-id="{{ quarter.id }}">
+                                    <i class="fas fa-edit me-1"></i> Edit
+                                </button>
+
+                                {% if not quarter.is_active %}
+                                    <form method="post" action="{{ url_for('admin_quarters.activate_quarter') }}">
+                                        <input type="hidden" name="quarter_id" value="{{ quarter.id }}">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check me-1"></i> Activate
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                        <i class="fas fa-check me-1"></i> Active
+                                    </button>
+                                {% endif %}
+
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteQuarterModal" data-quarter-id="{{ quarter.id }}" data-quarter-name="{{ quarter.name }} {{ quarter.year }}">
+                                    <i class="fas fa-trash me-1"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No quarters found. Use the button above to add a new quarter.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Quarter Modal -->
+<div class="modal fade" id="addQuarterModal" tabindex="-1" aria-labelledby="addQuarterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addQuarterModalLabel">Add New Quarter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('admin_quarters.add_quarter') }}">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Quarter Name</label>
+                            <select class="form-select" id="name" name="name" required>
+                                <option value="">Select Quarter</option>
+                                <option value="Quarter 1">Quarter 1</option>
+                                <option value="Quarter 2">Quarter 2</option>
+                                <option value="Quarter 3">Quarter 3</option>
+                                <option value="Quarter 4">Quarter 4</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="year" class="form-label">Year</label>
+                            <input type="number" class="form-control" id="year" name="year" min="2000" max="2100" value="{{ current_year }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="registration_deadline" class="form-label">Registration Deadline</label>
+                            <input type="date" class="form-control" id="registration_deadline" name="registration_deadline" required>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active">
+                                <label class="form-check-label" for="is_active">Active (Only one quarter can be active at a time)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Quarter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Quarter Modal -->
+<div class="modal fade" id="editQuarterModal" tabindex="-1" aria-labelledby="editQuarterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editQuarterModalLabel">Edit Quarter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('admin_quarters.edit_quarter') }}" id="editQuarterForm">
+                <input type="hidden" name="quarter_id" id="edit_quarter_id">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="edit_name" class="form-label">Quarter Name</label>
+                            <select class="form-select" id="edit_name" name="name" required>
+                                <option value="">Select Quarter</option>
+                                <option value="Quarter 1">Quarter 1</option>
+                                <option value="Quarter 2">Quarter 2</option>
+                                <option value="Quarter 3">Quarter 3</option>
+                                <option value="Quarter 4">Quarter 4</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_year" class="form-label">Year</label>
+                            <input type="number" class="form-control" id="edit_year" name="year" min="2000" max="2100" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="edit_start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="edit_end_date" name="end_date" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="edit_registration_deadline" class="form-label">Registration Deadline</label>
+                            <input type="date" class="form-control" id="edit_registration_deadline" name="registration_deadline" required>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="edit_is_active" name="is_active">
+                                <label class="form-check-label" for="edit_is_active">Active (Only one quarter can be active at a time)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Quarter Modal -->
+<div class="modal fade" id="deleteQuarterModal" tabindex="-1" aria-labelledby="deleteQuarterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteQuarterModalLabel">Delete Quarter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the quarter <strong id="delete_quarter_name"></strong>?</p>
+                <p class="text-danger">This action cannot be undone. All courses associated with this quarter will also be affected.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{{ url_for('admin_quarters.delete_quarter') }}" id="deleteQuarterForm">
+                    <input type="hidden" name="quarter_id" id="delete_quarter_id">
+                    <button type="submit" class="btn btn-danger">Delete Quarter</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle edit quarter modal
+        const editQuarterModal = document.getElementById('editQuarterModal');
+        if (editQuarterModal) {
+            editQuarterModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const quarterId = button.getAttribute('data-quarter-id');
+
+                // Fetch quarter data via AJAX
+                fetch(`{{ url_for('admin_quarters.get_quarter_data') }}?quarter_id=${quarterId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const quarter = data.quarter;
+
+                            // Populate form fields
+                            document.getElementById('edit_quarter_id').value = quarter.id;
+                            document.getElementById('edit_name').value = quarter.name;
+                            document.getElementById('edit_year').value = quarter.year;
+                            document.getElementById('edit_start_date').value = quarter.start_date;
+                            document.getElementById('edit_end_date').value = quarter.end_date;
+                            document.getElementById('edit_registration_deadline').value = quarter.registration_deadline;
+                            document.getElementById('edit_is_active').checked = quarter.is_active;
+                        } else {
+                            console.error('Error fetching quarter data:', data.message);
+                            alert('Error fetching quarter data. Please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
+                    });
+            });
+        }
+
+        // Handle delete quarter modal
+        const deleteQuarterModal = document.getElementById('deleteQuarterModal');
+        if (deleteQuarterModal) {
+            deleteQuarterModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const quarterId = button.getAttribute('data-quarter-id');
+                const quarterName = button.getAttribute('data-quarter-name');
+
+                document.getElementById('delete_quarter_id').value = quarterId;
+                document.getElementById('delete_quarter_name').textContent = quarterName;
+            });
+        }
+
+        // Auto-populate quarter dates based on selection
+        const nameSelect = document.getElementById('name');
+        const yearInput = document.getElementById('year');
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+        const registrationDeadlineInput = document.getElementById('registration_deadline');
+
+        function updateDates() {
+            if (nameSelect.value && yearInput.value) {
+                const year = parseInt(yearInput.value);
+
+                switch(nameSelect.value) {
+                    case 'Quarter 1':
+                        startDateInput.value = `${year}-01-01`;
+                        endDateInput.value = `${year}-03-31`;
+                        registrationDeadlineInput.value = `${year-1}-12-15`;
+                        break;
+                    case 'Quarter 2':
+                        startDateInput.value = `${year}-04-01`;
+                        endDateInput.value = `${year}-06-30`;
+                        registrationDeadlineInput.value = `${year}-03-15`;
+                        break;
+                    case 'Quarter 3':
+                        startDateInput.value = `${year}-07-01`;
+                        endDateInput.value = `${year}-09-30`;
+                        registrationDeadlineInput.value = `${year}-06-15`;
+                        break;
+                    case 'Quarter 4':
+                        startDateInput.value = `${year}-10-01`;
+                        endDateInput.value = `${year}-12-31`;
+                        registrationDeadlineInput.value = `${year}-09-15`;
+                        break;
+                }
+            }
+        }
+
+        if (nameSelect && yearInput) {
+            nameSelect.addEventListener('change', updateDates);
+            yearInput.addEventListener('change', updateDates);
+        }
+
+        // Same for edit form
+        const editNameSelect = document.getElementById('edit_name');
+        const editYearInput = document.getElementById('edit_year');
+        const editStartDateInput = document.getElementById('edit_start_date');
+        const editEndDateInput = document.getElementById('edit_end_date');
+        const editRegistrationDeadlineInput = document.getElementById('edit_registration_deadline');
+
+        function updateEditDates() {
+            if (editNameSelect.value && editYearInput.value) {
+                const year = parseInt(editYearInput.value);
+
+                switch(editNameSelect.value) {
+                    case 'Quarter 1':
+                        editStartDateInput.value = `${year}-01-01`;
+                        editEndDateInput.value = `${year}-03-31`;
+                        editRegistrationDeadlineInput.value = `${year-1}-12-15`;
+                        break;
+                    case 'Quarter 2':
+                        editStartDateInput.value = `${year}-04-01`;
+                        editEndDateInput.value = `${year}-06-30`;
+                        editRegistrationDeadlineInput.value = `${year}-03-15`;
+                        break;
+                    case 'Quarter 3':
+                        editStartDateInput.value = `${year}-07-01`;
+                        editEndDateInput.value = `${year}-09-30`;
+                        editRegistrationDeadlineInput.value = `${year}-06-15`;
+                        break;
+                    case 'Quarter 4':
+                        editStartDateInput.value = `${year}-10-01`;
+                        editEndDateInput.value = `${year}-12-31`;
+                        editRegistrationDeadlineInput.value = `${year}-09-15`;
+                        break;
+                }
+            }
+        }
+
+        if (editNameSelect && editYearInput) {
+            editNameSelect.addEventListener('change', updateEditDates);
+            editYearInput.addEventListener('change', updateEditDates);
+        }
+    });
+</script>
+{% endblock %}
